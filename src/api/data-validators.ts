@@ -95,6 +95,6 @@ function checkLineItem(type: 'Area' | 'Line' | 'Histogram', lineItem: SeriesData
 
 	assert(
 		// eslint-disable-next-line @typescript-eslint/tslint/config
-		typeof lineItem.value === 'number',
+		typeof lineItem.value === 'number' || lineItem.value === null,
 		`${type} series item data value must be a number, got=${typeof lineItem.value}, value=${lineItem.value}`);
 }

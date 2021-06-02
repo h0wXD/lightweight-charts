@@ -199,7 +199,7 @@ export class PlotList<PlotRowType extends PlotRow = PlotRow> {
 			const values = this._items[i].value;
 
 			const v = values[plotIndex];
-			if (Number.isNaN(v)) {
+			if (Number.isNaN(v) || v === null) {
 				continue;
 			}
 

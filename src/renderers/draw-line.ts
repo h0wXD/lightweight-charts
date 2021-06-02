@@ -5,6 +5,7 @@ export type LineWidth = 1 | 2 | 3 | 4;
 export const enum LineType {
 	Simple,
 	WithSteps,
+	WithGaps
 }
 
 export interface LinePoint {
