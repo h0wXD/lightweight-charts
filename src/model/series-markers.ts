@@ -1,4 +1,4 @@
-export type SeriesMarkerPosition = 'aboveBar' | 'belowBar' | 'inBar';
+export type SeriesMarkerPosition = 'aboveBar' | 'belowBar' | 'inBar' | number;
 
 export type SeriesMarkerShape = 'circle' | 'square' | 'arrowUp' | 'arrowDown';
 
