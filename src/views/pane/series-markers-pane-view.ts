@@ -52,6 +52,14 @@ function fillSizeAndY(
 	const halfSize = shapeSize / 2;
 	rendererItem.size = shapeSize;
 
+	if (typeof marker.position === 'number') {
+		rendererItem.y = priceScale.priceToCoordinate(marker.position, firstValue);
+		if (rendererItem.text !== undefined) {
+			rendererItem.text.y = rendererItem.y + halfSize + shapeMargin + textHeight * (0.5 + Constants.TextMargin) as Coordinate;
+		}
+		return;
+	}
+
 	switch (marker.position) {
 		case 'inBar': {
 			rendererItem.y = priceScale.priceToCoordinate(inBarPrice, firstValue);
