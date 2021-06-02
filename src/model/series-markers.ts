@@ -1,6 +1,6 @@
 export type SeriesMarkerPosition = 'aboveBar' | 'belowBar' | 'inBar';
 
-export type SeriesMarkerShape = 'circle' | 'square' | 'arrowUp' | 'arrowDown';
+export type SeriesMarkerShape = 'circle' | 'square' | 'arrowUp' | 'arrowDown' | 'triangleUp' | 'triangleDown';
 
 export interface SeriesMarker<TimeType> {
 	time: TimeType;

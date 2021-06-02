@@ -12,6 +12,7 @@ import { drawArrow, hitTestArrow } from './series-markers-arrow';
 import { drawCircle, hitTestCircle } from './series-markers-circle';
 import { drawSquare, hitTestSquare } from './series-markers-square';
 import { drawText, hitTestText } from './series-markers-text';
+import { drawTriangle, hitTestTriangle } from './series-markers-triangle';
 
 export interface SeriesMarkerText {
 	content: string;
@@ -114,6 +115,12 @@ function drawShape(item: SeriesMarkerRendererDataItem, ctx: CanvasRenderingConte
 		case 'arrowUp':
 			drawArrow(true, ctx, item.x, item.y, item.size);
 			return;
+		case 'triangleDown':
+			drawTriangle(false, ctx, item.x, item.y, item.size);
+			return;
+		case 'triangleUp':
+			drawTriangle(true, ctx, item.x, item.y, item.size);
+			return;
 		case 'circle':
 			drawCircle(ctx, item.x, item.y, item.size);
 			return;
@@ -139,10 +146,14 @@ function hitTestShape(item: SeriesMarkerRendererDataItem, x: Coordinate, y: Coor
 	}
 
 	switch (item.shape) {
-		case 'arrowDown':
-			return hitTestArrow(true, item.x, item.y, item.size, x, y);
 		case 'arrowUp':
+			return hitTestArrow(true, item.x, item.y, item.size, x, y);
+		case 'arrowDown':
 			return hitTestArrow(false, item.x, item.y, item.size, x, y);
+		case 'triangleUp':
+			return hitTestTriangle(true, item.x, item.y, item.size, x, y);
+		case 'triangleDown':
+			return hitTestTriangle(false, item.x, item.y, item.size, x, y);
 		case 'circle':
 			return hitTestCircle(item.x, item.y, item.size, x, y);
 		case 'square':
