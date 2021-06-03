@@ -105,6 +105,8 @@ export interface IChartApi {
 	 */
 	unsubscribeClick(handler: MouseEventHandler): void;
 
+	moveCrosshair(point: Point | null): void;
+
 	/**
 	 * Adds a subscription to crosshair movement to receive notifications on crosshair movements
 	 *

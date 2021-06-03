@@ -18,7 +18,7 @@ import { IPaneView } from '../views/pane/ipane-view';
 
 import { createBoundCanvas, getContext2D, Size } from './canvas-utils';
 import { ChartWidget } from './chart-widget';
-import { MouseEventHandler, Position, TouchMouseEvent } from './mouse-event-handler';
+import { MouseEventHandler, Position, TouchMouseEvent, TouchMouseEventLocal } from './mouse-event-handler';
 import { PriceAxisWidget, PriceAxisWidgetSide } from './price-axis-widget';
 import { isMobile, mobileTouch } from './support-touch';
 
@@ -244,7 +244,7 @@ export class PaneWidget implements IDestroyable {
 		}
 	}
 
-	public mouseMoveEvent(event: TouchMouseEvent): void {
+	public mouseMoveEvent(event: TouchMouseEventLocal): void {
 		if (!this._state) {
 			return;
 		}

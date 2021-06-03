@@ -23,6 +23,12 @@ export interface MouseEventHandlers {
 	longTapEvent?: HandlerEventCallback;
 }
 
+
+export interface TouchMouseEventLocal {
+	readonly localX: number;
+	readonly localY: number;
+}
+
 export interface TouchMouseEvent {
 	readonly clientX: number;
 	readonly clientY: number;
