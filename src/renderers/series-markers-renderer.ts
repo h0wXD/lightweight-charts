@@ -29,6 +29,8 @@ export interface SeriesMarkerRendererDataItem extends TimedValue {
 	internalId: number;
 	externalId?: string;
 	text?: SeriesMarkerText;
+	borderColor?: string;
+	borderSize?: number;
 }
 
 export interface SeriesMarkerRendererData {
@@ -110,22 +112,22 @@ function drawShape(item: SeriesMarkerRendererDataItem, ctx: CanvasRenderingConte
 
 	switch (item.shape) {
 		case 'arrowDown':
-			drawArrow(false, ctx, item.x, item.y, item.size);
+			drawArrow(false, ctx, item.x, item.y, item.size, item.borderSize, item.borderColor);
 			return;
 		case 'arrowUp':
-			drawArrow(true, ctx, item.x, item.y, item.size);
+			drawArrow(true, ctx, item.x, item.y, item.size, item.borderSize, item.borderColor);
 			return;
 		case 'triangleDown':
-			drawTriangle(false, ctx, item.x, item.y, item.size);
+			drawTriangle(false, ctx, item.x, item.y, item.size, item.borderSize, item.borderColor);
 			return;
 		case 'triangleUp':
-			drawTriangle(true, ctx, item.x, item.y, item.size);
+			drawTriangle(true, ctx, item.x, item.y, item.size, item.borderSize, item.borderColor);
 			return;
 		case 'circle':
-			drawCircle(ctx, item.x, item.y, item.size);
+			drawCircle(ctx, item.x, item.y, item.size, item.borderSize, item.borderColor);
 			return;
 		case 'square':
-			drawSquare(ctx, item.x, item.y, item.size);
+			drawSquare(ctx, item.x, item.y, item.size, item.borderSize, item.borderColor);
 			return;
 	}
 

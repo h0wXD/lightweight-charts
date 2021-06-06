@@ -10,12 +10,19 @@ export function drawArrow(
 	ctx: CanvasRenderingContext2D,
 	centerX: Coordinate,
 	centerY: Coordinate,
-	size: number
+	size: number,
+	borderSize?: number,
+	borderColor?: string
 ): void {
+	const currentColor = ctx.fillStyle;
 	const arrowSize = shapeSize('arrowUp', size);
 	const halfArrowSize = (arrowSize - 1) / 2;
 	const baseSize = ceiledOdd(size / 2);
 	const halfBaseSize = (baseSize - 1) / 2;
+
+	if (borderColor) {
+		ctx.fillStyle = borderColor;
+	}
 
 	ctx.beginPath();
 	if (up) {
@@ -34,6 +41,33 @@ export function drawArrow(
 		ctx.lineTo(centerX + halfBaseSize, centerY - halfArrowSize);
 		ctx.lineTo(centerX - halfBaseSize, centerY - halfArrowSize);
 		ctx.lineTo(centerX - halfBaseSize, centerY);
+	}
+
+	if (borderColor) {
+		const thickNess = borderSize || 2;
+		const thickNess2 = thickNess * 2;
+
+		ctx.fill();
+		ctx.beginPath();
+		ctx.fillStyle = currentColor;
+
+		if (up) {
+			ctx.moveTo(centerX - halfArrowSize + thickNess2, centerY - thickNess);
+			ctx.lineTo(centerX, centerY - halfArrowSize + thickNess);
+			ctx.lineTo(centerX + halfArrowSize - thickNess2, centerY - thickNess);
+			ctx.lineTo(centerX + halfBaseSize - thickNess, centerY - thickNess);
+			ctx.lineTo(centerX + halfBaseSize - thickNess, centerY + halfArrowSize - thickNess);
+			ctx.lineTo(centerX - halfBaseSize + thickNess, centerY + halfArrowSize - thickNess);
+			ctx.lineTo(centerX - halfBaseSize + thickNess, centerY - thickNess);
+		} else {
+			ctx.moveTo(centerX - halfArrowSize + thickNess2, centerY + thickNess);
+			ctx.lineTo(centerX, centerY + halfArrowSize - thickNess);
+			ctx.lineTo(centerX + halfArrowSize - thickNess2, centerY + thickNess);
+			ctx.lineTo(centerX + halfBaseSize - thickNess, centerY + thickNess);
+			ctx.lineTo(centerX + halfBaseSize - thickNess, centerY - halfArrowSize + thickNess);
+			ctx.lineTo(centerX - halfBaseSize + thickNess, centerY - halfArrowSize + thickNess);
+			ctx.lineTo(centerX - halfBaseSize + thickNess, centerY + thickNess);
+		}
 	}
 
 	ctx.fill();

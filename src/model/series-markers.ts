@@ -10,6 +10,8 @@ export interface SeriesMarker<TimeType> {
 	id?: string;
 	text?: string;
 	size?: number;
+	borderColor?: string;
+	borderSize?: number;
 }
 
 export interface InternalSeriesMarker<TimeType> extends SeriesMarker<TimeType> {
