@@ -1,7 +1,7 @@
 import { generateContrastColors } from '../../helpers/color';
 
 import { LastValueDataResultWithData, Series } from '../../model/series';
-import { PriceAxisLastValueMode } from '../../model/series-options';
+import { PriceAxisLastValueMode, PriceLineSource } from '../../model/series-options';
 import { PriceAxisViewRendererCommonData, PriceAxisViewRendererData } from '../../renderers/iprice-axis-view-renderer';
 
 import { PriceAxisView } from './price-axis-view';
@@ -33,7 +33,7 @@ export class SeriesPriceAxisView extends PriceAxisView {
 		const showSymbolLabel = this._source.title() !== '';
 		const showPriceAndPercentage = seriesOptions.seriesLastValueMode === PriceAxisLastValueMode.LastPriceAndPercentageValue;
 
-		const lastValueData = this._source.lastValueData(false);
+		const lastValueData = this._source.lastValueData(seriesOptions.priceLineSource === PriceLineSource.LastBar);
 		if (lastValueData.noData) {
 			return;
 		}
