@@ -110,7 +110,7 @@ export interface TimeScaleChanges {
 	/**
 	 * In terms of time scale "base index" means the latest time scale point with data (there might be whitespaces)
 	 */
-	baseIndex: TimePointIndex;
+	baseIndex: TimePointIndex | null;
 }
 
 export interface SeriesChanges {
@@ -381,7 +381,12 @@ export class DataLayer {
 		return firstChangedPointIndex;
 	}
 
-	private _getBaseIndex(): TimePointIndex {
+	private _getBaseIndex(): TimePointIndex | null {
+		if (this._seriesRowsBySeries.size === 0) {
+			// if we have no data then 'reset' the base index to null
+			return null;
+		}
+
 		let baseIndex = 0 as TimePointIndex;
 
 		this._seriesRowsBySeries.forEach((data: SeriesPlotRow[]) => {
@@ -419,6 +424,13 @@ export class DataLayer {
 			this._seriesRowsBySeries.forEach((data: SeriesPlotRow[], s: Series) => {
 				dataUpdateResponse.series.set(s, { data, fullUpdate: true });
 			});
+
+			// if the seires data was set to [] it will have already been removed from _seriesRowBySeries
+			// meaning the forEach above won't add the series to the data update response
+			// so we handle that case here
+			if (!this._seriesRowsBySeries.has(series)) {
+				dataUpdateResponse.series.set(series, { data: [], fullUpdate: true });
+			}
 
 			dataUpdateResponse.timeScale.points = this._sortedTimePoints;
 		} else {
