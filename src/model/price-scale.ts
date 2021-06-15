@@ -496,7 +496,7 @@ export class PriceScale {
 
 		for (const source of this._dataSources) {
 			const firstValue = source.firstValue();
-			if (firstValue === null) {
+			if (firstValue === null || firstValue.value === null) {
 				continue;
 			}
 
