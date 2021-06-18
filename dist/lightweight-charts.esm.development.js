@@ -1,6 +1,6 @@
 /*!
  * @license
- * TradingView Lightweight Charts v3.4.0-dev+202106151007
+ * TradingView Lightweight Charts v3.4.0-dev+202106181406
  * Copyright (c) 2020 TradingView, Inc.
  * Licensed under Apache License 2.0 https://www.apache.org/licenses/LICENSE-2.0
  */
@@ -1344,7 +1344,7 @@ var PriceFormatter = /** @class */ (function () {
         this._private__minMove = minMove;
         this._private__calculateDecimal();
     }
-    PriceFormatter.prototype._internal_format = function (price) {
+    PriceFormatter.prototype.format = function (price) {
         // \u2212 is unicode's minus sign https://www.fileformat.info/info/unicode/char/2212/index.htm
         // we should use it because it has the same width as plus sign +
         var sign = price < 0 ? '\u2212' : '';
@@ -1354,12 +1354,12 @@ var PriceFormatter = /** @class */ (function () {
     PriceFormatter.prototype._private__calculateDecimal = function () {
         // check if this._base is power of 10
         // for double fractional _fractionalLength if for the main fractional only
-        this._internal__fractionalLength = 0;
+        this._fractionalLength = 0;
         if (this._private__priceScale > 0 && this._private__minMove > 0) {
             var base = this._private__priceScale;
             while (base > 1) {
                 base /= 10;
-                this._internal__fractionalLength++;
+                this._fractionalLength++;
             }
         }
     };
@@ -1367,14 +1367,14 @@ var PriceFormatter = /** @class */ (function () {
         var base = this._private__priceScale / this._private__minMove;
         var intPart = Math.floor(price);
         var fracString = '';
-        var fracLength = this._internal__fractionalLength !== undefined ? this._internal__fractionalLength : NaN;
+        var fracLength = this._fractionalLength !== undefined ? this._fractionalLength : NaN;
         if (base > 1) {
-            var fracPart = +(Math.round(price * base) - intPart * base).toFixed(this._internal__fractionalLength);
+            var fracPart = +(Math.round(price * base) - intPart * base).toFixed(this._fractionalLength);
             if (fracPart >= base) {
                 fracPart -= base;
                 intPart += 1;
             }
-            fracString = formatterOptions._internal_decimalSign + numberToStringWithLeadingZero(+fracPart.toFixed(this._internal__fractionalLength) * this._private__minMove, fracLength);
+            fracString = formatterOptions._internal_decimalSign + numberToStringWithLeadingZero(+fracPart.toFixed(this._fractionalLength) * this._private__minMove, fracLength);
         }
         else {
             // should round int part to min move
@@ -1395,8 +1395,8 @@ var PercentageFormatter = /** @class */ (function (_super) {
         if (priceScale === void 0) { priceScale = 100; }
         return _super.call(this, priceScale) || this;
     }
-    PercentageFormatter.prototype._internal_format = function (price) {
-        return _super.prototype._internal_format.call(this, price) + "%";
+    PercentageFormatter.prototype.format = function (price) {
+        return _super.prototype.format.call(this, price) + "%";
     };
     return PercentageFormatter;
 }(PriceFormatter));
@@ -2100,7 +2100,7 @@ var PriceScale = /** @class */ (function () {
         for (var _i = 0, _a = this._private__dataSources; _i < _a.length; _i++) {
             var source = _a[_i];
             var firstValue = source._internal_firstValue();
-            if (firstValue === null) {
+            if (firstValue === null || firstValue._internal_value === null) {
                 continue;
             }
             if (result === null || firstValue._internal_timePoint < result._internal_timePoint) {
@@ -2216,9 +2216,9 @@ var PriceScale = /** @class */ (function () {
     PriceScale.prototype._internal_formatPrice = function (price, firstValue) {
         switch (this._private__options.mode) {
             case 2 /* Percentage */:
-                return this._internal_formatter()._internal_format(toPercent(price, firstValue));
+                return this._internal_formatter().format(toPercent(price, firstValue));
             case 3 /* IndexedTo100 */:
-                return this._internal_formatter()._internal_format(toIndexedTo100(price, firstValue));
+                return this._internal_formatter().format(toIndexedTo100(price, firstValue));
             default:
                 return this._private__formatPrice(price);
         }
@@ -2227,7 +2227,7 @@ var PriceScale = /** @class */ (function () {
         switch (this._private__options.mode) {
             case 2 /* Percentage */:
             case 3 /* IndexedTo100 */:
-                return this._internal_formatter()._internal_format(logical);
+                return this._internal_formatter().format(logical);
             default:
                 return this._private__formatPrice(logical);
         }
@@ -2237,7 +2237,7 @@ var PriceScale = /** @class */ (function () {
     };
     PriceScale.prototype._internal_formatPricePercentage = function (price, baseValue) {
         price = toPercent(price, baseValue);
-        return percentageFormatter._internal_format(price);
+        return percentageFormatter.format(price);
     };
     PriceScale.prototype._internal_sourcesForAutoScale = function () {
         return this._private__dataSources;
@@ -2422,7 +2422,7 @@ var PriceScale = /** @class */ (function () {
             if (fallbackFormatter === undefined) {
                 fallbackFormatter = this._internal_formatter();
             }
-            return fallbackFormatter._internal_format(price);
+            return fallbackFormatter.format(price);
         }
         return this._private__localizationOptions.priceFormatter(price);
     };
@@ -2494,7 +2494,7 @@ var DateFormatter = /** @class */ (function () {
         this._private__dateFormat = dateFormat;
         this._private__locale = locale;
     }
-    DateFormatter.prototype._internal_format = function (date) {
+    DateFormatter.prototype.format = function (date) {
         return formatDate(date, this._private__dateFormat, this._private__locale);
     };
     return DateFormatter;
@@ -2504,7 +2504,7 @@ var TimeFormatter = /** @class */ (function () {
     function TimeFormatter(format) {
         this._private__formatStr = format || '%h:%m:%s';
     }
-    TimeFormatter.prototype._internal_format = function (date) {
+    TimeFormatter.prototype.format = function (date) {
         return this._private__formatStr.replace('%h', numberToStringWithLeadingZero(date.getUTCHours(), 2)).
             replace('%m', numberToStringWithLeadingZero(date.getUTCMinutes(), 2)).
             replace('%s', numberToStringWithLeadingZero(date.getUTCSeconds(), 2));
@@ -2526,8 +2526,8 @@ var DateTimeFormatter = /** @class */ (function () {
         this._private__timeFormatter = new TimeFormatter(formatterParams._internal_timeFormat);
         this._private__separator = formatterParams._internal_dateTimeSeparator;
     }
-    DateTimeFormatter.prototype._internal_format = function (dateTime) {
-        return "" + this._private__dateFormatter._internal_format(dateTime) + this._private__separator + this._private__timeFormatter._internal_format(dateTime);
+    DateTimeFormatter.prototype.format = function (dateTime) {
+        return "" + this._private__dateFormatter.format(dateTime) + this._private__separator + this._private__timeFormatter.format(dateTime);
     };
     return DateTimeFormatter;
 }());
@@ -2776,9 +2776,13 @@ var TimeScale = /** @class */ (function () {
         this._private__updateDateTimeFormatter();
     };
     TimeScale.prototype._internal_applyOptions = function (options, localizationOptions) {
+        var _a;
         merge(this._private__options, options);
         if (this._private__options.fixLeftEdge) {
             this._private__doFixLeftEdge();
+        }
+        if (this._private__options.fixRightEdge) {
+            this._private__doFixRightEdge();
         }
         // note that bar spacing should be applied before right offset
         // because right offset depends on bar spacing
@@ -2787,6 +2791,11 @@ var TimeScale = /** @class */ (function () {
         }
         if (options.rightOffset !== undefined) {
             this._private__model._internal_setRightOffset(options.rightOffset);
+        }
+        if (options.minBarSpacing !== undefined) {
+            // yes, if we apply min bar spacing then we need to correct bar spacing
+            // the easiest way is to apply it once again
+            this._private__model._internal_setBarSpacing((_a = options.barSpacing) !== null && _a !== void 0 ? _a : this._private__barSpacing);
         }
         this._private__invalidateTickMarks();
         this._private__updateDateTimeFormatter();
@@ -2849,10 +2858,9 @@ var TimeScale = /** @class */ (function () {
         };
     };
     TimeScale.prototype._internal_logicalRangeForTimeRange = function (range) {
-        var timeScale = this._private__model._internal_timeScale();
         return {
-            from: ensureNotNull(timeScale._internal_timeToIndex(range.from, true)),
-            to: ensureNotNull(timeScale._internal_timeToIndex(range.to, true)),
+            from: ensureNotNull(this._internal_timeToIndex(range.from, true)),
+            to: ensureNotNull(this._internal_timeToIndex(range.to, true)),
         };
     };
     TimeScale.prototype._internal_tickMarks = function () {
@@ -2902,7 +2910,7 @@ var TimeScale = /** @class */ (function () {
         }
         var baseIndex = this._internal_baseIndex();
         var deltaFromRight = baseIndex + this._private__rightOffset - index;
-        var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing;
+        var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing - 1;
         return coordinate;
     };
     TimeScale.prototype._internal_indexesToCoordinates = function (points, visibleRange) {
@@ -2912,7 +2920,7 @@ var TimeScale = /** @class */ (function () {
         for (var i = indexFrom; i < indexTo; i++) {
             var index = points[i]._internal_time;
             var deltaFromRight = baseIndex + this._private__rightOffset - index;
-            var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing;
+            var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing - 1;
             points[i]._internal_x = coordinate;
         }
     };
@@ -3143,7 +3151,7 @@ var TimeScale = /** @class */ (function () {
         if (this._private__localizationOptions.timeFormatter !== undefined) {
             return this._private__localizationOptions.timeFormatter(time._internal_businessDay || time._internal_timestamp);
         }
-        return this._private__dateTimeFormatter._internal_format(new Date(time._internal_timestamp * 1000));
+        return this._private__dateTimeFormatter.format(new Date(time._internal_timestamp * 1000));
     };
     TimeScale.prototype._private__firstIndex = function () {
         return this._private__points.length === 0 ? null : 0;
@@ -3152,7 +3160,7 @@ var TimeScale = /** @class */ (function () {
         return this._private__points.length === 0 ? null : (this._private__points.length - 1);
     };
     TimeScale.prototype._private__rightOffsetForCoordinate = function (x) {
-        return (this._private__width + 1 - x) / this._private__barSpacing;
+        return (this._private__width - 1 - x) / this._private__barSpacing;
     };
     TimeScale.prototype._private__coordinateToFloatIndex = function (x) {
         var deltaFromRight = this._private__rightOffsetForCoordinate(x);
@@ -3189,8 +3197,9 @@ var TimeScale = /** @class */ (function () {
         this._private__setVisibleRange(new TimeScaleVisibleRange(logicalRange));
     };
     TimeScale.prototype._private__correctBarSpacing = function () {
-        if (this._private__barSpacing < 0.5 /* MinBarSpacing */) {
-            this._private__barSpacing = 0.5 /* MinBarSpacing */;
+        var minBarSpacing = this._private__minBarSpacing();
+        if (this._private__barSpacing < minBarSpacing) {
+            this._private__barSpacing = minBarSpacing;
             this._private__visibleRangeInvalidated = true;
         }
         if (this._private__width !== 0) {
@@ -3201,6 +3210,14 @@ var TimeScale = /** @class */ (function () {
                 this._private__visibleRangeInvalidated = true;
             }
         }
+    };
+    TimeScale.prototype._private__minBarSpacing = function () {
+        // if both options are enabled then limit bar spacing so that zooming-out is not possible
+        // if it would cause either the first or last points to move too far from an edge
+        if (this._private__options.fixLeftEdge && this._private__options.fixRightEdge) {
+            return this._private__width / this._private__points.length;
+        }
+        return this._private__options.minBarSpacing;
     };
     TimeScale.prototype._private__correctOffset = function () {
         // block scrolling of to future
@@ -3228,7 +3245,9 @@ var TimeScale = /** @class */ (function () {
         return firstIndex - baseIndex - 1 + barsEstimation;
     };
     TimeScale.prototype._private__maxRightOffset = function () {
-        return (this._private__width / this._private__barSpacing) - Math.min(2 /* MinVisibleBarsCount */, this._private__points.length);
+        return this._private__options.fixRightEdge
+            ? 0
+            : (this._private__width / this._private__barSpacing) - Math.min(2 /* MinVisibleBarsCount */, this._private__points.length);
     };
     TimeScale.prototype._private__saveCommonTransitionsStartState = function () {
         this._private__commonTransitionStartState = {
@@ -3330,6 +3349,11 @@ var TimeScale = /** @class */ (function () {
             var leftEdgeOffset = this._private__rightOffset - delta - 1;
             this._internal_setRightOffset(leftEdgeOffset);
         }
+        this._private__correctBarSpacing();
+    };
+    TimeScale.prototype._private__doFixRightEdge = function () {
+        this._private__correctOffset();
+        this._private__correctBarSpacing();
     };
     return TimeScale;
 }());
@@ -3519,7 +3543,7 @@ var VolumeFormatter = /** @class */ (function () {
     function VolumeFormatter(precision) {
         this._private__precision = precision;
     }
-    VolumeFormatter.prototype._internal_format = function (vol) {
+    VolumeFormatter.prototype.format = function (vol) {
         var sign = '';
         if (vol < 0) {
             sign = '-';
@@ -3750,6 +3774,7 @@ var SeriesPaneViewBase = /** @class */ (function () {
     function SeriesPaneViewBase(series, model, extendedVisibleRange) {
         this._internal__invalidated = true;
         this._internal__dataInvalidated = true;
+        this._internal__optionsInvalidated = true;
         this._internal__items = [];
         this._internal__itemsVisibleRange = null;
         this._internal__series = series;
@@ -3761,6 +3786,9 @@ var SeriesPaneViewBase = /** @class */ (function () {
         if (updateType === 'data') {
             this._internal__dataInvalidated = true;
         }
+        if (updateType === 'options') {
+            this._internal__optionsInvalidated = true;
+        }
     };
     SeriesPaneViewBase.prototype._internal__makeValid = function () {
         if (this._internal__dataInvalidated) {
@@ -3770,6 +3798,10 @@ var SeriesPaneViewBase = /** @class */ (function () {
         if (this._internal__invalidated) {
             this._internal__updatePoints();
             this._internal__invalidated = false;
+        }
+        if (this._internal__optionsInvalidated) {
+            this._internal__updateOptions();
+            this._internal__optionsInvalidated = false;
         }
     };
     SeriesPaneViewBase.prototype._internal__clearVisibleRange = function () {
@@ -3816,6 +3848,7 @@ var LinePaneViewBase = /** @class */ (function (_super) {
             _internal_y: NaN,
         };
     };
+    LinePaneViewBase.prototype._internal__updateOptions = function () { };
     LinePaneViewBase.prototype._internal__fillRawPoints = function () {
         var _this = this;
         var colorer = this._internal__series._internal_barColorer();
@@ -4014,6 +4047,12 @@ var SeriesBarsPaneView = /** @class */ (function (_super) {
         this._private__renderer._internal_setData(data);
         return this._private__renderer;
     };
+    SeriesBarsPaneView.prototype._internal__updateOptions = function () {
+        var _this = this;
+        this._internal__items.forEach(function (item) {
+            item._internal_color = _this._internal__series._internal_barColorer()._internal_barStyle(item._internal_time)._internal_barColor;
+        });
+    };
     SeriesBarsPaneView.prototype._internal__createRawItem = function (time, bar, colorer) {
         return __assign(__assign({}, this._internal__createDefaultItem(time, bar, colorer)), { _internal_color: colorer._internal_barStyle(time)._internal_barColor });
     };
@@ -4187,6 +4226,15 @@ var SeriesCandlesticksPaneView = /** @class */ (function (_super) {
         };
         this._private__renderer._internal_setData(data);
         return this._private__renderer;
+    };
+    SeriesCandlesticksPaneView.prototype._internal__updateOptions = function () {
+        var _this = this;
+        this._internal__items.forEach(function (item) {
+            var style = _this._internal__series._internal_barColorer()._internal_barStyle(item._internal_time);
+            item._internal_color = style._internal_barColor;
+            item._internal_wickColor = style._internal_barWickColor;
+            item._internal_borderColor = style._internal_barBorderColor;
+        });
     };
     SeriesCandlesticksPaneView.prototype._internal__createRawItem = function (time, bar, colorer) {
         var style = colorer._internal_barStyle(time);
@@ -4372,6 +4420,7 @@ var SeriesHistogramPaneView = /** @class */ (function (_super) {
         this._private__renderer._internal_setData(this._private__histogramData);
         this._private__compositeRenderer._internal_setRenderers([this._private__renderer]);
     };
+    SeriesHistogramPaneView.prototype._internal__updateOptions = function () { };
     SeriesHistogramPaneView.prototype._internal__clearVisibleRange = function () {
         _super.prototype._internal__clearVisibleRange.call(this);
         this._private__histogramData._internal_visibleRange = null;
@@ -5851,6 +5900,7 @@ var Series = /** @class */ (function (_super) {
         // a series might affect crosshair by some options (like crosshair markers)
         // that's why we need to update crosshair as well
         this._internal_model()._internal_updateCrosshair();
+        this._private__paneView._internal_update('options');
     };
     Series.prototype._internal_clearData = function () {
         this._private__data._internal_clear();
@@ -6074,7 +6124,7 @@ var Series = /** @class */ (function (_super) {
     Series.prototype._private__recreateFormatter = function () {
         switch (this._private__options.priceFormat.type) {
             case 'custom': {
-                this._private__formatter = { _internal_format: this._private__options.priceFormat.formatter };
+                this._private__formatter = { format: this._private__options.priceFormat.formatter };
                 break;
             }
             case 'volume': {
@@ -8545,7 +8595,7 @@ var PaneWidget = /** @class */ (function () {
         return this._private__canvasBinding.canvas;
     };
     PaneWidget.prototype._internal_paint = function (type) {
-        if (type === 0) {
+        if (type === 0 /* None */) {
             return;
         }
         if (this._private__state === null) {
@@ -10370,7 +10420,9 @@ var priceScaleOptionsDefaults = {
 var timeScaleOptionsDefaults = {
     rightOffset: 0,
     barSpacing: 6,
+    minBarSpacing: 0.5,
     fixLeftEdge: false,
+    fixRightEdge: false,
     lockVisibleTimeRangeOnResize: false,
     rightBarStaysOnScroll: false,
     borderVisible: true,
@@ -10925,7 +10977,7 @@ function createChart(container, options) {
 
 /// <reference types="_build-time-constants" />
 function version() {
-    return "3.4.0-dev+202106151007";
+    return "3.4.0-dev+202106181406";
 }
 
-export { CrosshairMode, LineStyle, LineType, PriceLineSource, PriceScaleMode, TickMarkType, createChart, isBusinessDay, isUTCTimestamp, version };
+export { CrosshairMode, LineStyle, LineType, PriceFormatter, PriceLineSource, PriceScaleMode, TickMarkType, createChart, isBusinessDay, isUTCTimestamp, version };
