@@ -30,7 +30,6 @@ import { TimeScaleVisibleRange } from './time-scale-visible-range';
 
 const enum Constants {
 	DefaultAnimationDuration = 400,
-	MinBarSpacing = 0.5,
 	// make sure that this (1 / MinVisibleBarsCount) >= coeff in max bar spacing
 	MinVisibleBarsCount = 2,
 }
@@ -68,7 +67,9 @@ export type TickMarkFormatter = (time: UTCTimestamp | BusinessDay, tickMarkType:
 export interface TimeScaleOptions {
 	rightOffset: number;
 	barSpacing: number;
+	minBarSpacing: number;
 	fixLeftEdge: boolean;
+	fixRightEdge: boolean;
 	lockVisibleTimeRangeOnResize: boolean;
 	rightBarStaysOnScroll: boolean;
 	borderVisible: boolean;
@@ -137,6 +138,10 @@ export class TimeScale {
 			this._doFixLeftEdge();
 		}
 
+		if (this._options.fixRightEdge) {
+			this._doFixRightEdge();
+		}
+
 		// note that bar spacing should be applied before right offset
 		// because right offset depends on bar spacing
 		if (options.barSpacing !== undefined) {
@@ -145,6 +150,12 @@ export class TimeScale {
 
 		if (options.rightOffset !== undefined) {
 			this._model.setRightOffset(options.rightOffset);
+		}
+
+		if (options.minBarSpacing !== undefined) {
+			// yes, if we apply min bar spacing then we need to correct bar spacing
+			// the easiest way is to apply it once again
+			this._model.setBarSpacing(options.barSpacing ?? this._barSpacing);
 		}
 
 		this._invalidateTickMarks();
@@ -224,11 +235,9 @@ export class TimeScale {
 	}
 
 	public logicalRangeForTimeRange(range: TimePointsRange): LogicalRange {
-		const timeScale = this._model.timeScale();
-
 		return {
-			from: ensureNotNull(timeScale.timeToIndex(range.from, true)) as number as Logical,
-			to: ensureNotNull(timeScale.timeToIndex(range.to, true)) as number as Logical,
+			from: ensureNotNull(this.timeToIndex(range.from, true)) as number as Logical,
+			to: ensureNotNull(this.timeToIndex(range.to, true)) as number as Logical,
 		};
 	}
 
@@ -288,7 +297,7 @@ export class TimeScale {
 
 		const baseIndex = this.baseIndex();
 		const deltaFromRight = baseIndex + this._rightOffset - index;
-		const coordinate = this._width - (deltaFromRight + 0.5) * this._barSpacing;
+		const coordinate = this._width - (deltaFromRight + 0.5) * this._barSpacing - 1;
 		return coordinate as Coordinate;
 	}
 
@@ -300,7 +309,7 @@ export class TimeScale {
 		for (let i = indexFrom; i < indexTo; i++) {
 			const index = points[i].time;
 			const deltaFromRight = baseIndex + this._rightOffset - index;
-			const coordinate = this._width - (deltaFromRight + 0.5) * this._barSpacing;
+			const coordinate = this._width - (deltaFromRight + 0.5) * this._barSpacing - 1;
 			points[i].x = coordinate as Coordinate;
 		}
 	}
@@ -605,7 +614,7 @@ export class TimeScale {
 	}
 
 	private _rightOffsetForCoordinate(x: Coordinate): number {
-		return (this._width + 1 - x) / this._barSpacing;
+		return (this._width - 1 - x) / this._barSpacing;
 	}
 
 	private _coordinateToFloatIndex(x: Coordinate): number {
@@ -652,8 +661,10 @@ export class TimeScale {
 	}
 
 	private _correctBarSpacing(): void {
-		if (this._barSpacing < Constants.MinBarSpacing) {
-			this._barSpacing = Constants.MinBarSpacing;
+		const minBarSpacing = this._minBarSpacing();
+
+		if (this._barSpacing < minBarSpacing) {
+			this._barSpacing = minBarSpacing;
 			this._visibleRangeInvalidated = true;
 		}
 
@@ -665,6 +676,16 @@ export class TimeScale {
 				this._visibleRangeInvalidated = true;
 			}
 		}
+	}
+
+	private _minBarSpacing(): number {
+		// if both options are enabled then limit bar spacing so that zooming-out is not possible
+		// if it would cause either the first or last points to move too far from an edge
+		if (this._options.fixLeftEdge && this._options.fixRightEdge) {
+			return this._width / this._points.length;
+		}
+
+		return this._options.minBarSpacing;
 	}
 
 	private _correctOffset(): void {
@@ -699,7 +720,9 @@ export class TimeScale {
 	}
 
 	private _maxRightOffset(): number {
-		return (this._width / this._barSpacing) - Math.min(Constants.MinVisibleBarsCount, this._points.length);
+		return this._options.fixRightEdge
+			? 0
+			: (this._width / this._barSpacing) - Math.min(Constants.MinVisibleBarsCount, this._points.length);
 	}
 
 	private _saveCommonTransitionsStartState(): void {
@@ -813,5 +836,13 @@ export class TimeScale {
 			const leftEdgeOffset = this._rightOffset - delta - 1;
 			this.setRightOffset(leftEdgeOffset);
 		}
+
+		this._correctBarSpacing();
+	}
+
+	private _doFixRightEdge(): void {
+		this._correctOffset();
+
+		this._correctBarSpacing();
 	}
 }
