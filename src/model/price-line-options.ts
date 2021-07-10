@@ -7,4 +7,5 @@ export interface PriceLineOptions {
 	lineStyle: LineStyle;
 	axisLabelVisible: boolean;
 	title: string;
+	draggable: boolean;
 }

@@ -35,6 +35,10 @@ export class CustomPriceLine {
 		return this._options;
 	}
 
+	public series(): Series {
+		return this._series;
+	}
+
 	public paneViews(): readonly IPaneView[] {
 		return [
 			this._priceLineView,
