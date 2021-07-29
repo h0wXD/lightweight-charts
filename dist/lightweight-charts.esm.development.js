@@ -1,6 +1,6 @@
 /*!
  * @license
- * TradingView Lightweight Charts v3.4.0-dev+202107100546
+ * TradingView Lightweight Charts v3.5.0-dev+202107270744
  * Copyright (c) 2020 TradingView, Inc.
  * Licensed under Apache License 2.0 https://www.apache.org/licenses/LICENSE-2.0
  */
@@ -2494,7 +2494,7 @@ var DateFormatter = /** @class */ (function () {
         this._private__dateFormat = dateFormat;
         this._private__locale = locale;
     }
-    DateFormatter.prototype.format = function (date) {
+    DateFormatter.prototype._internal_format = function (date) {
         return formatDate(date, this._private__dateFormat, this._private__locale);
     };
     return DateFormatter;
@@ -2504,7 +2504,7 @@ var TimeFormatter = /** @class */ (function () {
     function TimeFormatter(format) {
         this._private__formatStr = format || '%h:%m:%s';
     }
-    TimeFormatter.prototype.format = function (date) {
+    TimeFormatter.prototype._internal_format = function (date) {
         return this._private__formatStr.replace('%h', numberToStringWithLeadingZero(date.getUTCHours(), 2)).
             replace('%m', numberToStringWithLeadingZero(date.getUTCMinutes(), 2)).
             replace('%s', numberToStringWithLeadingZero(date.getUTCSeconds(), 2));
@@ -2526,8 +2526,8 @@ var DateTimeFormatter = /** @class */ (function () {
         this._private__timeFormatter = new TimeFormatter(formatterParams._internal_timeFormat);
         this._private__separator = formatterParams._internal_dateTimeSeparator;
     }
-    DateTimeFormatter.prototype.format = function (dateTime) {
-        return "" + this._private__dateFormatter.format(dateTime) + this._private__separator + this._private__timeFormatter.format(dateTime);
+    DateTimeFormatter.prototype._internal_format = function (dateTime) {
+        return "" + this._private__dateFormatter._internal_format(dateTime) + this._private__separator + this._private__timeFormatter._internal_format(dateTime);
     };
     return DateTimeFormatter;
 }());
@@ -3151,7 +3151,7 @@ var TimeScale = /** @class */ (function () {
         if (this._private__localizationOptions.timeFormatter !== undefined) {
             return this._private__localizationOptions.timeFormatter(time.businessDay || time.timestamp);
         }
-        return this._private__dateTimeFormatter.format(new Date(time.timestamp * 1000));
+        return this._private__dateTimeFormatter._internal_format(new Date(time.timestamp * 1000));
     };
     TimeScale.prototype._private__firstIndex = function () {
         return this._private__points.length === 0 ? null : 0;
@@ -11119,7 +11119,7 @@ function createChart(container, options) {
 
 /// <reference types="_build-time-constants" />
 function version() {
-    return "3.4.0-dev+202107100546";
+    return "3.5.0-dev+202107270744";
 }
 
 export { CrosshairMode, LineStyle, LineType, PriceFormatter, PriceLineSource, PriceScaleMode, TickMarkType, createChart, isBusinessDay, isUTCTimestamp, version };
