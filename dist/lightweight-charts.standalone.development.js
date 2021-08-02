@@ -1,6 +1,6 @@
 /*!
  * @license
- * TradingView Lightweight Charts v3.5.0-dev+202107270744
+ * TradingView Lightweight Charts v3.5.0-dev+202108020110
  * Copyright (c) 2020 TradingView, Inc.
  * Licensed under Apache License 2.0 https://www.apache.org/licenses/LICENSE-2.0
  */
@@ -6011,7 +6011,10 @@
             return res;
         };
         Series.prototype.priceAxisViews = function (pane, priceScale) {
-            var result = (priceScale === this._priceScale || this._private__isOverlay()) ? __spreadArray([], this._private__priceAxisViews) : [];
+            if (priceScale !== this._priceScale && !this._private__isOverlay()) {
+                return [];
+            }
+            var result = __spreadArray([], this._private__priceAxisViews);
             for (var _i = 0, _a = this._private__customPriceLines; _i < _a.length; _i++) {
                 var customPriceLine = _a[_i];
                 result.push(customPriceLine.priceAxisView());
@@ -6456,7 +6459,7 @@
             return this._private__leftPriceScale !== priceScale && this._private__rightPriceScale !== priceScale;
         };
         Pane.prototype.addDataSource = function (source, targetScaleId, zOrder) {
-            var targetZOrder = (zOrder !== undefined) ? zOrder : this._private__getZOrderMinMax()._internal_minZOrder - 1;
+            var targetZOrder = (zOrder !== undefined) ? zOrder : this._private__getZOrderMinMax()._internal_maxZOrder + 1;
             this._private__insertDataSource(source, targetScaleId, targetZOrder);
         };
         Pane.prototype.removeDataSource = function (source) {
@@ -9640,7 +9643,7 @@
                     var image = _this._private__timeAxisWidget._internal_getImage();
                     ctx.drawImage(image, targetX, targetY, size._internal_w, size._internal_h);
                     if (_this._private__isRightAxisVisible()) {
-                        targetX = firstPane._internal_getSize()._internal_w;
+                        targetX += firstPane._internal_getSize()._internal_w;
                         drawStub('right');
                         ctx.restore();
                     }
@@ -11228,7 +11231,7 @@
 
     /// <reference types="_build-time-constants" />
     function version() {
-        return "3.5.0-dev+202107270744";
+        return "3.5.0-dev+202108020110";
     }
 
     var LightweightChartsModule = /*#__PURE__*/Object.freeze({
