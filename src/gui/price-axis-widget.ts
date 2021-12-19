@@ -1,7 +1,7 @@
 import { Binding as CanvasCoordinateSpaceBinding } from 'fancy-canvas/coordinate-space';
 
 import { ensureNotNull } from '../helpers/assertions';
-import { clearRect, drawScaled } from '../helpers/canvas-helpers';
+import { clearRect, clearRectWithGradient, drawScaled } from '../helpers/canvas-helpers';
 import { IDestroyable } from '../helpers/idestroyable';
 import { makeFont } from '../helpers/make-font';
 
@@ -10,7 +10,7 @@ import { CustomPriceLine } from '../model/custom-price-line';
 import { IDataSource } from '../model/idata-source';
 import { InvalidationLevel } from '../model/invalidate-mask';
 import { IPriceDataSource } from '../model/iprice-data-source';
-import { LayoutOptions } from '../model/layout-options';
+import { LayoutOptionsInternal } from '../model/layout-options';
 import { PriceScalePosition } from '../model/pane';
 import { PriceScale } from '../model/price-scale';
 import { Series } from '../model/series';
@@ -37,7 +37,7 @@ type IPriceAxisViewArray = readonly IPriceAxisView[];
 
 export class PriceAxisWidget implements IDestroyable {
 	private readonly _pane: PaneWidget;
-	private readonly _options: LayoutOptions;
+	private readonly _options: LayoutOptionsInternal;
 	private readonly _rendererOptionsProvider: PriceAxisRendererOptionsProvider;
 	private readonly _isLeft: boolean;
 
@@ -62,7 +62,7 @@ export class PriceAxisWidget implements IDestroyable {
 	private _font: string | null = null;
 	private _prevOptimalWidth: number = 0;
 
-	public constructor(pane: PaneWidget, options: LayoutOptions, rendererOptionsProvider: PriceAxisRendererOptionsProvider, side: PriceAxisWidgetSide) {
+	public constructor(pane: PaneWidget, options: LayoutOptionsInternal, rendererOptionsProvider: PriceAxisRendererOptionsProvider, side: PriceAxisWidgetSide) {
 		this._pane = pane;
 		this._options = options;
 		this._rendererOptionsProvider = rendererOptionsProvider;
@@ -138,10 +138,6 @@ export class PriceAxisWidget implements IDestroyable {
 		return this._cell;
 	}
 
-	public backgroundColor(): string {
-		return this._options.backgroundColor;
-	}
-
 	public lineColor(): string {
 		return ensureNotNull(this._priceScale).options().borderColor;
 	}
@@ -204,6 +200,18 @@ export class PriceAxisWidget implements IDestroyable {
 			if (width > tickMarkMaxWidth) {
 				tickMarkMaxWidth = width;
 			}
+		}
+
+		const firstValue = this._priceScale.firstValue();
+		if (firstValue !== null && this._size !== null) {
+			const topValue = this._priceScale.coordinateToPrice(1 as Coordinate, firstValue);
+			const bottomValue = this._priceScale.coordinateToPrice(this._size.h - 2 as Coordinate, firstValue);
+
+			tickMarkMaxWidth = Math.max(
+				tickMarkMaxWidth,
+				this._widthCache.measureText(ctx, this._priceScale.formatPrice(Math.floor(Math.min(topValue, bottomValue)) + 0.11111111111111, firstValue)),
+				this._widthCache.measureText(ctx, this._priceScale.formatPrice(Math.ceil(Math.max(topValue, bottomValue)) - 0.11111111111111, firstValue))
+			);
 		}
 
 		tickMarkMaxWidth = Math.max(tickMarkMaxWidth, rendererOptions.width);
@@ -351,7 +359,7 @@ export class PriceAxisWidget implements IDestroyable {
 
 		const model = this._pane.chart().model();
 		const pane = this._pane.state();
-		model.startScalePrice(pane, this._priceScale, e.localY as Coordinate);
+		model.startScalePrice(pane, this._priceScale, e.localY);
 	}
 
 	private _pressedMouseMoveEvent(e: TouchMouseEvent): void {
@@ -373,7 +381,7 @@ export class PriceAxisWidget implements IDestroyable {
 
 		const model = this._pane.chart().model();
 		const pane = this._pane.state();
-		model.scalePriceTo(pane, priceScale, e.localY as Coordinate);
+		model.scalePriceTo(pane, priceScale, e.localY);
 	}
 
 	private _mouseDownOutsideEvent(): void {
@@ -484,7 +492,15 @@ export class PriceAxisWidget implements IDestroyable {
 		const width = this._size.w;
 		const height = this._size.h;
 		drawScaled(ctx, pixelRatio, () => {
-			clearRect(ctx, 0, 0, width, height, this.backgroundColor());
+			const model = this._pane.state().model();
+			const topColor = model.backgroundTopColor();
+			const bottomColor = model.backgroundBottomColor();
+
+			if (topColor === bottomColor) {
+				clearRect(ctx, 0, 0, width, height, topColor);
+			} else {
+				clearRectWithGradient(ctx, 0, 0, width, height, topColor, bottomColor);
+			}
 		});
 	}
 
@@ -568,7 +584,7 @@ export class PriceAxisWidget implements IDestroyable {
 		const rendererOptions = this.rendererOptions();
 
 		// if we are default price scale, append labels from no-scale
-		const isDefault = this._priceScale === paneState.defaultPriceScale();
+		const isDefault = this._priceScale === paneState.defaultVisiblePriceScale();
 
 		if (isDefault) {
 			this._pane.state().orderedSources().forEach((source: IPriceDataSource) => {

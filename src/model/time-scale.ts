@@ -1,6 +1,7 @@
 import { DateFormatter } from '../formatters/date-formatter';
 import { DateTimeFormatter } from '../formatters/date-time-formatter';
 
+import { lowerbound } from '../helpers/algorithms';
 import { ensureNotNull } from '../helpers/assertions';
 import { Delegate } from '../helpers/delegate';
 import { ISubscription } from '../helpers/isubscription';
@@ -19,6 +20,7 @@ import {
 	Logical,
 	LogicalRange,
 	SeriesItemsIndexesRange,
+	TickMarkWeight,
 	TimedValue,
 	TimePoint,
 	TimePointIndex,
@@ -34,50 +36,163 @@ const enum Constants {
 	MinVisibleBarsCount = 2,
 }
 
-const enum MarkWeightBorder {
-	Minute = 20,
-	Hour = 30,
-	Day = 40,
-	Week = 50,
-	Month = 60,
-	Year = 70,
-}
-
 interface TransitionState {
 	barSpacing: number;
 	rightOffset: number;
 }
 
 export interface TimeMark {
+	needAlignCoordinate: boolean;
 	coord: number;
 	label: string;
-	weight: number;
+	weight: TickMarkWeight;
 }
 
+/**
+ * Represents the type of a tick mark on the time axis.
+ */
 export const enum TickMarkType {
+	/**
+	 * The start of the year (e.g. it's the first tick mark in a year).
+	 */
 	Year,
+	/**
+	 * The start of the month (e.g. it's the first tick mark in a month).
+	 */
 	Month,
+	/**
+	 * A day of the month.
+	 */
 	DayOfMonth,
+	/**
+	 * A time without seconds.
+	 */
 	Time,
+	/**
+	 * A time with seconds.
+	 */
 	TimeWithSeconds,
 }
 
+/**
+ * The `TickMarkFormatter` is used to customize tick mark labels on the time scale.
+ *
+ * This function should return `time` as a string formatted according to `tickMarkType` type (year, month, etc) and `locale`.
+ *
+ * Note that the returned string should be the shortest possible value and should have no more than 8 characters.
+ * Otherwise, the tick marks will overlap each other.
+ *
+ * @example
+ * ```js
+ * const customFormatter = (time, tickMarkType, locale) => {
+ *     // your code here
+ * };
+ * ```
+ */
 export type TickMarkFormatter = (time: UTCTimestamp | BusinessDay, tickMarkType: TickMarkType, locale: string) => string;
 
+/**
+ * Options for the time scale; the horizontal scale at the bottom of the chart that displays the time of data.
+ */
 export interface TimeScaleOptions {
+	/**
+	 * The margin space in bars from the right side of the chart.
+	 *
+	 * @defaultValue `0`
+	 */
 	rightOffset: number;
+
+	/**
+	 * The space between bars in pixels.
+	 *
+	 * @defaultValue `6`
+	 */
 	barSpacing: number;
+
+	/**
+	 * The minimum space between bars in pixels.
+	 *
+	 * @defaultValue `0.5`
+	 */
 	minBarSpacing: number;
+
+	/**
+	 * Prevent scrolling to the left of the first bar.
+	 *
+	 * @defaultValue `false`
+	 */
 	fixLeftEdge: boolean;
+
+	/**
+	 * Prevent scrolling to the right of the most recent bar.
+	 *
+	 * @defaultValue `false`
+	 */
 	fixRightEdge: boolean;
+
+	/**
+	 * Prevent changing the visible time range during chart resizing.
+	 *
+	 * @defaultValue `false`
+	 */
 	lockVisibleTimeRangeOnResize: boolean;
+
+	/**
+	 * Prevent the hovered bar from moving when scrolling.
+	 *
+	 * @defaultValue `false`
+	 */
 	rightBarStaysOnScroll: boolean;
+
+	/**
+	 * Show the time scale border.
+	 *
+	 * @defaultValue `true`
+	 */
 	borderVisible: boolean;
+
+	/**
+	 * The time scale border color.
+	 *
+	 * @defaultValue `'#2B2B43'`
+	 */
 	borderColor: string;
+
+	/**
+	 * Show the time scale.
+	 *
+	 * @defaultValue `true`
+	 */
 	visible: boolean;
+
+	/**
+	 * Show the time, not just the date, in the time scale and vertical crosshair label.
+	 *
+	 * @defaultValue `false`
+	 */
 	timeVisible: boolean;
+
+	/**
+	 * Show seconds in the time scale and vertical crosshair label in `hh:mm:ss` format for intraday data.
+	 *
+	 * @defaultValue `true`
+	 */
 	secondsVisible: boolean;
+
+	/**
+	 * Shift the visible range to the right (into the future) by the number of new bars when new data is added.
+	 *
+	 * Note that this only applies when the last bar is visible.
+	 *
+	 * @defaultValue `true`
+	 */
 	shiftVisibleRangeOnNewBar: boolean;
+
+	/**
+	 * Tick marks formatter can be used to customize tick marks labels on the time axis.
+	 *
+	 * @defaultValue `undefined`
+	 */
 	tickMarkFormatter?: TickMarkFormatter;
 }
 
@@ -179,21 +294,17 @@ export class TimeScale {
 			return findNearest ? this._points.length - 1 as TimePointIndex : null;
 		}
 
-		for (let i = 0; i < this._points.length; ++i) {
-			if (time.timestamp === this._points[i].time.timestamp) {
-				return i as TimePointIndex;
-			}
+		const index = lowerbound(this._points, time.timestamp, (a: TimeScalePoint, b: UTCTimestamp) => a.time.timestamp < b);
 
-			if (time.timestamp < this._points[i].time.timestamp) {
-				return findNearest ? i as TimePointIndex : null;
-			}
+		if (time.timestamp < this._points[index].time.timestamp) {
+			return findNearest ? index as TimePointIndex : null;
 		}
 
-		return null;
+		return index as TimePointIndex;
 	}
 
 	public isEmpty(): boolean {
-		return this._width === 0 || this._points.length === 0;
+		return this._width === 0 || this._points.length === 0 || this._baseIndexOrNull === null;
 	}
 
 	// strict range: integer indices of the bars in the visible range rounded in more wide direction
@@ -241,10 +352,6 @@ export class TimeScale {
 		};
 	}
 
-	public tickMarks(): TickMarks {
-		return this._tickMarks;
-	}
-
 	public width(): number {
 		return this._width;
 	}
@@ -261,7 +368,7 @@ export class TimeScale {
 		if (this._options.lockVisibleTimeRangeOnResize && this._width) {
 			// recalculate bar spacing
 			const newBarSpacing = this._barSpacing * width / this._width;
-			this._setBarSpacing(newBarSpacing);
+			this._barSpacing = newBarSpacing;
 		}
 
 		// if time scale is scrolled to the end of data and we have fixed right edge
@@ -366,29 +473,44 @@ export class TimeScale {
 
 		const items = this._tickMarks.build(spacing, maxLabelWidth);
 
+		// according to indexPerLabel value this value means "earliest index which _might be_ used as the second label on time scale"
+		const earliestIndexOfSecondLabel = (this._firstIndex() as number) + indexPerLabel;
+
+		// according to indexPerLabel value this value means "earliest index which _might be_ used as the second last label on time scale"
+		const indexOfSecondLastLabel = (this._lastIndex() as number) - indexPerLabel;
+
 		let targetIndex = 0;
 		for (const tm of items) {
 			if (!(firstBar <= tm.index && tm.index <= lastBar)) {
 				continue;
 			}
 
-			const time = this.indexToTime(tm.index);
-			if (time === null) {
-				continue;
-			}
-
+			let label: TimeMark;
 			if (targetIndex < this._labels.length) {
-				const label = this._labels[targetIndex];
+				label = this._labels[targetIndex];
 				label.coord = this.indexToCoordinate(tm.index);
-				label.label = this._formatLabel(time, tm.weight);
+				label.label = this._formatLabel(tm.time, tm.weight);
 				label.weight = tm.weight;
 			} else {
-				this._labels.push({
+				label = {
+					needAlignCoordinate: false,
 					coord: this.indexToCoordinate(tm.index),
-					label: this._formatLabel(time, tm.weight),
+					label: this._formatLabel(tm.time, tm.weight),
 					weight: tm.weight,
-				});
+				};
+
+				this._labels.push(label);
 			}
+
+			if (this._barSpacing > (maxLabelWidth / 2)) {
+				// if there is enough space then let's show all tick marks as usual
+				label.needAlignCoordinate = false;
+			} else {
+				// if a user is able to scroll after a tick mark then show it as usual, otherwise the coordinate might be aligned
+				// if the index is for the second (last) label or later (earlier) then most likely this label might be displayed without correcting the coordinate
+				label.needAlignCoordinate = this._options.fixLeftEdge && tm.index <= earliestIndexOfSecondLabel || this._options.fixRightEdge && tm.index >= indexOfSecondLastLabel;
+			}
+
 			targetIndex++;
 		}
 		this._labels.length = targetIndex;
@@ -527,9 +649,9 @@ export class TimeScale {
 		}
 
 		const source = this._rightOffset;
-		const animationStart = Date.now();
+		const animationStart = performance.now();
 		const animationFn = () => {
-			const animationProgress = (Date.now() - animationStart) / animationDuration;
+			const animationProgress = (performance.now() - animationStart) / animationDuration;
 			const finishAnimation = animationProgress >= 1;
 			const rightOffset = finishAnimation ? offset : source + (offset - source) * animationProgress;
 			this.setRightOffset(rightOffset);
@@ -541,11 +663,11 @@ export class TimeScale {
 		animationFn();
 	}
 
-	public update(newPoints: readonly TimeScalePoint[]): void {
+	public update(newPoints: readonly TimeScalePoint[], firstChangedPointIndex: number): void {
 		this._visibleRangeInvalidated = true;
 
 		this._points = newPoints;
-		this._tickMarks.setTimeScalePoints(newPoints);
+		this._tickMarks.setTimeScalePoints(newPoints, firstChangedPointIndex);
 		this._correctOffset();
 	}
 
@@ -681,7 +803,7 @@ export class TimeScale {
 	private _minBarSpacing(): number {
 		// if both options are enabled then limit bar spacing so that zooming-out is not possible
 		// if it would cause either the first or last points to move too far from an edge
-		if (this._options.fixLeftEdge && this._options.fixRightEdge) {
+		if (this._options.fixLeftEdge && this._options.fixRightEdge && this._points.length !== 0) {
 			return this._width / this._points.length;
 		}
 
@@ -749,23 +871,8 @@ export class TimeScale {
 		return formatter.format(time);
 	}
 
-	private _formatLabelImpl(timePoint: TimePoint, weight: number): string {
-		let tickMarkType: TickMarkType;
-
-		const timeVisible = this._options.timeVisible;
-		if (weight < MarkWeightBorder.Minute && timeVisible) {
-			tickMarkType = this._options.secondsVisible ? TickMarkType.TimeWithSeconds : TickMarkType.Time;
-		} else if (weight < MarkWeightBorder.Day && timeVisible) {
-			tickMarkType = TickMarkType.Time;
-		} else if (weight < MarkWeightBorder.Week) {
-			tickMarkType = TickMarkType.DayOfMonth;
-		} else if (weight < MarkWeightBorder.Month) {
-			tickMarkType = TickMarkType.DayOfMonth;
-		} else if (weight < MarkWeightBorder.Year) {
-			tickMarkType = TickMarkType.Month;
-		} else {
-			tickMarkType = TickMarkType.Year;
-		}
+	private _formatLabelImpl(timePoint: TimePoint, weight: TickMarkWeight): string {
+		const tickMarkType = weightToTickMarkType(weight, this._options.timeVisible, this._options.secondsVisible);
 
 		if (this._options.tickMarkFormatter !== undefined) {
 			// this is temporary solution to make more consistency API
@@ -831,7 +938,12 @@ export class TimeScale {
 			return;
 		}
 
-		const delta = ensureNotNull(this.visibleStrictRange()).left() - firstIndex;
+		const visibleRange = this.visibleStrictRange();
+		if (visibleRange === null) {
+			return;
+		}
+
+		const delta = visibleRange.left() - firstIndex;
 		if (delta < 0) {
 			const leftEdgeOffset = this._rightOffset - delta - 1;
 			this.setRightOffset(leftEdgeOffset);
@@ -844,5 +956,34 @@ export class TimeScale {
 		this._correctOffset();
 
 		this._correctBarSpacing();
+	}
+}
+
+// eslint-disable-next-line complexity
+function weightToTickMarkType(weight: TickMarkWeight, timeVisible: boolean, secondsVisible: boolean): TickMarkType {
+	switch (weight) {
+		case TickMarkWeight.LessThanSecond:
+		case TickMarkWeight.Second:
+			return timeVisible
+				? (secondsVisible ? TickMarkType.TimeWithSeconds : TickMarkType.Time)
+				: TickMarkType.DayOfMonth;
+
+		case TickMarkWeight.Minute1:
+		case TickMarkWeight.Minute5:
+		case TickMarkWeight.Minute30:
+		case TickMarkWeight.Hour1:
+		case TickMarkWeight.Hour3:
+		case TickMarkWeight.Hour6:
+		case TickMarkWeight.Hour12:
+			return timeVisible ? TickMarkType.Time : TickMarkType.DayOfMonth;
+
+		case TickMarkWeight.Day:
+			return TickMarkType.DayOfMonth;
+
+		case TickMarkWeight.Month:
+			return TickMarkType.Month;
+
+		case TickMarkWeight.Year:
+			return TickMarkType.Year;
 	}
 }

@@ -1,4 +1,3 @@
-import { ensureNever } from '../helpers/assertions';
 import { ceiledEven, ceiledOdd } from '../helpers/mathex';
 
 import { SeriesMarkerShape } from '../model/series-markers';
@@ -27,8 +26,6 @@ export function shapeSize(shape: SeriesMarkerShape, originalSize: number): numbe
 		case 'triangleUp':
 			return size(originalSize, 0.7);
 	}
-
-	ensureNever(shape);
 }
 
 export function calculateShapeHeight(barSpacing: number): number {

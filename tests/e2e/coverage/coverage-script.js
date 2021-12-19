@@ -72,6 +72,16 @@ function runTestCase(container) {
 			fontFamily: 'Roboto',
 			fontStyle: 'italic',
 		},
+		kineticScroll: {
+			mouse: true,
+		},
+		layout: {
+			background: {
+				type: LightweightCharts.ColorType.VerticalGradient,
+				topColor: '#FFFFFF',
+				bottomColor: '#AAFFAA',
+			},
+		},
 	});
 
 	const data = generateLineData();
@@ -93,6 +103,7 @@ function runTestCase(container) {
 		priceFormat: {
 			type: 'volume',
 		},
+		lastPriceAnimation: LightweightCharts.LastPriceAnimationMode.Continuous,
 	});
 	seriesToRemove.setData(generateLineData());
 
@@ -121,9 +132,13 @@ function runTestCase(container) {
 		priceFormat: {
 			type: 'volume',
 		},
+		lastPriceAnimation: LightweightCharts.LastPriceAnimationMode.OnDataUpdate,
 	});
 
 	lineSeries.setData(generateLineData());
+
+	const baselineSeries = chart.addBaselineSeries();
+	baselineSeries.setData(generateLineData());
 
 	areaSeries.createPriceLine({
 		price: 10,

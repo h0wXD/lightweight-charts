@@ -133,6 +133,10 @@ export class ChartWidget implements IDestroyable {
 		return this._paneWidgets;
 	}
 
+	public timeAxisWidget(): TimeAxisWidget {
+		return this._timeAxisWidget;
+	}
+
 	public destroy(): void {
 		this._element.removeEventListener('wheel', this._onWheelBound);
 		if (this._drawRafId !== 0) {
@@ -200,7 +204,9 @@ export class ChartWidget implements IDestroyable {
 			this._paneWidgets[i].paint(invalidateMask.invalidateForPane(i).level);
 		}
 
-		this._timeAxisWidget.paint(invalidateMask.fullInvalidation());
+		if (this._options.timeScale.visible) {
+			this._timeAxisWidget.paint(invalidateMask.fullInvalidation());
+		}
 	}
 
 	public applyOptions(options: DeepPartial<ChartOptionsInternal>): void {
@@ -358,7 +364,8 @@ export class ChartWidget implements IDestroyable {
 		// const separatorCount = this._paneSeparators.length;
 		// const separatorHeight = SEPARATOR_HEIGHT;
 		const separatorsHeight = 0; // separatorHeight * separatorCount;
-		let timeAxisHeight = this._options.timeScale.visible ? this._timeAxisWidget.optimalHeight() : 0;
+		const timeAxisVisible = this._options.timeScale.visible;
+		let timeAxisHeight = timeAxisVisible ? this._timeAxisWidget.optimalHeight() : 0;
 		// TODO: Fix it better
 		// on Hi-DPI CSS size * Device Pixel Ratio should be integer to avoid smoothing
 		if (timeAxisHeight % 2) {
@@ -400,9 +407,9 @@ export class ChartWidget implements IDestroyable {
 		}
 
 		this._timeAxisWidget.setSizes(
-			new Size(paneWidth, timeAxisHeight),
-			leftPriceAxisWidth,
-			rightPriceAxisWidth
+			new Size(timeAxisVisible ? paneWidth : 0, timeAxisHeight),
+			timeAxisVisible ? leftPriceAxisWidth : 0,
+			timeAxisVisible ? rightPriceAxisWidth : 0
 		);
 
 		this._model.setWidth(paneWidth);
@@ -653,11 +660,11 @@ export class ChartWidget implements IDestroyable {
 	}
 
 	private _isLeftAxisVisible(): boolean {
-		return this._options.leftPriceScale.visible;
+		return this._paneWidgets[0].state().leftPriceScale().options().visible;
 	}
 
 	private _isRightAxisVisible(): boolean {
-		return this._options.rightPriceScale.visible;
+		return this._paneWidgets[0].state().rightPriceScale().options().visible;
 	}
 }
 
@@ -666,9 +673,10 @@ function disableSelection(element: HTMLElement): void {
 	// eslint-disable-next-line deprecation/deprecation
 	element.style.webkitUserSelect = 'none';
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
-	(element as any).style.msUserSelect = 'none';
+	(element.style as any).msUserSelect = 'none';
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
-	(element as any).style.MozUserSelect = 'none';
+	(element.style as any).MozUserSelect = 'none';
 
-	element.style.webkitTapHighlightColor = 'transparent';
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
+	(element.style as any).webkitTapHighlightColor = 'transparent';
 }

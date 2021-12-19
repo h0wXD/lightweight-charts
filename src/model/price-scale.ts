@@ -10,7 +10,7 @@ import { DeepPartial, merge } from '../helpers/strict-type-checks';
 import { BarCoordinates, BarPrice, BarPrices } from './bar';
 import { Coordinate } from './coordinate';
 import { FirstValue, IPriceDataSource } from './iprice-data-source';
-import { LayoutOptions } from './layout-options';
+import { LayoutOptionsInternal } from './layout-options';
 import { LocalizationOptions } from './localization-options';
 import { PriceRangeImpl } from './price-range-impl';
 import {
@@ -20,6 +20,9 @@ import {
 	fromIndexedTo100,
 	fromLog,
 	fromPercent,
+	LogFormula,
+	logFormulaForPriceRange,
+	logFormulasAreSame,
 	toIndexedTo100,
 	toIndexedTo100Range,
 	toLog,
@@ -32,16 +35,25 @@ import { sortSources } from './sort-sources';
 import { SeriesItemsIndexesRange, TimePointIndex } from './time-data';
 
 /**
- * Enum of possible price scale modes
- * Normal mode displays original price values
- * Logarithmic mode makes price scale show logarithms of series values instead of original values
- * Percentage turns the percentage mode on.
- * IndexedTo100 turns the "indexed to 100" mode on
+ * Represents the price scale mode.
  */
 export const enum PriceScaleMode {
+	/**
+	 * Price scale shows prices. Price range changes linearly.
+	 */
 	Normal,
+	/**
+	 * Price scale shows prices. Price range changes logarithmically.
+	 */
 	Logarithmic,
+	/**
+	 * Price scale shows percentage values according the first visible value of the price scale.
+	 * The first visible value is 0% in this mode.
+	 */
 	Percentage,
+	/**
+	 * The same as percentage mode, but the first value is moved to 100.
+	 */
 	IndexedTo100,
 }
 
@@ -61,42 +73,112 @@ export interface PricedValue {
 	y: Coordinate;
 }
 
-/** Defines margins of the price scale */
+/** Defines margins of the price scale. */
 export interface PriceScaleMargins {
-	/** Top margin in percentages. Must be greater or equal to 0 and less than 100 */
+	/**
+	 * Top margin in percentages. Must be greater or equal to 0 and less than 1.
+	 */
 	top: number;
-	/** Bottom margin in percentages. Must be greater or equal to 0 and less than 100 */
+	/**
+	 * Bottom margin in percentages. Must be greater or equal to 0 and less than 1.
+	 */
 	bottom: number;
 }
 
+/**
+ * Represents the position of a price axis relative to the chart.
+ */
 export type PriceAxisPosition = 'left' | 'right' | 'none';
 
 /** Structure that describes price scale options */
 export interface PriceScaleOptions {
-	/** True makes chart calculate the price range automatically based on the visible data range */
-	autoScale: boolean;
-	/** Mode of the price scale */
-	mode: PriceScaleMode;
-	/** True inverts the scale. Makes larger values drawn lower. Affects both the price scale and the data on the chart */
-	invertScale: boolean;
-	/** True value prevents labels on the price scale from overlapping one another by aligning them one below others */
-	alignLabels: boolean;
 	/**
-	 * @deprecated Defines position of the price scale on the chart
+	 * Autoscaling is a feature that automatically adjusts a price scale to fit the visible range of data.
+	 * Note that overlay price scales are always auto-scaled.
+	 *
+	 * @defaultValue `true`
+	 */
+	autoScale: boolean;
+
+	/**
+	 * Price scale mode.
+	 *
+	 * @defaultValue {@link PriceScaleMode.Normal}
+	 */
+	mode: PriceScaleMode;
+
+	/**
+	 * Invert the price scale, so that a upwards trend is shown as a downwards trend and vice versa.
+	 * Affects both the price scale and the data on the chart.
+	 *
+	 * @defaultValue `false`
+	 */
+	invertScale: boolean;
+
+	/**
+	 * Align price scale labels to prevent them from overlapping.
+	 *
+	 * @defaultValue `true`
+	 */
+	alignLabels: boolean;
+
+	/**
+	 * Price scale's position on the chart.
+	 *
+	 * @deprecated Use options for different price scales instead
 	 * @internal
 	 */
 	position?: PriceAxisPosition;
-	/** Defines price margins for the price scale */
+
+	/**
+	 * Price scale margins.
+	 *
+	 * @defaultValue `{ bottom: 0.1, top: 0.2 }`
+	 * @example
+	 * ```js
+	 * chart.priceScale('right').applyOptions({
+	 *     scaleMargins: {
+	 *         top: 0.8,
+	 *         bottom: 0,
+	 *     },
+	 * });
+	 * ```
+	 */
 	scaleMargins: PriceScaleMargins;
-	/** Set true to draw a border between the price scale and the chart area */
+
+	/**
+	 * Set true to draw a border between the price scale and the chart area.
+	 *
+	 * @defaultValue `true`
+	 */
 	borderVisible: boolean;
-	/** Defines a color of the border between the price scale and the chart area. It is ignored if borderVisible is false */
+
+	/**
+	 * Price scale border color.
+	 *
+	 * @defaultValue `'#2B2B43'`
+	 */
 	borderColor: string;
-	/** Indicates whether the price scale displays only full lines of text or partial lines. */
+
+	/**
+	 * Show top and bottom corner labels only if entire text is visible.
+	 *
+	 * @defaultValue `false`
+	 */
 	entireTextOnly: boolean;
-	/** Indicates if this price scale visible. Could not be applied to overlay price scale */
+
+	/**
+	 * Indicates if this price scale visible. Ignored by overlay price scales.
+	 *
+	 * @defaultValue `true` for the right price scale and `false` for the left
+	 */
 	visible: boolean;
-	/** True value add a small horizontal ticks on price axis labels */
+
+	/**
+	 * Draw small horizontal line on price axis labels.
+	 *
+	 * @defaultValue `true`
+	 */
 	drawTicks: boolean;
 	width: number;
 }
@@ -115,7 +197,7 @@ const defaultPriceFormatter = new PriceFormatter(100, 1);
 export class PriceScale {
 	private readonly _id: string;
 
-	private readonly _layoutOptions: LayoutOptions;
+	private readonly _layoutOptions: LayoutOptionsInternal;
 	private readonly _localizationOptions: LocalizationOptions;
 	private readonly _options: PriceScaleOptions;
 
@@ -143,7 +225,9 @@ export class PriceScale {
 	private _scrollStartPoint: number | null = null;
 	private _formatter: IPriceFormatter = defaultPriceFormatter;
 
-	public constructor(id: string, options: PriceScaleOptions, layoutOptions: LayoutOptions, localizationOptions: LocalizationOptions) {
+	private _logFormula: LogFormula = logFormulaForPriceRange(null);
+
+	public constructor(id: string, options: PriceScaleOptions, layoutOptions: LayoutOptionsInternal, localizationOptions: LocalizationOptions) {
 		this._id = id;
 		this._options = options;
 		this._layoutOptions = layoutOptions;
@@ -232,8 +316,8 @@ export class PriceScale {
 
 		// define which scale converted from
 		if (oldMode.mode === PriceScaleMode.Logarithmic && newMode.mode !== oldMode.mode) {
-			if (canConvertPriceRangeFromLog(this._priceRange)) {
-				priceRange = convertPriceRangeFromLog(this._priceRange);
+			if (canConvertPriceRangeFromLog(this._priceRange, this._logFormula)) {
+				priceRange = convertPriceRangeFromLog(this._priceRange, this._logFormula);
 
 				if (priceRange !== null) {
 					this.setPriceRange(priceRange);
@@ -245,7 +329,7 @@ export class PriceScale {
 
 		// define which scale converted to
 		if (newMode.mode === PriceScaleMode.Logarithmic && newMode.mode !== oldMode.mode) {
-			priceRange = convertPriceRangeToLog(this._priceRange);
+			priceRange = convertPriceRangeToLog(this._priceRange, this._logFormula);
 
 			if (priceRange !== null) {
 				this.setPriceRange(priceRange);
@@ -727,7 +811,7 @@ export class PriceScale {
 	}
 
 	/**
-	 * Returns the source which will be used as "formatter source" (take minMove for formatter)
+	 * @returns The {@link IPriceDataSource} that will be used as the "formatter source" (take minMove for formatter).
 	 */
 	private _formatterSource(): IPriceDataSource | null {
 		return this._dataSources[0] || null;
@@ -762,7 +846,7 @@ export class PriceScale {
 			return 0 as Coordinate;
 		}
 
-		logical = this.isLog() && logical ? toLog(logical) : logical;
+		logical = this.isLog() && logical ? toLog(logical, this._logFormula) : logical;
 		const range = ensureNotNull(this.priceRange());
 		const invCoordinate = this._bottomMarginPx() +
 			(this.internalHeight() - 1) * (logical - range.minValue()) / range.length();
@@ -780,7 +864,7 @@ export class PriceScale {
 		const range = ensureNotNull(this.priceRange());
 		const logical = range.minValue() + range.length() *
 			((invCoordinate - this._bottomMarginPx()) / (this.internalHeight() - 1));
-		return this.isLog() ? fromLog(logical) : logical;
+		return this.isLog() ? fromLog(logical, this._logFormula) : logical;
 	}
 
 	private _onIsInvertedChanged(): void {
@@ -817,7 +901,7 @@ export class PriceScale {
 			if (sourceRange !== null) {
 				switch (this._options.mode) {
 					case PriceScaleMode.Logarithmic:
-						sourceRange = convertPriceRangeToLog(sourceRange);
+						sourceRange = convertPriceRangeToLog(sourceRange, this._logFormula);
 						break;
 					case PriceScaleMode.Percentage:
 						sourceRange = toPercentRange(sourceRange, firstValue.value);
@@ -859,7 +943,29 @@ export class PriceScale {
 				// if price range is degenerated to 1 point let's extend it by 10 min move values
 				// to avoid incorrect range and empty (blank) scale (in case of min tick much greater than 1)
 				const extendValue = 5 * minMove;
+
+				if (this.isLog()) {
+					priceRange = convertPriceRangeFromLog(priceRange, this._logFormula);
+				}
+
 				priceRange = new PriceRangeImpl(priceRange.minValue() - extendValue, priceRange.maxValue() + extendValue);
+
+				if (this.isLog()) {
+					priceRange = convertPriceRangeToLog(priceRange, this._logFormula);
+				}
+			}
+
+			if (this.isLog()) {
+				const rawRange = convertPriceRangeFromLog(priceRange, this._logFormula);
+				const newLogFormula = logFormulaForPriceRange(rawRange);
+				if (!logFormulasAreSame(newLogFormula, this._logFormula)) {
+					const rawSnapshot = this._priceRangeSnapshot !== null ? convertPriceRangeFromLog(this._priceRangeSnapshot, this._logFormula) : null;
+					this._logFormula = newLogFormula;
+					priceRange = convertPriceRangeToLog(rawRange, newLogFormula);
+					if (rawSnapshot !== null) {
+						this._priceRangeSnapshot = convertPriceRangeToLog(rawSnapshot, newLogFormula);
+					}
+				}
 			}
 
 			this.setPriceRange(priceRange);
@@ -867,6 +973,7 @@ export class PriceScale {
 			// reset empty to default
 			if (this._priceRange === null) {
 				this.setPriceRange(new PriceRangeImpl(-0.5, 0.5));
+				this._logFormula = logFormulaForPriceRange(null);
 			}
 		}
 
@@ -879,7 +986,7 @@ export class PriceScale {
 		} else if (this.isIndexedTo100()) {
 			return toIndexedTo100;
 		} else if (this.isLog()) {
-			return toLog;
+			return (price: number) => toLog(price, this._logFormula);
 		}
 
 		return null;
