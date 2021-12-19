@@ -27,8 +27,8 @@ export interface MouseEventHandlers {
 
 
 export interface TouchMouseEventLocal {
-	readonly localX: number;
-	readonly localY: number;
+	readonly localX: Coordinate;
+	readonly localY: Coordinate;
 }
 
 export interface TouchMouseEvent {

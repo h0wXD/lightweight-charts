@@ -664,7 +664,7 @@ export class ChartModel implements IDestroyable {
 			const isSeriesPointsAddedToRight = isSeriesPointsAdded && !isLeftBarShiftToLeft;
 
 			const needShiftVisibleRangeOnNewBar = isLastSeriesBarVisible && this._timeScale.options().shiftVisibleRangeOnNewBar;
-			if (isSeriesPointsAddedToRight && !needShiftVisibleRangeOnNewBar) {
+			if (newBaseIndex !== null && isSeriesPointsAddedToRight && !needShiftVisibleRangeOnNewBar) {
 				const compensationShift = newBaseIndex - currentBaseIndex;
 				this._timeScale.setRightOffset(this._timeScale.rightOffset() - compensationShift);
 			}

@@ -340,8 +340,8 @@ export class ChartApi implements IChartApi, DataUpdatesConsumer<SeriesType> {
 		if (!point) return;
 		const paneWidgets = this._chartWidget.paneWidgets();
 		const event = {
-			localX: point.x as number,
-			localY: point.y as number,
+			localX: point.x,
+			localY: point.y,
 		};
 		paneWidgets[0].mouseMoveEvent(event);
 	}
