@@ -1,23 +1,50 @@
 /*!
  * @license
- * TradingView Lightweight Charts v3.5.0-dev+202108020110
+ * TradingView Lightweight Charts v3.8.0-dev+202112190350
  * Copyright (c) 2020 TradingView, Inc.
  * Licensed under Apache License 2.0 https://www.apache.org/licenses/LICENSE-2.0
  */
 import { bindToDevicePixelRatio } from 'fancy-canvas/coordinate-space';
 
+/**
+ * Represents the possible line types.
+ */
 var LineType;
 (function (LineType) {
+    /**
+     * A line.
+     */
     LineType[LineType["Simple"] = 0] = "Simple";
+    /**
+     * A stepped line.
+     */
     LineType[LineType["WithSteps"] = 1] = "WithSteps";
     LineType[LineType["WithGaps"] = 2] = "WithGaps";
 })(LineType || (LineType = {}));
+/**
+ * Represents the possible line styles.
+ */
 var LineStyle;
 (function (LineStyle) {
+    /**
+     * A solid line.
+     */
     LineStyle[LineStyle["Solid"] = 0] = "Solid";
+    /**
+     * A dotted line.
+     */
     LineStyle[LineStyle["Dotted"] = 1] = "Dotted";
+    /**
+     * A dashed line.
+     */
     LineStyle[LineStyle["Dashed"] = 2] = "Dashed";
+    /**
+     * A dashed line with bigger dashes.
+     */
     LineStyle[LineStyle["LargeDashed"] = 3] = "LargeDashed";
+    /**
+     * A dottled line with more space between dots.
+     */
     LineStyle[LineStyle["SparseDotted"] = 4] = "SparseDotted";
 })(LineStyle || (LineStyle = {}));
 function setLineStyle(ctx, style) {
@@ -299,7 +326,7 @@ var PaneRendererMarks = /** @class */ (function (_super) {
     return PaneRendererMarks;
 }(ScaledRenderer));
 
-function createEmptyMarkerData(chartOptions) {
+function createEmptyMarkerData() {
     return {
         _internal_items: [{
                 x: 0,
@@ -308,7 +335,7 @@ function createEmptyMarkerData(chartOptions) {
                 price: 0,
             }],
         _internal_lineColor: '',
-        _internal_backColor: chartOptions.layout.backgroundColor,
+        _internal_backColor: '',
         _internal_radius: 0,
         _internal_visibleRange: null,
     };
@@ -325,10 +352,9 @@ var CrosshairMarksPaneView = /** @class */ (function () {
         this._private__compositeRenderer._internal_setRenderers(this._private__markersRenderers);
     }
     CrosshairMarksPaneView.prototype.update = function (updateType) {
-        var _this = this;
         var serieses = this._private__chartModel.serieses();
         if (serieses.length !== this._private__markersRenderers.length) {
-            this._private__markersData = serieses.map(function () { return createEmptyMarkerData(_this._private__chartModel.options()); });
+            this._private__markersData = serieses.map(createEmptyMarkerData);
             this._private__markersRenderers = this._private__markersData.map(function (data) {
                 var res = new PaneRendererMarks();
                 res._internal_setData(data);
@@ -340,17 +366,18 @@ var CrosshairMarksPaneView = /** @class */ (function () {
     };
     CrosshairMarksPaneView.prototype.renderer = function (height, width, addAnchors) {
         if (this._private__invalidated) {
-            this._private__updateImpl();
+            this._private__updateImpl(height);
             this._private__invalidated = false;
         }
         return this._private__compositeRenderer;
     };
-    CrosshairMarksPaneView.prototype._private__updateImpl = function () {
+    CrosshairMarksPaneView.prototype._private__updateImpl = function (height) {
         var _this = this;
         var serieses = this._private__chartModel.serieses();
         var timePointIndex = this._private__crosshair.appliedIndex();
         var timeScale = this._private__chartModel.timeScale();
         serieses.forEach(function (s, index) {
+            var _a;
             var data = _this._private__markersData[index];
             var seriesData = s.markerDataAtIndex(timePointIndex);
             if (seriesData === null || !s.visible()) {
@@ -359,10 +386,10 @@ var CrosshairMarksPaneView = /** @class */ (function () {
             }
             var firstValue = ensureNotNull(s.firstValue());
             data._internal_lineColor = seriesData.backgroundColor;
-            data._internal_backColor = seriesData.borderColor;
             data._internal_radius = seriesData.radius;
             data._internal_items[0].price = seriesData.price;
             data._internal_items[0].y = s.priceScale().priceToCoordinate(seriesData.price, firstValue.value);
+            data._internal_backColor = (_a = seriesData.borderColor) !== null && _a !== void 0 ? _a : _this._private__chartModel.backgroundColorAtYPercentFromTop(data._internal_items[0].y / height);
             data._internal_items[0].time = timePointIndex;
             data._internal_items[0].x = timeScale.indexToCoordinate(timePointIndex);
             data._internal_visibleRange = rangeForSinglePoint;
@@ -464,7 +491,12 @@ var CrosshairPaneView = /** @class */ (function () {
     return CrosshairPaneView;
 }());
 
-/** @public see https://developer.mozilla.org/en-US/docs/Web/CSS/color_value */
+/**
+ * Note this object should be explicitly marked as public so that dts-bundle-generator does not mangle the property names.
+ *
+ * @public
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
+ */
 var namedColorRgbHexStrings = {
     // The order of properties in this Record is not important for the internal logic.
     // It's just GZIPped better when props follows this order.
@@ -624,6 +656,13 @@ function normalizeRgbComponent(component) {
     // NaN values are treated as 0
     return (Math.round(component) || 0);
 }
+function normalizeAlphaComponent(component) {
+    return (!(component <= 0) && !(component > 0) ? 0 :
+        component < 0 ? 0 :
+            component > 1 ? 1 :
+                // limit the precision of all numbers to at most 4 digits in fractional part
+                Math.round(component * 10000) / 10000);
+}
 /**
  * @example
  * #fb0
@@ -656,7 +695,7 @@ var rgbRe = /^rgb\(\s*(-?\d{1,10})\s*,\s*(-?\d{1,10})\s*,\s*(-?\d{1,10})\s*\)$/;
  * rgba(255,234,245,0.1)
  */
 var rgbaRe = /^rgba\(\s*(-?\d{1,10})\s*,\s*(-?\d{1,10})\s*,\s*(-?\d{1,10})\s*,\s*(-?[\d]{0,10}(?:\.\d+)?)\s*\)$/;
-function colorStringToRgb(colorString) {
+function colorStringToRgba(colorString) {
     colorString = colorString.toLowerCase();
     // eslint-disable-next-line no-restricted-syntax
     if (colorString in namedColorRgbHexStrings) {
@@ -669,6 +708,7 @@ function colorStringToRgb(colorString) {
                 normalizeRgbComponent(parseInt(matches[1], 10)),
                 normalizeRgbComponent(parseInt(matches[2], 10)),
                 normalizeRgbComponent(parseInt(matches[3], 10)),
+                normalizeAlphaComponent((matches.length < 5 ? 1 : parseFloat(matches[4]))),
             ];
         }
     }
@@ -679,6 +719,7 @@ function colorStringToRgb(colorString) {
                 normalizeRgbComponent(parseInt(matches[1], 16)),
                 normalizeRgbComponent(parseInt(matches[2], 16)),
                 normalizeRgbComponent(parseInt(matches[3], 16)),
+                1,
             ];
         }
     }
@@ -689,12 +730,13 @@ function colorStringToRgb(colorString) {
                 normalizeRgbComponent(parseInt(matches[1], 16) * 0x11),
                 normalizeRgbComponent(parseInt(matches[2], 16) * 0x11),
                 normalizeRgbComponent(parseInt(matches[3], 16) * 0x11),
+                1,
             ];
         }
     }
     throw new Error("Cannot parse color: " + colorString);
 }
-function rgbToGrayscale(rgbValue) {
+function rgbaToGrayscale(rgbValue) {
     // Originally, the NTSC RGB to YUV formula
     // perfected by @eugene-korobko's black magic
     var redComponentGrayscaleWeight = 0.199;
@@ -704,15 +746,37 @@ function rgbToGrayscale(rgbValue) {
         greenComponentGrayscaleWeight * rgbValue[1] +
         blueComponentGrayscaleWeight * rgbValue[2]);
 }
+function applyAlpha(color, alpha) {
+    // special case optimization
+    if (color === 'transparent') {
+        return color;
+    }
+    var originRgba = colorStringToRgba(color);
+    var originAlpha = originRgba[3];
+    return "rgba(" + originRgba[0] + ", " + originRgba[1] + ", " + originRgba[2] + ", " + alpha * originAlpha + ")";
+}
 function generateContrastColors(backgroundColor) {
-    var rgb = colorStringToRgb(backgroundColor);
+    var rgb = colorStringToRgba(backgroundColor);
     return {
         _internal_background: "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")",
-        _internal_foreground: rgbToGrayscale(rgb) > 160 ? 'black' : 'white',
+        _internal_foreground: rgbaToGrayscale(rgb) > 160 ? 'black' : 'white',
     };
+}
+function gradientColorAtPercent(topColor, bottomColor, percent) {
+    var _a = colorStringToRgba(topColor), topR = _a[0], topG = _a[1], topB = _a[2], topA = _a[3];
+    var _b = colorStringToRgba(bottomColor), bottomR = _b[0], bottomG = _b[1], bottomB = _b[2], bottomA = _b[3];
+    var resultRgba = [
+        normalizeRgbComponent(topR + percent * (bottomR - topR)),
+        normalizeRgbComponent(topG + percent * (bottomG - topG)),
+        normalizeRgbComponent(topB + percent * (bottomB - topB)),
+        normalizeAlphaComponent(topA + percent * (bottomA - topA)),
+    ];
+    return "rgba(" + resultRgba[0] + ", " + resultRgba[1] + ", " + resultRgba[2] + ", " + resultRgba[3] + ")";
 }
 
 /**
+ * Fills rectangle's inner border (so, all the filled area is limited by the [x, x + width]*[y, y + height] region)
+ * ```
  * (x, y)
  * O***********************|*****
  * |        border         |  ^
@@ -730,15 +794,14 @@ function generateContrastColors(backgroundColor) {
  * |***********************|*****
  * |                       |
  * |<------- width ------->|
+ * ```
  *
- * Fills rectangle's inner border (so, all the filled area is limited by the [x, x + width]*[y, y + height] region)
- *
- * @param ctx context to draw on
- * @param x left side of the target rectangle
- * @param y top side of the target rectangle
- * @param width width of the target rectangle
- * @param height height of the target rectangle
- * @param borderWidth width of border to fill, must be less than width and height of the target rectangle
+ * @param ctx - Context to draw on
+ * @param x - Left side of the target rectangle
+ * @param y - Top side of the target rectangle
+ * @param width - Width of the target rectangle
+ * @param height - Height of the target rectangle
+ * @param borderWidth - Width of border to fill, must be less than width and height of the target rectangle
  */
 function fillRectInnerBorder(ctx, x, y, width, height, borderWidth) {
     // horizontal (top and bottom) edges
@@ -758,6 +821,17 @@ function clearRect(ctx, x, y, w, h, clearColor) {
     ctx.save();
     ctx.globalCompositeOperation = 'copy';
     ctx.fillStyle = clearColor;
+    ctx.fillRect(x, y, w, h);
+    ctx.restore();
+}
+// eslint-disable-next-line max-params
+function clearRectWithGradient(ctx, x, y, w, h, topColor, bottomColor) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'copy';
+    var gradient = ctx.createLinearGradient(0, 0, 0, h);
+    gradient.addColorStop(0, topColor);
+    gradient.addColorStop(1, bottomColor);
+    ctx.fillStyle = gradient;
     ctx.fillRect(x, y, w, h);
     ctx.restore();
 }
@@ -1108,12 +1182,6 @@ var DataSource = /** @class */ (function () {
     DataSource.prototype.setPriceScale = function (priceScale) {
         this._priceScale = priceScale;
     };
-    DataSource.prototype.priceAxisViews = function (pane, priceScale) {
-        return [];
-    };
-    DataSource.prototype.paneViews = function (pane) {
-        return [];
-    };
     DataSource.prototype.timeAxisViews = function () {
         return [];
     };
@@ -1124,13 +1192,17 @@ var DataSource = /** @class */ (function () {
 }());
 
 /**
- * Enum of possible crosshair behavior modes.
- * Normal means that the crosshair always follows the pointer.
- * Magnet means that the vertical line of the crosshair follows the pointer, while the horizontal line is placed on the corresponding series point.
+ * Represents the crosshair mode.
  */
 var CrosshairMode;
 (function (CrosshairMode) {
+    /**
+     * This mode allows crosshair to move freely on the chart.
+     */
     CrosshairMode[CrosshairMode["Normal"] = 0] = "Normal";
+    /**
+     * This mode sticks crosshair's horizontal line to the price value of a single-value series or to the close price of OHLC-based series.
+     */
     CrosshairMode[CrosshairMode["Magnet"] = 1] = "Magnet";
 })(CrosshairMode || (CrosshairMode = {}));
 var Crosshair = /** @class */ (function (_super) {
@@ -1312,7 +1384,10 @@ var formatterOptions = {
     _internal_decimalSign: '.',
     _internal_decimalSignFractional: '\'',
 };
-// length mustn't be more then 16
+/**
+ * @param value - The number of convert.
+ * @param length - The length. Must be between 0 and 16 inclusive.
+ */
 function numberToStringWithLeadingZero(value, length) {
     if (!isNumber(value)) {
         return 'n/a';
@@ -1551,6 +1626,10 @@ function ceiledOdd(x) {
     return (ceiled % 2 === 0) ? ceiled - 1 : ceiled;
 }
 
+var defLogFormula = {
+    _internal_logicalOffset: 4,
+    _internal_coordOffset: 0.0001,
+};
 function fromPercent(value, baseValue) {
     if (baseValue < 0) {
         value = -value;
@@ -1582,48 +1661,66 @@ function toIndexedTo100Range(priceRange, baseValue) {
     var maxPercent = toIndexedTo100(priceRange.maxValue(), baseValue);
     return new PriceRangeImpl(minPercent, maxPercent);
 }
-function toLog(price) {
+function toLog(price, logFormula) {
     var m = Math.abs(price);
-    if (m < 1e-8) {
+    if (m < 1e-15) {
         return 0;
     }
-    var res = log10(m + 0.0001 /* CoordOffset */) + 4 /* LogicalOffset */;
+    var res = log10(m + logFormula._internal_coordOffset) + logFormula._internal_logicalOffset;
     return ((price < 0) ? -res : res);
 }
-function fromLog(logical) {
+function fromLog(logical, logFormula) {
     var m = Math.abs(logical);
-    if (m < 1e-8) {
+    if (m < 1e-15) {
         return 0;
     }
-    var res = Math.pow(10, m - 4 /* LogicalOffset */) - 0.0001 /* CoordOffset */;
+    var res = Math.pow(10, m - logFormula._internal_logicalOffset) - logFormula._internal_coordOffset;
     return (logical < 0) ? -res : res;
 }
-function convertPriceRangeToLog(priceRange) {
+function convertPriceRangeToLog(priceRange, logFormula) {
     if (priceRange === null) {
         return null;
     }
-    var min = toLog(priceRange.minValue());
-    var max = toLog(priceRange.maxValue());
+    var min = toLog(priceRange.minValue(), logFormula);
+    var max = toLog(priceRange.maxValue(), logFormula);
     return new PriceRangeImpl(min, max);
 }
-function canConvertPriceRangeFromLog(priceRange) {
+function canConvertPriceRangeFromLog(priceRange, logFormula) {
     if (priceRange === null) {
         return false;
     }
-    var min = fromLog(priceRange.minValue());
-    var max = fromLog(priceRange.maxValue());
+    var min = fromLog(priceRange.minValue(), logFormula);
+    var max = fromLog(priceRange.maxValue(), logFormula);
     return isFinite(min) && isFinite(max);
 }
-function convertPriceRangeFromLog(priceRange) {
+function convertPriceRangeFromLog(priceRange, logFormula) {
     if (priceRange === null) {
         return null;
     }
-    var min = fromLog(priceRange.minValue());
-    var max = fromLog(priceRange.maxValue());
+    var min = fromLog(priceRange.minValue(), logFormula);
+    var max = fromLog(priceRange.maxValue(), logFormula);
     return new PriceRangeImpl(min, max);
 }
+function logFormulaForPriceRange(range) {
+    if (range === null) {
+        return defLogFormula;
+    }
+    var diff = Math.abs(range.maxValue() - range.minValue());
+    if (diff >= 1 || diff < 1e-15) {
+        return defLogFormula;
+    }
+    var digits = Math.ceil(Math.abs(Math.log10(diff)));
+    var logicalOffset = defLogFormula._internal_logicalOffset + digits;
+    var coordOffset = 1 / Math.pow(10, logicalOffset);
+    return {
+        _internal_logicalOffset: logicalOffset,
+        _internal_coordOffset: coordOffset,
+    };
+}
+function logFormulasAreSame(f1, f2) {
+    return f1._internal_logicalOffset === f2._internal_logicalOffset && f1._internal_coordOffset === f2._internal_coordOffset;
+}
 
-var TICK_SPAN_EPSILON = 1e-9;
 var PriceTickSpanCalculator = /** @class */ (function () {
     function PriceTickSpanCalculator(base, integralDividers) {
         this._private__base = base;
@@ -1653,7 +1750,6 @@ var PriceTickSpanCalculator = /** @class */ (function () {
     }
     PriceTickSpanCalculator.prototype._internal_tickSpan = function (high, low, maxTickSpan) {
         var minMovement = (this._private__base === 0) ? (0) : (1 / this._private__base);
-        var tickSpanEpsilon = TICK_SPAN_EPSILON;
         var resultTickSpan = Math.pow(10, Math.max(0, Math.ceil(log10(high - low))));
         var index = 0;
         var c = this._private__integralDividers[0];
@@ -1661,9 +1757,9 @@ var PriceTickSpanCalculator = /** @class */ (function () {
         while (true) {
             // the second part is actual for small with very small values like 1e-10
             // greaterOrEqual fails for such values
-            var resultTickSpanLargerMinMovement = greaterOrEqual(resultTickSpan, minMovement, tickSpanEpsilon) && resultTickSpan > (minMovement + tickSpanEpsilon);
-            var resultTickSpanLargerMaxTickSpan = greaterOrEqual(resultTickSpan, maxTickSpan * c, tickSpanEpsilon);
-            var resultTickSpanLarger1 = greaterOrEqual(resultTickSpan, 1, tickSpanEpsilon);
+            var resultTickSpanLargerMinMovement = greaterOrEqual(resultTickSpan, minMovement, 1e-14 /* TickSpanEpsilon */) && resultTickSpan > (minMovement + 1e-14 /* TickSpanEpsilon */);
+            var resultTickSpanLargerMaxTickSpan = greaterOrEqual(resultTickSpan, maxTickSpan * c, 1e-14 /* TickSpanEpsilon */);
+            var resultTickSpanLarger1 = greaterOrEqual(resultTickSpan, 1, 1e-14 /* TickSpanEpsilon */);
             var haveToContinue = resultTickSpanLargerMinMovement && resultTickSpanLargerMaxTickSpan && resultTickSpanLarger1;
             if (!haveToContinue) {
                 break;
@@ -1671,14 +1767,14 @@ var PriceTickSpanCalculator = /** @class */ (function () {
             resultTickSpan /= c;
             c = this._private__integralDividers[++index % this._private__integralDividers.length];
         }
-        if (resultTickSpan <= (minMovement + tickSpanEpsilon)) {
+        if (resultTickSpan <= (minMovement + 1e-14 /* TickSpanEpsilon */)) {
             resultTickSpan = minMovement;
         }
         resultTickSpan = Math.max(1, resultTickSpan);
-        if ((this._private__fractionalDividers.length > 0) && equal(resultTickSpan, 1, tickSpanEpsilon)) {
+        if ((this._private__fractionalDividers.length > 0) && equal(resultTickSpan, 1, 1e-14 /* TickSpanEpsilon */)) {
             index = 0;
             c = this._private__fractionalDividers[0];
-            while (greaterOrEqual(resultTickSpan, maxTickSpan * c, tickSpanEpsilon) && resultTickSpan > (minMovement + tickSpanEpsilon)) {
+            while (greaterOrEqual(resultTickSpan, maxTickSpan * c, 1e-14 /* TickSpanEpsilon */) && resultTickSpan > (minMovement + 1e-14 /* TickSpanEpsilon */)) {
                 resultTickSpan /= c;
                 c = this._private__fractionalDividers[++index % this._private__fractionalDividers.length];
             }
@@ -1785,17 +1881,26 @@ function sortSources(sources) {
 }
 
 /**
- * Enum of possible price scale modes
- * Normal mode displays original price values
- * Logarithmic mode makes price scale show logarithms of series values instead of original values
- * Percentage turns the percentage mode on.
- * IndexedTo100 turns the "indexed to 100" mode on
+ * Represents the price scale mode.
  */
 var PriceScaleMode;
 (function (PriceScaleMode) {
+    /**
+     * Price scale shows prices. Price range changes linearly.
+     */
     PriceScaleMode[PriceScaleMode["Normal"] = 0] = "Normal";
+    /**
+     * Price scale shows prices. Price range changes logarithmically.
+     */
     PriceScaleMode[PriceScaleMode["Logarithmic"] = 1] = "Logarithmic";
+    /**
+     * Price scale shows percentage values according the first visible value of the price scale.
+     * The first visible value is 0% in this mode.
+     */
     PriceScaleMode[PriceScaleMode["Percentage"] = 2] = "Percentage";
+    /**
+     * The same as percentage mode, but the first value is moved to 100.
+     */
     PriceScaleMode[PriceScaleMode["IndexedTo100"] = 3] = "IndexedTo100";
 })(PriceScaleMode || (PriceScaleMode = {}));
 var percentageFormatter = new PercentageFormatter();
@@ -1817,6 +1922,7 @@ var PriceScale = /** @class */ (function () {
         this._private__scaleStartPoint = null;
         this._private__scrollStartPoint = null;
         this._private__formatter = defaultPriceFormatter;
+        this._private__logFormula = logFormulaForPriceRange(null);
         this._private__id = id;
         this._private__options = options;
         this._private__layoutOptions = layoutOptions;
@@ -1887,8 +1993,8 @@ var PriceScale = /** @class */ (function () {
         }
         // define which scale converted from
         if (oldMode.mode === 1 /* Logarithmic */ && newMode.mode !== oldMode.mode) {
-            if (canConvertPriceRangeFromLog(this._private__priceRange)) {
-                priceRange = convertPriceRangeFromLog(this._private__priceRange);
+            if (canConvertPriceRangeFromLog(this._private__priceRange, this._private__logFormula)) {
+                priceRange = convertPriceRangeFromLog(this._private__priceRange, this._private__logFormula);
                 if (priceRange !== null) {
                     this.setPriceRange(priceRange);
                 }
@@ -1899,7 +2005,7 @@ var PriceScale = /** @class */ (function () {
         }
         // define which scale converted to
         if (newMode.mode === 1 /* Logarithmic */ && newMode.mode !== oldMode.mode) {
-            priceRange = convertPriceRangeToLog(this._private__priceRange);
+            priceRange = convertPriceRangeToLog(this._private__priceRange, this._private__logFormula);
             if (priceRange !== null) {
                 this.setPriceRange(priceRange);
             }
@@ -2280,7 +2386,7 @@ var PriceScale = /** @class */ (function () {
         this._private__cachedOrderedSources = null;
     };
     /**
-     * Returns the source which will be used as "formatter source" (take minMove for formatter)
+     * @returns The {@link IPriceDataSource} that will be used as the "formatter source" (take minMove for formatter).
      */
     PriceScale.prototype._private__formatterSource = function () {
         return this._private__dataSources[0] || null;
@@ -2309,7 +2415,7 @@ var PriceScale = /** @class */ (function () {
         if (this.isEmpty()) {
             return 0;
         }
-        logical = this.isLog() && logical ? toLog(logical) : logical;
+        logical = this.isLog() && logical ? toLog(logical, this._private__logFormula) : logical;
         var range = ensureNotNull(this.priceRange());
         var invCoordinate = this._private__bottomMarginPx() +
             (this.internalHeight() - 1) * (logical - range.minValue()) / range.length();
@@ -2325,7 +2431,7 @@ var PriceScale = /** @class */ (function () {
         var range = ensureNotNull(this.priceRange());
         var logical = range.minValue() + range.length() *
             ((invCoordinate - this._private__bottomMarginPx()) / (this.internalHeight() - 1));
-        return this.isLog() ? fromLog(logical) : logical;
+        return this.isLog() ? fromLog(logical, this._private__logFormula) : logical;
     };
     PriceScale.prototype._private__onIsInvertedChanged = function () {
         this._private__marksCache = null;
@@ -2355,7 +2461,7 @@ var PriceScale = /** @class */ (function () {
             if (sourceRange !== null) {
                 switch (this._private__options.mode) {
                     case 1 /* Logarithmic */:
-                        sourceRange = convertPriceRangeToLog(sourceRange);
+                        sourceRange = convertPriceRangeToLog(sourceRange, this._private__logFormula);
                         break;
                     case 2 /* Percentage */:
                         sourceRange = toPercentRange(sourceRange, firstValue.value);
@@ -2393,7 +2499,25 @@ var PriceScale = /** @class */ (function () {
                 // if price range is degenerated to 1 point let's extend it by 10 min move values
                 // to avoid incorrect range and empty (blank) scale (in case of min tick much greater than 1)
                 var extendValue = 5 * minMove;
+                if (this.isLog()) {
+                    priceRange = convertPriceRangeFromLog(priceRange, this._private__logFormula);
+                }
                 priceRange = new PriceRangeImpl(priceRange.minValue() - extendValue, priceRange.maxValue() + extendValue);
+                if (this.isLog()) {
+                    priceRange = convertPriceRangeToLog(priceRange, this._private__logFormula);
+                }
+            }
+            if (this.isLog()) {
+                var rawRange = convertPriceRangeFromLog(priceRange, this._private__logFormula);
+                var newLogFormula = logFormulaForPriceRange(rawRange);
+                if (!logFormulasAreSame(newLogFormula, this._private__logFormula)) {
+                    var rawSnapshot = this._private__priceRangeSnapshot !== null ? convertPriceRangeFromLog(this._private__priceRangeSnapshot, this._private__logFormula) : null;
+                    this._private__logFormula = newLogFormula;
+                    priceRange = convertPriceRangeToLog(rawRange, newLogFormula);
+                    if (rawSnapshot !== null) {
+                        this._private__priceRangeSnapshot = convertPriceRangeToLog(rawSnapshot, newLogFormula);
+                    }
+                }
             }
             this.setPriceRange(priceRange);
         }
@@ -2401,11 +2525,13 @@ var PriceScale = /** @class */ (function () {
             // reset empty to default
             if (this._private__priceRange === null) {
                 this.setPriceRange(new PriceRangeImpl(-0.5, 0.5));
+                this._private__logFormula = logFormulaForPriceRange(null);
             }
         }
         this._private__invalidatedForRange._internal_isValid = true;
     };
     PriceScale.prototype._private__getCoordinateTransformer = function () {
+        var _this = this;
         if (this.isPercentage()) {
             return toPercent;
         }
@@ -2413,7 +2539,7 @@ var PriceScale = /** @class */ (function () {
             return toIndexedTo100;
         }
         else if (this.isLog()) {
-            return toLog;
+            return function (price) { return toLog(price, _this._private__logFormula); };
         }
         return null;
     };
@@ -2439,6 +2565,24 @@ function fillUpDownCandlesticksColors(options) {
         options.wickDownColor = options.wickColor;
     }
 }
+/**
+ * Represents the type of the last price animation for series such as area or line.
+ */
+var LastPriceAnimationMode;
+(function (LastPriceAnimationMode) {
+    /**
+     * Animation is always disabled
+     */
+    LastPriceAnimationMode[LastPriceAnimationMode["Disabled"] = 0] = "Disabled";
+    /**
+     * Animation is always enabled.
+     */
+    LastPriceAnimationMode[LastPriceAnimationMode["Continuous"] = 1] = "Continuous";
+    /**
+     * Animation is active after new data.
+     */
+    LastPriceAnimationMode[LastPriceAnimationMode["OnDataUpdate"] = 2] = "OnDataUpdate";
+})(LastPriceAnimationMode || (LastPriceAnimationMode = {}));
 function precisionByMinMove(minMove) {
     if (minMove >= 1) {
         return 0;
@@ -2454,14 +2598,17 @@ function precisionByMinMove(minMove) {
     }
     return i;
 }
+/**
+ * Represents the source of data to be used for the horizontal price line.
+ */
 var PriceLineSource;
 (function (PriceLineSource) {
     /**
-     * The last bar data
+     * Use the last bar data.
      */
     PriceLineSource[PriceLineSource["LastBar"] = 0] = "LastBar";
     /**
-     * The last visible bar in viewport
+     * Use the last visible data of the chart viewport.
      */
     PriceLineSource[PriceLineSource["LastVisible"] = 1] = "LastVisible";
 })(PriceLineSource || (PriceLineSource = {}));
@@ -2531,6 +2678,46 @@ var DateTimeFormatter = /** @class */ (function () {
     };
     return DateTimeFormatter;
 }());
+
+/**
+ * Binary function that accepts two arguments (the first of the type of array elements, and the second is always val), and returns a value convertible to bool.
+ * The value returned indicates whether the first argument is considered to go before the second.
+ * The function shall not modify any of its arguments.
+ */
+function lowerbound(arr, value, compare, start, to) {
+    if (start === void 0) { start = 0; }
+    if (to === void 0) { to = arr.length; }
+    var count = to - start;
+    while (0 < count) {
+        var count2 = (count >> 1);
+        var mid = start + count2;
+        if (compare(arr[mid], value)) {
+            start = mid + 1;
+            count -= count2 + 1;
+        }
+        else {
+            count = count2;
+        }
+    }
+    return start;
+}
+function upperbound(arr, value, compare, start, to) {
+    if (start === void 0) { start = 0; }
+    if (to === void 0) { to = arr.length; }
+    var count = to - start;
+    while (0 < count) {
+        var count2 = (count >> 1);
+        var mid = start + count2;
+        if (!(compare(value, arr[mid]))) {
+            start = mid + 1;
+            count -= count2 + 1;
+        }
+        else {
+            count = count2;
+        }
+    }
+    return start;
+}
 
 function defaultTickMarkFormatter(timePoint, tickMarkType, locale) {
     var formatOptions = {};
@@ -2636,26 +2823,24 @@ var TickMarks = /** @class */ (function () {
         this._private__marksByWeight = new Map();
         this._private__cache = null;
     }
-    TickMarks.prototype.setTimeScalePoints = function (newPoints) {
-        var _this = this;
+    TickMarks.prototype._internal_setTimeScalePoints = function (newPoints, firstChangedPointIndex) {
+        this._private__removeMarksSinceIndex(firstChangedPointIndex);
         this._private__cache = null;
-        this._private__marksByWeight.clear();
-        // TODO: it looks like this is quite fast even with thousands of points
-        // but there might be point of improvements by providing the only changed points
-        newPoints.forEach(function (point, index) {
-            var marksForWeight = _this._private__marksByWeight.get(point.timeWeight);
+        for (var index = firstChangedPointIndex; index < newPoints.length; ++index) {
+            var point = newPoints[index];
+            var marksForWeight = this._private__marksByWeight.get(point.timeWeight);
             if (marksForWeight === undefined) {
                 marksForWeight = [];
-                _this._private__marksByWeight.set(point.timeWeight, marksForWeight);
+                this._private__marksByWeight.set(point.timeWeight, marksForWeight);
             }
             marksForWeight.push({
-                index: index,
-                time: point.time,
-                weight: point.timeWeight,
+                _internal_index: index,
+                _internal_time: point.time,
+                _internal_weight: point.timeWeight,
             });
-        });
+        }
     };
-    TickMarks.prototype.build = function (spacing, maxWidth) {
+    TickMarks.prototype._internal_build = function (spacing, maxWidth) {
         var maxIndexesPerMark = Math.ceil(maxWidth / spacing);
         if (this._private__cache === null || this._private__cache._internal_maxIndexesPerMark !== maxIndexesPerMark) {
             this._private__cache = {
@@ -2664,6 +2849,25 @@ var TickMarks = /** @class */ (function () {
             };
         }
         return this._private__cache._internal_marks;
+    };
+    TickMarks.prototype._private__removeMarksSinceIndex = function (sinceIndex) {
+        if (sinceIndex === 0) {
+            this._private__marksByWeight.clear();
+            return;
+        }
+        var weightsToClear = [];
+        this._private__marksByWeight.forEach(function (marks, timeWeight) {
+            if (sinceIndex <= marks[0]._internal_index) {
+                weightsToClear.push(timeWeight);
+            }
+            else {
+                marks.splice(lowerbound(marks, sinceIndex, function (tm) { return tm._internal_index < sinceIndex; }), Infinity);
+            }
+        });
+        for (var _i = 0, weightsToClear_1 = weightsToClear; _i < weightsToClear_1.length; _i++) {
+            var weight = weightsToClear_1[_i];
+            this._private__marksByWeight.delete(weight);
+        }
     };
     TickMarks.prototype._private__buildMarksImpl = function (maxIndexesPerMark) {
         var marks = [];
@@ -2683,12 +2887,12 @@ var TickMarks = /** @class */ (function () {
             var leftIndex = -Infinity;
             for (var i = 0; i < currentWeightLength; i++) {
                 var mark = currentWeight[i];
-                var currentIndex = mark.index;
+                var currentIndex = mark._internal_index;
                 // Determine indexes with which current index will be compared
                 // All marks to the right is moved to new array
                 while (prevMarksPointer < prevMarksLength) {
                     var lastMark = prevMarks[prevMarksPointer];
-                    var lastIndex = lastMark.index;
+                    var lastIndex = lastMark._internal_index;
                     if (lastIndex < currentIndex) {
                         prevMarksPointer++;
                         marks.push(lastMark);
@@ -2735,12 +2939,30 @@ var TimeScaleVisibleRange = /** @class */ (function () {
     return TimeScaleVisibleRange;
 }());
 
+/**
+ * Represents the type of a tick mark on the time axis.
+ */
 var TickMarkType;
 (function (TickMarkType) {
+    /**
+     * The start of the year (e.g. it's the first tick mark in a year).
+     */
     TickMarkType[TickMarkType["Year"] = 0] = "Year";
+    /**
+     * The start of the month (e.g. it's the first tick mark in a month).
+     */
     TickMarkType[TickMarkType["Month"] = 1] = "Month";
+    /**
+     * A day of the month.
+     */
     TickMarkType[TickMarkType["DayOfMonth"] = 2] = "DayOfMonth";
+    /**
+     * A time without seconds.
+     */
     TickMarkType[TickMarkType["Time"] = 3] = "Time";
+    /**
+     * A time with seconds.
+     */
     TickMarkType[TickMarkType["TimeWithSeconds"] = 4] = "TimeWithSeconds";
 })(TickMarkType || (TickMarkType = {}));
 var TimeScale = /** @class */ (function () {
@@ -2814,18 +3036,14 @@ var TimeScale = /** @class */ (function () {
             // special case
             return findNearest ? this._private__points.length - 1 : null;
         }
-        for (var i = 0; i < this._private__points.length; ++i) {
-            if (time.timestamp === this._private__points[i].time.timestamp) {
-                return i;
-            }
-            if (time.timestamp < this._private__points[i].time.timestamp) {
-                return findNearest ? i : null;
-            }
+        var index = lowerbound(this._private__points, time.timestamp, function (a, b) { return a.time.timestamp < b; });
+        if (time.timestamp < this._private__points[index].time.timestamp) {
+            return findNearest ? index : null;
         }
-        return null;
+        return index;
     };
     TimeScale.prototype.isEmpty = function () {
-        return this._private__width === 0 || this._private__points.length === 0;
+        return this._private__width === 0 || this._private__points.length === 0 || this._private__baseIndexOrNull === null;
     };
     // strict range: integer indices of the bars in the visible range rounded in more wide direction
     TimeScale.prototype.visibleStrictRange = function () {
@@ -2863,9 +3081,6 @@ var TimeScale = /** @class */ (function () {
             to: ensureNotNull(this.timeToIndex(range.to, true)),
         };
     };
-    TimeScale.prototype.tickMarks = function () {
-        return this._private__tickMarks;
-    };
     TimeScale.prototype.width = function () {
         return this._private__width;
     };
@@ -2879,7 +3094,7 @@ var TimeScale = /** @class */ (function () {
         if (this._private__options.lockVisibleTimeRangeOnResize && this._private__width) {
             // recalculate bar spacing
             var newBarSpacing = this._private__barSpacing * width / this._private__width;
-            this._private__setBarSpacing(newBarSpacing);
+            this._private__barSpacing = newBarSpacing;
         }
         // if time scale is scrolled to the end of data and we have fixed right edge
         // keep left edge instead of right
@@ -2961,29 +3176,41 @@ var TimeScale = /** @class */ (function () {
         var visibleBars = ensureNotNull(this.visibleStrictRange());
         var firstBar = Math.max(visibleBars.left(), visibleBars.left() - indexPerLabel);
         var lastBar = Math.max(visibleBars.right(), visibleBars.right() - indexPerLabel);
-        var items = this._private__tickMarks.build(spacing, maxLabelWidth);
+        var items = this._private__tickMarks._internal_build(spacing, maxLabelWidth);
+        // according to indexPerLabel value this value means "earliest index which _might be_ used as the second label on time scale"
+        var earliestIndexOfSecondLabel = this._private__firstIndex() + indexPerLabel;
+        // according to indexPerLabel value this value means "earliest index which _might be_ used as the second last label on time scale"
+        var indexOfSecondLastLabel = this._private__lastIndex() - indexPerLabel;
         var targetIndex = 0;
         for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
             var tm = items_1[_i];
-            if (!(firstBar <= tm.index && tm.index <= lastBar)) {
+            if (!(firstBar <= tm._internal_index && tm._internal_index <= lastBar)) {
                 continue;
             }
-            var time = this.indexToTime(tm.index);
-            if (time === null) {
-                continue;
-            }
+            var label = void 0;
             if (targetIndex < this._private__labels.length) {
-                var label = this._private__labels[targetIndex];
-                label.coord = this.indexToCoordinate(tm.index);
-                label.label = this._private__formatLabel(time, tm.weight);
-                label.weight = tm.weight;
+                label = this._private__labels[targetIndex];
+                label.coord = this.indexToCoordinate(tm._internal_index);
+                label.label = this._private__formatLabel(tm._internal_time, tm._internal_weight);
+                label.weight = tm._internal_weight;
             }
             else {
-                this._private__labels.push({
-                    coord: this.indexToCoordinate(tm.index),
-                    label: this._private__formatLabel(time, tm.weight),
-                    weight: tm.weight,
-                });
+                label = {
+                    needAlignCoordinate: false,
+                    coord: this.indexToCoordinate(tm._internal_index),
+                    label: this._private__formatLabel(tm._internal_time, tm._internal_weight),
+                    weight: tm._internal_weight,
+                };
+                this._private__labels.push(label);
+            }
+            if (this._private__barSpacing > (maxLabelWidth / 2)) {
+                // if there is enough space then let's show all tick marks as usual
+                label.needAlignCoordinate = false;
+            }
+            else {
+                // if a user is able to scroll after a tick mark then show it as usual, otherwise the coordinate might be aligned
+                // if the index is for the second (last) label or later (earlier) then most likely this label might be displayed without correcting the coordinate
+                label.needAlignCoordinate = this._private__options.fixLeftEdge && tm._internal_index <= earliestIndexOfSecondLabel || this._private__options.fixRightEdge && tm._internal_index >= indexOfSecondLastLabel;
             }
             targetIndex++;
         }
@@ -3092,9 +3319,9 @@ var TimeScale = /** @class */ (function () {
             throw new RangeError('animationDuration (optional) must be finite positive number');
         }
         var source = this._private__rightOffset;
-        var animationStart = Date.now();
+        var animationStart = performance.now();
         var animationFn = function () {
-            var animationProgress = (Date.now() - animationStart) / animationDuration;
+            var animationProgress = (performance.now() - animationStart) / animationDuration;
             var finishAnimation = animationProgress >= 1;
             var rightOffset = finishAnimation ? offset : source + (offset - source) * animationProgress;
             _this.setRightOffset(rightOffset);
@@ -3104,10 +3331,10 @@ var TimeScale = /** @class */ (function () {
         };
         animationFn();
     };
-    TimeScale.prototype.update = function (newPoints) {
+    TimeScale.prototype.update = function (newPoints, firstChangedPointIndex) {
         this._private__visibleRangeInvalidated = true;
         this._private__points = newPoints;
-        this._private__tickMarks.setTimeScalePoints(newPoints);
+        this._private__tickMarks._internal_setTimeScalePoints(newPoints, firstChangedPointIndex);
         this._private__correctOffset();
     };
     TimeScale.prototype.visibleBarsChanged = function () {
@@ -3214,7 +3441,7 @@ var TimeScale = /** @class */ (function () {
     TimeScale.prototype._private__minBarSpacing = function () {
         // if both options are enabled then limit bar spacing so that zooming-out is not possible
         // if it would cause either the first or last points to move too far from an edge
-        if (this._private__options.fixLeftEdge && this._private__options.fixRightEdge) {
+        if (this._private__options.fixLeftEdge && this._private__options.fixRightEdge && this._private__points.length !== 0) {
             return this._private__width / this._private__points.length;
         }
         return this._private__options.minBarSpacing;
@@ -3271,26 +3498,7 @@ var TimeScale = /** @class */ (function () {
     };
     TimeScale.prototype._private__formatLabelImpl = function (timePoint, weight) {
         var _a;
-        var tickMarkType;
-        var timeVisible = this._private__options.timeVisible;
-        if (weight < 20 /* Minute */ && timeVisible) {
-            tickMarkType = this._private__options.secondsVisible ? 4 /* TimeWithSeconds */ : 3 /* Time */;
-        }
-        else if (weight < 40 /* Day */ && timeVisible) {
-            tickMarkType = 3 /* Time */;
-        }
-        else if (weight < 50 /* Week */) {
-            tickMarkType = 2 /* DayOfMonth */;
-        }
-        else if (weight < 60 /* Month */) {
-            tickMarkType = 2 /* DayOfMonth */;
-        }
-        else if (weight < 70 /* Year */) {
-            tickMarkType = 1 /* Month */;
-        }
-        else {
-            tickMarkType = 0 /* Year */;
-        }
+        var tickMarkType = weightToTickMarkType(weight, this._private__options.timeVisible, this._private__options.secondsVisible);
         if (this._private__options.tickMarkFormatter !== undefined) {
             // this is temporary solution to make more consistency API
             // it looks like that all time types in API should have the same form
@@ -3344,7 +3552,11 @@ var TimeScale = /** @class */ (function () {
         if (firstIndex === null) {
             return;
         }
-        var delta = ensureNotNull(this.visibleStrictRange()).left() - firstIndex;
+        var visibleRange = this.visibleStrictRange();
+        if (visibleRange === null) {
+            return;
+        }
+        var delta = visibleRange.left() - firstIndex;
         if (delta < 0) {
             var leftEdgeOffset = this._private__rightOffset - delta - 1;
             this.setRightOffset(leftEdgeOffset);
@@ -3357,10 +3569,57 @@ var TimeScale = /** @class */ (function () {
     };
     return TimeScale;
 }());
+// eslint-disable-next-line complexity
+function weightToTickMarkType(weight, timeVisible, secondsVisible) {
+    switch (weight) {
+        case 0 /* LessThanSecond */:
+        case 10 /* Second */:
+            return timeVisible
+                ? (secondsVisible ? 4 /* TimeWithSeconds */ : 3 /* Time */)
+                : 2 /* DayOfMonth */;
+        case 20 /* Minute1 */:
+        case 21 /* Minute5 */:
+        case 22 /* Minute30 */:
+        case 30 /* Hour1 */:
+        case 31 /* Hour3 */:
+        case 32 /* Hour6 */:
+        case 33 /* Hour12 */:
+            return timeVisible ? 3 /* Time */ : 2 /* DayOfMonth */;
+        case 50 /* Day */:
+            return 2 /* DayOfMonth */;
+        case 60 /* Month */:
+            return 1 /* Month */;
+        case 70 /* Year */:
+            return 0 /* Year */;
+    }
+}
 
+/**
+ * Represents a type of color.
+ */
+var ColorType;
+(function (ColorType) {
+    /** Solid color */
+    ColorType["Solid"] = "solid";
+    /** Vertical gradient color */
+    ColorType["VerticalGradient"] = "gradient";
+})(ColorType || (ColorType = {}));
+
+/**
+ * Check if a time value is a business day object.
+ *
+ * @param time - The time to check.
+ * @returns `true` if `time` is a {@link BusinessDay} object, false otherwise.
+ */
 function isBusinessDay(time) {
     return !isNumber(time) && !isString(time);
 }
+/**
+ * Check if a time value is a UTC timestamp number.
+ *
+ * @param time - The time to check.
+ * @returns `true` if `time` is a {@link UTCTimestamp} number, false otherwise.
+ */
 function isUTCTimestamp(time) {
     return isNumber(time);
 }
@@ -3378,7 +3637,12 @@ function isFulfilledData(data) {
 var defaultFontFamily = "'Trebuchet MS', Roboto, Ubuntu, sans-serif";
 /**
  * Generates a font string, which can be used to set in canvas' font property.
- * If no family provided, [defaultFontFamily] will be used.
+ * If no family provided, {@link defaultFontFamily} will be used.
+ *
+ * @param size - Font size in pixels.
+ * @param family - Optional font family.
+ * @param style - Optional font style.
+ * @returns The font string.
  */
 function makeFont(size, family, style) {
     if (style !== undefined) {
@@ -3623,23 +3887,22 @@ function walkLine(ctx, points, lineType, visibleRange) {
     }
 }
 
-var PaneRendererArea = /** @class */ (function (_super) {
-    __extends(PaneRendererArea, _super);
-    function PaneRendererArea() {
+var PaneRendererAreaBase = /** @class */ (function (_super) {
+    __extends(PaneRendererAreaBase, _super);
+    function PaneRendererAreaBase() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._internal__data = null;
         return _this;
     }
-    PaneRendererArea.prototype._internal_setData = function (data) {
+    PaneRendererAreaBase.prototype._internal_setData = function (data) {
         this._internal__data = data;
     };
-    PaneRendererArea.prototype._internal__drawImpl = function (ctx) {
+    PaneRendererAreaBase.prototype._internal__drawImpl = function (ctx) {
         if (this._internal__data === null || this._internal__data._internal_items.length === 0 || this._internal__data._internal_visibleRange === null) {
             return;
         }
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'round';
-        ctx.strokeStyle = this._internal__data._internal_lineColor;
         ctx.lineWidth = this._internal__data._internal_lineWidth;
         setLineStyle(ctx, this._internal__data._internal_lineStyle);
         // walk lines with width=1 to have more accurate gradient's filling
@@ -3648,48 +3911,60 @@ var PaneRendererArea = /** @class */ (function (_super) {
         if (this._internal__data._internal_items.length === 1) {
             var point = this._internal__data._internal_items[0];
             var halfBarWidth = this._internal__data._internal_barWidth / 2;
-            ctx.moveTo(point.x - halfBarWidth, this._internal__data._internal_bottom);
+            ctx.moveTo(point.x - halfBarWidth, this._internal__data._internal_baseLevelCoordinate);
             ctx.lineTo(point.x - halfBarWidth, point.y);
             ctx.lineTo(point.x + halfBarWidth, point.y);
-            ctx.lineTo(point.x + halfBarWidth, this._internal__data._internal_bottom);
+            ctx.lineTo(point.x + halfBarWidth, this._internal__data._internal_baseLevelCoordinate);
         }
         else {
-            ctx.moveTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.from].x, this._internal__data._internal_bottom);
+            ctx.moveTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.from].x, this._internal__data._internal_baseLevelCoordinate);
             ctx.lineTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.from].x, this._internal__data._internal_items[this._internal__data._internal_visibleRange.from].y);
             walkLine(ctx, this._internal__data._internal_items, this._internal__data._internal_lineType, this._internal__data._internal_visibleRange);
             if (this._internal__data._internal_visibleRange.to > this._internal__data._internal_visibleRange.from) {
-                ctx.lineTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.to - 1].x, this._internal__data._internal_bottom);
-                ctx.lineTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.from].x, this._internal__data._internal_bottom);
+                ctx.lineTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.to - 1].x, this._internal__data._internal_baseLevelCoordinate);
+                ctx.lineTo(this._internal__data._internal_items[this._internal__data._internal_visibleRange.from].x, this._internal__data._internal_baseLevelCoordinate);
             }
         }
         ctx.closePath();
-        var gradient = ctx.createLinearGradient(0, 0, 0, this._internal__data._internal_bottom);
-        gradient.addColorStop(0, this._internal__data._internal_topColor);
-        gradient.addColorStop(1, this._internal__data._internal_bottomColor);
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = this._internal__fillStyle(ctx);
         ctx.fill();
     };
-    return PaneRendererArea;
+    return PaneRendererAreaBase;
 }(ScaledRenderer));
+var PaneRendererArea = /** @class */ (function (_super) {
+    __extends(PaneRendererArea, _super);
+    function PaneRendererArea() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PaneRendererArea.prototype._internal__fillStyle = function (ctx) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        var data = this._internal__data;
+        var gradient = ctx.createLinearGradient(0, 0, 0, data._internal_bottom);
+        gradient.addColorStop(0, data._internal_topColor);
+        gradient.addColorStop(1, data._internal_bottomColor);
+        return gradient;
+    };
+    return PaneRendererArea;
+}(PaneRendererAreaBase));
 
-var PaneRendererLine = /** @class */ (function (_super) {
-    __extends(PaneRendererLine, _super);
-    function PaneRendererLine() {
+var PaneRendererLineBase = /** @class */ (function (_super) {
+    __extends(PaneRendererLineBase, _super);
+    function PaneRendererLineBase() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._internal__data = null;
         return _this;
     }
-    PaneRendererLine.prototype._internal_setData = function (data) {
+    PaneRendererLineBase.prototype._internal_setData = function (data) {
         this._internal__data = data;
     };
-    PaneRendererLine.prototype._internal__drawImpl = function (ctx) {
+    PaneRendererLineBase.prototype._internal__drawImpl = function (ctx) {
         if (this._internal__data === null || this._internal__data._internal_items.length === 0 || this._internal__data._internal_visibleRange === null) {
             return;
         }
         ctx.lineCap = 'butt';
         ctx.lineWidth = this._internal__data._internal_lineWidth;
         setLineStyle(ctx, this._internal__data._internal_lineStyle);
-        ctx.strokeStyle = this._internal__data._internal_lineColor;
+        ctx.strokeStyle = this._internal__strokeStyle(ctx);
         ctx.lineJoin = 'round';
         ctx.beginPath();
         if (this._internal__data._internal_items.length === 1) {
@@ -3702,48 +3977,19 @@ var PaneRendererLine = /** @class */ (function (_super) {
         }
         ctx.stroke();
     };
-    return PaneRendererLine;
+    return PaneRendererLineBase;
 }(ScaledRenderer));
-
-/**
- * Binary function that accepts two arguments (the first of the type of array elements, and the second is always val), and returns a value convertible to bool.
- * The value returned indicates whether the first argument is considered to go before the second.
- * The function shall not modify any of its arguments.
- */
-function lowerbound(arr, value, compare, start, to) {
-    if (start === void 0) { start = 0; }
-    if (to === void 0) { to = arr.length; }
-    var count = to - start;
-    while (0 < count) {
-        var count2 = (count >> 1);
-        var mid = start + count2;
-        if (compare(arr[mid], value)) {
-            start = mid + 1;
-            count -= count2 + 1;
-        }
-        else {
-            count = count2;
-        }
+var PaneRendererLine = /** @class */ (function (_super) {
+    __extends(PaneRendererLine, _super);
+    function PaneRendererLine() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    return start;
-}
-function upperbound(arr, value, compare, start, to) {
-    if (start === void 0) { start = 0; }
-    if (to === void 0) { to = arr.length; }
-    var count = to - start;
-    while (0 < count) {
-        var count2 = (count >> 1);
-        var mid = start + count2;
-        if (!(compare(value, arr[mid]))) {
-            start = mid + 1;
-            count -= count2 + 1;
-        }
-        else {
-            count = count2;
-        }
-    }
-    return start;
-}
+    PaneRendererLine.prototype._internal__strokeStyle = function () {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return this._internal__data._internal_lineColor;
+    };
+    return PaneRendererLine;
+}(PaneRendererLineBase));
 
 function lowerBoundItemsCompare(item, time) {
     return item.time < time;
@@ -3876,20 +4122,27 @@ var SeriesAreaPaneView = /** @class */ (function (_super) {
         }
         var areaStyleProperties = this._internal__series.options();
         this._internal__makeValid();
-        var data = {
+        this._private__areaRenderer._internal_setData({
+            _internal_lineType: areaStyleProperties.lineType,
+            _internal_items: this._internal__items,
+            _internal_lineStyle: areaStyleProperties.lineStyle,
+            _internal_lineWidth: areaStyleProperties.lineWidth,
+            _internal_topColor: areaStyleProperties.topColor,
+            _internal_bottomColor: areaStyleProperties.bottomColor,
+            _internal_baseLevelCoordinate: height,
+            _internal_bottom: height,
+            _internal_visibleRange: this._internal__itemsVisibleRange,
+            _internal_barWidth: this._internal__model.timeScale().barSpacing(),
+        });
+        this._private__lineRenderer._internal_setData({
             _internal_lineType: areaStyleProperties.lineType,
             _internal_items: this._internal__items,
             _internal_lineColor: areaStyleProperties.lineColor,
             _internal_lineStyle: areaStyleProperties.lineStyle,
             _internal_lineWidth: areaStyleProperties.lineWidth,
-            _internal_topColor: areaStyleProperties.topColor,
-            _internal_bottomColor: areaStyleProperties.bottomColor,
-            _internal_bottom: height,
             _internal_visibleRange: this._internal__itemsVisibleRange,
             _internal_barWidth: this._internal__model.timeScale().barSpacing(),
-        };
-        this._private__areaRenderer._internal_setData(data);
-        this._private__lineRenderer._internal_setData(data);
+        });
         return this._private__renderer;
     };
     SeriesAreaPaneView.prototype._internal__createRawItem = function (time, price) {
@@ -4058,6 +4311,99 @@ var SeriesBarsPaneView = /** @class */ (function (_super) {
     };
     return SeriesBarsPaneView;
 }(BarsPaneViewBase));
+
+var PaneRendererBaselineArea = /** @class */ (function (_super) {
+    __extends(PaneRendererBaselineArea, _super);
+    function PaneRendererBaselineArea() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PaneRendererBaselineArea.prototype._internal__fillStyle = function (ctx) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        var data = this._internal__data;
+        var gradient = ctx.createLinearGradient(0, 0, 0, data._internal_bottom);
+        var baselinePercent = clamp(data._internal_baseLevelCoordinate / data._internal_bottom, 0, 1);
+        gradient.addColorStop(0, data._internal_topFillColor1);
+        gradient.addColorStop(baselinePercent, data._internal_topFillColor2);
+        gradient.addColorStop(baselinePercent, data._internal_bottomFillColor1);
+        gradient.addColorStop(1, data._internal_bottomFillColor2);
+        return gradient;
+    };
+    return PaneRendererBaselineArea;
+}(PaneRendererAreaBase));
+var PaneRendererBaselineLine = /** @class */ (function (_super) {
+    __extends(PaneRendererBaselineLine, _super);
+    function PaneRendererBaselineLine() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PaneRendererBaselineLine.prototype._internal__strokeStyle = function (ctx) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        var data = this._internal__data;
+        var gradient = ctx.createLinearGradient(0, 0, 0, data._internal_bottom);
+        var baselinePercent = clamp(data._internal_baseLevelCoordinate / data._internal_bottom, 0, 1);
+        gradient.addColorStop(0, data._internal_topColor);
+        gradient.addColorStop(baselinePercent, data._internal_topColor);
+        gradient.addColorStop(baselinePercent, data._internal_bottomColor);
+        gradient.addColorStop(1, data._internal_bottomColor);
+        return gradient;
+    };
+    return PaneRendererBaselineLine;
+}(PaneRendererLineBase));
+
+var SeriesBaselinePaneView = /** @class */ (function (_super) {
+    __extends(SeriesBaselinePaneView, _super);
+    function SeriesBaselinePaneView(series, model) {
+        var _this = _super.call(this, series, model) || this;
+        _this._private__baselineAreaRenderer = new PaneRendererBaselineArea();
+        _this._private__baselineLineRenderer = new PaneRendererBaselineLine();
+        _this._private__compositeRenderer = new CompositeRenderer();
+        _this._private__compositeRenderer._internal_setRenderers([_this._private__baselineAreaRenderer, _this._private__baselineLineRenderer]);
+        return _this;
+    }
+    SeriesBaselinePaneView.prototype.renderer = function (height, width) {
+        if (!this._internal__series.visible()) {
+            return null;
+        }
+        var firstValue = this._internal__series.firstValue();
+        if (firstValue === null) {
+            return null;
+        }
+        var baselineProps = this._internal__series.options();
+        this._internal__makeValid();
+        var baseLevelCoordinate = this._internal__series.priceScale().priceToCoordinate(baselineProps.baseValue.price, firstValue.value);
+        var barWidth = this._internal__model.timeScale().barSpacing();
+        this._private__baselineAreaRenderer._internal_setData({
+            _internal_items: this._internal__items,
+            _internal_topFillColor1: baselineProps.topFillColor1,
+            _internal_topFillColor2: baselineProps.topFillColor2,
+            _internal_bottomFillColor1: baselineProps.bottomFillColor1,
+            _internal_bottomFillColor2: baselineProps.bottomFillColor2,
+            _internal_lineWidth: baselineProps.lineWidth,
+            _internal_lineStyle: baselineProps.lineStyle,
+            _internal_lineType: 0 /* Simple */,
+            _internal_baseLevelCoordinate: baseLevelCoordinate,
+            _internal_bottom: height,
+            _internal_visibleRange: this._internal__itemsVisibleRange,
+            _internal_barWidth: barWidth,
+        });
+        this._private__baselineLineRenderer._internal_setData({
+            _internal_items: this._internal__items,
+            _internal_topColor: baselineProps.topLineColor,
+            _internal_bottomColor: baselineProps.bottomLineColor,
+            _internal_lineWidth: baselineProps.lineWidth,
+            _internal_lineStyle: baselineProps.lineStyle,
+            _internal_lineType: 0 /* Simple */,
+            _internal_baseLevelCoordinate: baseLevelCoordinate,
+            _internal_bottom: height,
+            _internal_visibleRange: this._internal__itemsVisibleRange,
+            _internal_barWidth: barWidth,
+        });
+        return this._private__compositeRenderer;
+    };
+    SeriesBaselinePaneView.prototype._internal__createRawItem = function (time, price) {
+        return this._internal__createRawItemBase(time, price);
+    };
+    return SeriesBaselinePaneView;
+}(LinePaneViewBase));
 
 var PaneRendererCandlesticks = /** @class */ (function () {
     function PaneRendererCandlesticks() {
@@ -4569,7 +4915,7 @@ var PanePriceAxisView = /** @class */ (function () {
             return null;
         }
         // this price scale will be used to find label placement only (left, right, none)
-        var priceScale = pane.isOverlay(this._private__dataSource) ? pane.defaultPriceScale() : this._private__dataSource.priceScale();
+        var priceScale = pane.isOverlay(this._private__dataSource) ? pane.defaultVisiblePriceScale() : this._private__dataSource.priceScale();
         if (priceScale === null) {
             return null;
         }
@@ -4680,6 +5026,205 @@ var SeriesHorizontalBaseLinePaneView = /** @class */ (function (_super) {
     };
     return SeriesHorizontalBaseLinePaneView;
 }(SeriesHorizontalLinePaneView));
+
+var SeriesLastPriceAnimationRenderer = /** @class */ (function () {
+    function SeriesLastPriceAnimationRenderer() {
+        this._private__data = null;
+    }
+    SeriesLastPriceAnimationRenderer.prototype._internal_setData = function (data) {
+        this._private__data = data;
+    };
+    SeriesLastPriceAnimationRenderer.prototype._internal_data = function () {
+        return this._private__data;
+    };
+    SeriesLastPriceAnimationRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
+        var data = this._private__data;
+        if (data === null) {
+            return;
+        }
+        ctx.save();
+        var tickWidth = Math.max(1, Math.floor(pixelRatio));
+        var correction = (tickWidth % 2) / 2;
+        var centerX = Math.round(data._internal_center.x * pixelRatio) + correction; // correct x coordinate only
+        var centerY = data._internal_center.y * pixelRatio;
+        ctx.fillStyle = data._internal_seriesLineColor;
+        ctx.beginPath();
+        var centerPointRadius = Math.max(2, data._internal_seriesLineWidth * 1.5) * pixelRatio;
+        ctx.arc(centerX, centerY, centerPointRadius, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.fillStyle = data._internal_fillColor;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, data._internal_radius * pixelRatio, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.lineWidth = tickWidth;
+        ctx.strokeStyle = data._internal_strokeColor;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, data._internal_radius * pixelRatio + tickWidth / 2, 0, 2 * Math.PI, false);
+        ctx.stroke();
+        ctx.restore();
+    };
+    return SeriesLastPriceAnimationRenderer;
+}());
+
+var animationStagesData = [
+    {
+        _internal_start: 0,
+        _internal_end: 0.25 /* Stage1Period */,
+        _internal_startRadius: 4 /* Stage1StartCircleRadius */,
+        _internal_endRadius: 10 /* Stage1EndCircleRadius */,
+        _internal_startFillAlpha: 0.25 /* Stage1StartFillAlpha */,
+        _internal_endFillAlpha: 0 /* Stage1EndFillAlpha */,
+        _internal_startStrokeAlpha: 0.4 /* Stage1StartStrokeAlpha */,
+        _internal_endStrokeAlpha: 0.8 /* Stage1EndStrokeAlpha */,
+    },
+    {
+        _internal_start: 0.25 /* Stage1Period */,
+        _internal_end: 0.25 /* Stage1Period */ + 0.275 /* Stage2Period */,
+        _internal_startRadius: 10 /* Stage2StartCircleRadius */,
+        _internal_endRadius: 14 /* Stage2EndCircleRadius */,
+        _internal_startFillAlpha: 0 /* Stage2StartFillAlpha */,
+        _internal_endFillAlpha: 0 /* Stage2EndFillAlpha */,
+        _internal_startStrokeAlpha: 0.8 /* Stage2StartStrokeAlpha */,
+        _internal_endStrokeAlpha: 0 /* Stage2EndStrokeAlpha */,
+    },
+    {
+        _internal_start: 0.25 /* Stage1Period */ + 0.275 /* Stage2Period */,
+        _internal_end: 0.25 /* Stage1Period */ + 0.275 /* Stage2Period */ + 0.475 /* Stage3Period */,
+        _internal_startRadius: 14 /* Stage3StartCircleRadius */,
+        _internal_endRadius: 14 /* Stage3EndCircleRadius */,
+        _internal_startFillAlpha: 0 /* Stage3StartFillAlpha */,
+        _internal_endFillAlpha: 0 /* Stage3EndFillAlpha */,
+        _internal_startStrokeAlpha: 0 /* Stage3StartStrokeAlpha */,
+        _internal_endStrokeAlpha: 0 /* Stage3EndStrokeAlpha */,
+    },
+];
+function color(seriesLineColor, stage, startAlpha, endAlpha) {
+    var alpha = startAlpha + (endAlpha - startAlpha) * stage;
+    return applyAlpha(seriesLineColor, alpha);
+}
+function radius(stage, startRadius, endRadius) {
+    return startRadius + (endRadius - startRadius) * stage;
+}
+function animationData(durationSinceStart, lineColor) {
+    var globalStage = (durationSinceStart % 2600 /* AnimationPeriod */) / 2600 /* AnimationPeriod */;
+    var currentStageData;
+    for (var _i = 0, animationStagesData_1 = animationStagesData; _i < animationStagesData_1.length; _i++) {
+        var stageData = animationStagesData_1[_i];
+        if (globalStage >= stageData._internal_start && globalStage <= stageData._internal_end) {
+            currentStageData = stageData;
+            break;
+        }
+    }
+    assert(currentStageData !== undefined, 'Last price animation internal logic error');
+    var subStage = (globalStage - currentStageData._internal_start) / (currentStageData._internal_end - currentStageData._internal_start);
+    return {
+        _internal_fillColor: color(lineColor, subStage, currentStageData._internal_startFillAlpha, currentStageData._internal_endFillAlpha),
+        _internal_strokeColor: color(lineColor, subStage, currentStageData._internal_startStrokeAlpha, currentStageData._internal_endStrokeAlpha),
+        _internal_radius: radius(subStage, currentStageData._internal_startRadius, currentStageData._internal_endRadius),
+    };
+}
+var SeriesLastPriceAnimationPaneView = /** @class */ (function () {
+    function SeriesLastPriceAnimationPaneView(series) {
+        this._private__renderer = new SeriesLastPriceAnimationRenderer();
+        this._private__invalidated = true;
+        this._private__stageInvalidated = true;
+        this._private__startTime = performance.now();
+        this._private__endTime = this._private__startTime - 1;
+        this._private__series = series;
+    }
+    SeriesLastPriceAnimationPaneView.prototype._internal_onDataCleared = function () {
+        this._private__endTime = this._private__startTime - 1;
+        this.update();
+    };
+    SeriesLastPriceAnimationPaneView.prototype._internal_onNewRealtimeDataReceived = function () {
+        this.update();
+        if (this._private__series.options().lastPriceAnimation === 2 /* OnDataUpdate */) {
+            var now = performance.now();
+            var timeToAnimationEnd = this._private__endTime - now;
+            if (timeToAnimationEnd > 0) {
+                if (timeToAnimationEnd < 2600 /* AnimationPeriod */ / 4) {
+                    this._private__endTime += 2600 /* AnimationPeriod */;
+                }
+                return;
+            }
+            this._private__startTime = now;
+            this._private__endTime = now + 2600 /* AnimationPeriod */;
+        }
+    };
+    SeriesLastPriceAnimationPaneView.prototype.update = function () {
+        this._private__invalidated = true;
+    };
+    SeriesLastPriceAnimationPaneView.prototype._internal_invalidateStage = function () {
+        this._private__stageInvalidated = true;
+    };
+    SeriesLastPriceAnimationPaneView.prototype._internal_visible = function () {
+        // center point is always visible if lastPriceAnimation is not LastPriceAnimationMode.Disabled
+        return this._private__series.options().lastPriceAnimation !== 0 /* Disabled */;
+    };
+    SeriesLastPriceAnimationPaneView.prototype._internal_animationActive = function () {
+        switch (this._private__series.options().lastPriceAnimation) {
+            case 0 /* Disabled */:
+                return false;
+            case 1 /* Continuous */:
+                return true;
+            case 2 /* OnDataUpdate */:
+                return performance.now() <= this._private__endTime;
+        }
+    };
+    SeriesLastPriceAnimationPaneView.prototype.renderer = function (height, width) {
+        if (this._private__invalidated) {
+            this._private__updateImpl(height, width);
+            this._private__invalidated = false;
+            this._private__stageInvalidated = false;
+        }
+        else if (this._private__stageInvalidated) {
+            this._private__updateRendererDataStage();
+            this._private__stageInvalidated = false;
+        }
+        return this._private__renderer;
+    };
+    SeriesLastPriceAnimationPaneView.prototype._private__updateImpl = function (height, width) {
+        this._private__renderer._internal_setData(null);
+        var timeScale = this._private__series.model().timeScale();
+        var visibleRange = timeScale.visibleStrictRange();
+        var firstValue = this._private__series.firstValue();
+        if (visibleRange === null || firstValue === null) {
+            return;
+        }
+        var lastValue = this._private__series.lastValueData(true);
+        if (lastValue.noData || !visibleRange.contains(lastValue.index)) {
+            return;
+        }
+        var lastValuePoint = {
+            x: timeScale.indexToCoordinate(lastValue.index),
+            y: this._private__series.priceScale().priceToCoordinate(lastValue.price, firstValue.value),
+        };
+        var seriesLineColor = lastValue.color;
+        var seriesLineWidth = this._private__series.options().lineWidth;
+        var data = animationData(this._private__duration(), seriesLineColor);
+        this._private__renderer._internal_setData({
+            _internal_seriesLineColor: seriesLineColor,
+            _internal_seriesLineWidth: seriesLineWidth,
+            _internal_fillColor: data._internal_fillColor,
+            _internal_strokeColor: data._internal_strokeColor,
+            _internal_radius: data._internal_radius,
+            _internal_center: lastValuePoint,
+        });
+    };
+    SeriesLastPriceAnimationPaneView.prototype._private__updateRendererDataStage = function () {
+        var rendererData = this._private__renderer._internal_data();
+        if (rendererData !== null) {
+            var data = animationData(this._private__duration(), rendererData._internal_seriesLineColor);
+            rendererData._internal_fillColor = data._internal_fillColor;
+            rendererData._internal_strokeColor = data._internal_strokeColor;
+            rendererData._internal_radius = data._internal_radius;
+        }
+    };
+    SeriesLastPriceAnimationPaneView.prototype._private__duration = function () {
+        return this._internal_animationActive() ? performance.now() - this._private__startTime : 2600 /* AnimationPeriod */ - 1;
+    };
+    return SeriesLastPriceAnimationPaneView;
+}());
 
 function size(barSpacing, coeff) {
     var result = Math.min(Math.max(barSpacing, 12 /* MinShapeSize */), 30 /* MaxShapeSize */) * coeff;
@@ -4985,7 +5530,6 @@ function hitTestShape(item, x, y) {
         case 'square':
             return hitTestSquare(item.x, item._internal_y, item._internal_size, x, y);
     }
-    ensureNever(item._internal_shape);
 }
 
 // eslint-disable-next-line max-params
@@ -5191,14 +5735,15 @@ var SeriesPriceAxisView = /** @class */ (function (_super) {
     SeriesPriceAxisView.prototype._internal__updateRendererData = function (axisRendererData, paneRendererData, commonRendererData) {
         axisRendererData.visible = false;
         paneRendererData.visible = false;
-        if (!this._private__source.visible()) {
+        var source = this._private__source;
+        if (!source.visible()) {
             return;
         }
-        var seriesOptions = this._private__source.options();
+        var seriesOptions = source.options();
         var showSeriesLastValue = seriesOptions.lastValueVisible;
-        var showSymbolLabel = this._private__source.title() !== '';
+        var showSymbolLabel = source.title() !== '';
         var showPriceAndPercentage = seriesOptions.seriesLastValueMode === 0 /* LastPriceAndPercentageValue */;
-        var lastValueData = this._private__source.lastValueData(seriesOptions.priceLineSource === 0 /* LastBar */);
+        var lastValueData = source.lastValueData(seriesOptions.priceLineSource === 0 /* LastBar */);
         if (lastValueData.noData) {
             return;
         }
@@ -5210,12 +5755,12 @@ var SeriesPriceAxisView = /** @class */ (function (_super) {
             paneRendererData.text = this._internal__paneText(lastValueData, showSeriesLastValue, showSymbolLabel, showPriceAndPercentage);
             paneRendererData.visible = paneRendererData.text.length > 0;
         }
-        var lastValueColor = this._private__source.priceLineColor(lastValueData.color);
+        var lastValueColor = source.priceLineColor(lastValueData.color);
         var colors = generateContrastColors(lastValueColor);
         commonRendererData.background = colors._internal_background;
         commonRendererData.color = colors._internal_foreground;
         commonRendererData.coordinate = lastValueData.coordinate;
-        paneRendererData.borderColor = this._private__source.model().options().layout.backgroundColor;
+        paneRendererData.borderColor = source.model().backgroundColorAtYPercentFromTop(lastValueData.coordinate / source.priceScale().height());
         axisRendererData.borderColor = lastValueColor;
     };
     SeriesPriceAxisView.prototype._internal__paneText = function (lastValue, showSeriesLastValue, showSymbolLabel, showPriceAndPercentage) {
@@ -5312,7 +5857,8 @@ var CustomPriceLinePriceAxisView = /** @class */ (function (_super) {
         var options = this._private__priceLine.options();
         var labelVisible = options.axisLabelVisible;
         var showPaneLabel = options.title !== '';
-        if (!labelVisible || !this._private__series.visible()) {
+        var series = this._private__series;
+        if (!labelVisible || !series.visible()) {
             return;
         }
         var y = this._private__priceLine.yCoord();
@@ -5323,8 +5869,8 @@ var CustomPriceLinePriceAxisView = /** @class */ (function (_super) {
             paneRendererData.text = options.title;
             paneRendererData.visible = true;
         }
-        paneRendererData.borderColor = this._private__series.model().options().layout.backgroundColor;
-        axisRendererData.text = this._private__series.priceScale().formatPriceAbsolute(options.price);
+        paneRendererData.borderColor = series.model().backgroundColorAtYPercentFromTop(y / series.priceScale().height());
+        axisRendererData.text = series.priceScale().formatPriceAbsolute(options.price);
         axisRendererData.visible = true;
         var colors = generateContrastColors(options.color);
         commonData.background = colors._internal_background;
@@ -5414,6 +5960,8 @@ var SeriesBarColorer = /** @class */ (function () {
                 return this._private__lineStyle(seriesOptions);
             case 'Area':
                 return this._private__areaStyle(seriesOptions);
+            case 'Baseline':
+                return this._private__baselineStyle(seriesOptions, barIndex, precomputedBars);
             case 'Bar':
                 return this._private__barStyle(seriesOptions, barIndex, precomputedBars);
             case 'Candlestick':
@@ -5453,6 +6001,11 @@ var SeriesBarColorer = /** @class */ (function () {
     SeriesBarColorer.prototype._private__areaStyle = function (areaStyle) {
         return __assign(__assign({}, emptyResult), { barColor: areaStyle.lineColor });
     };
+    SeriesBarColorer.prototype._private__baselineStyle = function (baselineStyle, barIndex, precomputedBars) {
+        var currentBar = ensureNotNull(this._private__findBar(barIndex, precomputedBars));
+        var isAboveBaseline = currentBar.value[3 /* Close */] >= baselineStyle.baseValue.price;
+        return __assign(__assign({}, emptyResult), { barColor: isAboveBaseline ? baselineStyle.topLineColor : baselineStyle.bottomLineColor });
+    };
     SeriesBarColorer.prototype._private__lineStyle = function (lineStyle) {
         return __assign(__assign({}, emptyResult), { barColor: lineStyle.color });
     };
@@ -5483,11 +6036,6 @@ var PlotList = /** @class */ (function () {
         this._private__minMaxCache = new Map();
         this._private__rowSearchCache = new Map();
     }
-    PlotList.prototype.clear = function () {
-        this._private__items = [];
-        this._private__minMaxCache.clear();
-        this._private__rowSearchCache.clear();
-    };
     // @returns Last row
     PlotList.prototype.last = function () {
         return this.size() > 0 ? this._private__items[this._private__items.length - 1] : null;
@@ -5535,26 +6083,10 @@ var PlotList = /** @class */ (function () {
         }
         return result;
     };
-    PlotList.prototype.merge = function (plotRows) {
-        if (plotRows.length === 0) {
-            return;
-        }
-        // if we get a bunch of history - just prepend it
-        if (this.isEmpty() || plotRows[plotRows.length - 1].index < this._private__items[0].index) {
-            this._private__prepend(plotRows);
-            return;
-        }
-        // if we get new rows - just append it
-        if (plotRows[0].index > this._private__items[this._private__items.length - 1].index) {
-            this._private__append(plotRows);
-            return;
-        }
-        // if we get update for the last row - just replace it
-        if (plotRows.length === 1 && plotRows[0].index === this._private__items[this._private__items.length - 1].index) {
-            this._private__updateLast(plotRows[0]);
-            return;
-        }
-        this._private__merge(plotRows);
+    PlotList.prototype.setData = function (plotRows) {
+        this._private__rowSearchCache.clear();
+        this._private__minMaxCache.clear();
+        this._private__items = plotRows;
     };
     PlotList.prototype._private__indexAt = function (offset) {
         return this._private__items[offset].index;
@@ -5600,12 +6132,9 @@ var PlotList = /** @class */ (function () {
     PlotList.prototype._private__upperbound = function (index) {
         return upperbound(this._private__items, index, function (a, b) { return b.index > a; });
     };
-    /**
-     * @param endIndex - Non-inclusive end
-     */
-    PlotList.prototype._private__plotMinMax = function (startIndex, endIndex, plotIndex) {
+    PlotList.prototype._private__plotMinMax = function (startIndex, endIndexExclusive, plotIndex) {
         var result = null;
-        for (var i = startIndex; i < endIndex; i++) {
+        for (var i = startIndex; i < endIndexExclusive; i++) {
             var values = this._private__items[i].value;
             var v = values[plotIndex];
             if (Number.isNaN(v) || v === null) {
@@ -5624,36 +6153,6 @@ var PlotList = /** @class */ (function () {
             }
         }
         return result;
-    };
-    PlotList.prototype._private__invalidateCacheForRow = function (row) {
-        var chunkIndex = Math.floor(row.index / CHUNK_SIZE);
-        this._private__minMaxCache.forEach(function (cacheItem) { return cacheItem.delete(chunkIndex); });
-    };
-    PlotList.prototype._private__prepend = function (plotRows) {
-        assert(plotRows.length !== 0, 'plotRows should not be empty');
-        this._private__rowSearchCache.clear();
-        this._private__minMaxCache.clear();
-        this._private__items = plotRows.concat(this._private__items);
-    };
-    PlotList.prototype._private__append = function (plotRows) {
-        assert(plotRows.length !== 0, 'plotRows should not be empty');
-        this._private__rowSearchCache.clear();
-        this._private__minMaxCache.clear();
-        this._private__items = this._private__items.concat(plotRows);
-    };
-    PlotList.prototype._private__updateLast = function (plotRow) {
-        assert(!this.isEmpty(), 'plot list should not be empty');
-        var currentLastRow = this._private__items[this._private__items.length - 1];
-        assert(currentLastRow.index === plotRow.index, 'last row index should match new row index');
-        this._private__invalidateCacheForRow(plotRow);
-        this._private__rowSearchCache.delete(plotRow.index);
-        this._private__items[this._private__items.length - 1] = plotRow;
-    };
-    PlotList.prototype._private__merge = function (plotRows) {
-        assert(plotRows.length !== 0, 'plot rows should not be empty');
-        this._private__rowSearchCache.clear();
-        this._private__minMaxCache.clear();
-        this._private__items = mergePlotRows(this._private__items, plotRows);
     };
     PlotList.prototype._private__minMaxOnRangeCachedImpl = function (start, end, plotIndex) {
         // this code works for single series only
@@ -5719,74 +6218,6 @@ function mergeMinMax(first, second) {
         }
     }
 }
-/**
- * Merges two ordered plot row arrays and returns result (ordered plot row array).
- *
- * BEWARE: If row indexes from plot rows are equal, the new plot row is used.
- *
- * NOTE: Time and memory complexity are O(N+M).
- */
-function mergePlotRows(originalPlotRows, newPlotRows) {
-    var newArraySize = calcMergedArraySize(originalPlotRows, newPlotRows);
-    var result = new Array(newArraySize);
-    var originalRowsIndex = 0;
-    var newRowsIndex = 0;
-    var originalRowsSize = originalPlotRows.length;
-    var newRowsSize = newPlotRows.length;
-    var resultRowsIndex = 0;
-    while (originalRowsIndex < originalRowsSize && newRowsIndex < newRowsSize) {
-        if (originalPlotRows[originalRowsIndex].index < newPlotRows[newRowsIndex].index) {
-            result[resultRowsIndex] = originalPlotRows[originalRowsIndex];
-            originalRowsIndex++;
-        }
-        else if (originalPlotRows[originalRowsIndex].index > newPlotRows[newRowsIndex].index) {
-            result[resultRowsIndex] = newPlotRows[newRowsIndex];
-            newRowsIndex++;
-        }
-        else {
-            result[resultRowsIndex] = newPlotRows[newRowsIndex];
-            originalRowsIndex++;
-            newRowsIndex++;
-        }
-        resultRowsIndex++;
-    }
-    while (originalRowsIndex < originalRowsSize) {
-        result[resultRowsIndex] = originalPlotRows[originalRowsIndex];
-        originalRowsIndex++;
-        resultRowsIndex++;
-    }
-    while (newRowsIndex < newRowsSize) {
-        result[resultRowsIndex] = newPlotRows[newRowsIndex];
-        newRowsIndex++;
-        resultRowsIndex++;
-    }
-    return result;
-}
-function calcMergedArraySize(firstPlotRows, secondPlotRows) {
-    var firstPlotsSize = firstPlotRows.length;
-    var secondPlotsSize = secondPlotRows.length;
-    // new plot rows size is (first plot rows size) + (second plot rows size) - common part size
-    // in this case we can just calculate common part size
-    var result = firstPlotsSize + secondPlotsSize;
-    // TODO: we can move first/second indexes to the right and first/second size to lower/upper bound of opposite array
-    // to skip checking uncommon parts
-    var firstIndex = 0;
-    var secondIndex = 0;
-    while (firstIndex < firstPlotsSize && secondIndex < secondPlotsSize) {
-        if (firstPlotRows[firstIndex].index < secondPlotRows[secondIndex].index) {
-            firstIndex++;
-        }
-        else if (firstPlotRows[firstIndex].index > secondPlotRows[secondIndex].index) {
-            secondIndex++;
-        }
-        else {
-            firstIndex++;
-            secondIndex++;
-            result--;
-        }
-    }
-    return result;
-}
 
 function createSeriesPlotList() {
     return new PlotList();
@@ -5800,30 +6231,32 @@ var Series = /** @class */ (function (_super) {
         _this._private__priceLineView = new SeriesPriceLinePaneView(_this);
         _this._private__customPriceLines = [];
         _this._private__baseHorizontalLineView = new SeriesHorizontalBaseLinePaneView(_this);
+        _this._private__lastPriceAnimationPaneView = null;
         _this._private__barColorerCache = null;
         _this._private__markers = [];
         _this._private__indexedMarkers = [];
+        _this._private__animationTimeoutId = null;
         _this._private__options = options;
         _this._private__seriesType = seriesType;
         var priceAxisView = new SeriesPriceAxisView(_this);
         _this._private__priceAxisViews = [priceAxisView];
         _this._private__panePriceAxisView = new PanePriceAxisView(priceAxisView, _this, model);
+        if (seriesType === 'Area' || seriesType === 'Line' || seriesType === 'Baseline') {
+            _this._private__lastPriceAnimationPaneView = new SeriesLastPriceAnimationPaneView(_this);
+        }
         _this._private__recreateFormatter();
         _this._private__recreatePaneViews();
         return _this;
     }
-    Series.prototype.destroy = function () { };
+    Series.prototype.destroy = function () {
+        if (this._private__animationTimeoutId !== null) {
+            clearTimeout(this._private__animationTimeoutId);
+        }
+    };
     Series.prototype.priceLineColor = function (lastBarColor) {
         return this._private__options.priceLineColor || lastBarColor;
     };
-    // returns object with:
-    // formatted price
-    // raw price (if withRawPrice)
-    // coordinate
-    // color
-    // or { "noData":true } if last value could not be found
-    // NOTE: should NEVER return null or undefined!
-    Series.prototype.lastValueData = function (globalLast, withRawPrice) {
+    Series.prototype.lastValueData = function (globalLast) {
         var noDataRes = { noData: true };
         var priceScale = this.priceScale();
         if (this.model().timeScale().isEmpty() || priceScale.isEmpty() || this._private__data.isEmpty()) {
@@ -5863,7 +6296,7 @@ var Series = /** @class */ (function (_super) {
         var coordinate = priceScale.priceToCoordinate(price, firstValue.value);
         return {
             noData: false,
-            price: withRawPrice ? price : undefined,
+            price: price,
             text: priceScale.formatPrice(price, firstValue.value),
             formattedPriceAbsolute: priceScale.formatPriceAbsolute(price),
             formattedPricePercentage: priceScale.formatPricePercentage(price, firstValue.value),
@@ -5905,22 +6338,19 @@ var Series = /** @class */ (function (_super) {
         this.model().updateCrosshair();
         this._private__paneView.update('options');
     };
-    Series.prototype.clearData = function () {
-        this._private__data.clear();
-        // we must either re-create pane view on clear data
-        // or clear all caches inside pane views
-        // but currently we can't separate update/append last bar and full data replacement (update vs setData) in pane views invalidation
-        // so let's just re-create all views
-        this._private__recreatePaneViews();
-    };
-    Series.prototype.updateData = function (data, clearData) {
-        if (clearData) {
-            this._private__data.clear();
-        }
-        this._private__data.merge(data);
+    Series.prototype.setData = function (data, updateInfo) {
+        this._private__data.setData(data);
         this._private__recalculateMarkers();
         this._private__paneView.update('data');
         this._private__markersPaneView.update('data');
+        if (this._private__lastPriceAnimationPaneView !== null) {
+            if (updateInfo && updateInfo.lastBarUpdatedOrNewBarsAddedToTheRight) {
+                this._private__lastPriceAnimationPaneView._internal_onNewRealtimeDataReceived();
+            }
+            else if (data.length === 0) {
+                this._private__lastPriceAnimationPaneView._internal_onDataCleared();
+            }
+        }
         var sourcePane = this.model().paneForSource(this);
         this.model().recalculatePane(sourcePane);
         this.model().updateSource(this);
@@ -5997,6 +6427,21 @@ var Series = /** @class */ (function (_super) {
             return prices.value[3 /* Close */];
         }
     };
+    Series.prototype.topPaneViews = function (pane) {
+        var _this = this;
+        var animationPaneView = this._private__lastPriceAnimationPaneView;
+        if (animationPaneView === null || !animationPaneView._internal_visible()) {
+            return [];
+        }
+        if (this._private__animationTimeoutId === null && animationPaneView._internal_animationActive()) {
+            this._private__animationTimeoutId = setTimeout(function () {
+                _this._private__animationTimeoutId = null;
+                _this.model().cursorUpdate();
+            }, 0);
+        }
+        animationPaneView._internal_invalidateStage();
+        return [animationPaneView];
+    };
     Series.prototype.paneViews = function () {
         var res = [];
         if (!this._private__isOverlay()) {
@@ -6038,24 +6483,26 @@ var Series = /** @class */ (function (_super) {
         return this._private__formatter;
     };
     Series.prototype.updateAllViews = function () {
+        var _a;
         this._private__paneView.update();
         this._private__markersPaneView.update();
-        for (var _i = 0, _a = this._private__priceAxisViews; _i < _a.length; _i++) {
-            var priceAxisView = _a[_i];
+        for (var _i = 0, _b = this._private__priceAxisViews; _i < _b.length; _i++) {
+            var priceAxisView = _b[_i];
             priceAxisView.update();
         }
-        for (var _b = 0, _c = this._private__customPriceLines; _b < _c.length; _b++) {
-            var customPriceLine = _c[_b];
+        for (var _c = 0, _d = this._private__customPriceLines; _c < _d.length; _c++) {
+            var customPriceLine = _d[_c];
             customPriceLine.update();
         }
         this._private__priceLineView._internal_update();
         this._private__baseHorizontalLineView._internal_update();
+        (_a = this._private__lastPriceAnimationPaneView) === null || _a === void 0 ? void 0 : _a.update();
     };
     Series.prototype.priceScale = function () {
-        return ensureNotNull(this._priceScale);
+        return ensureNotNull(_super.prototype.priceScale.call(this));
     };
     Series.prototype.markerDataAtIndex = function (index) {
-        var getValue = (this._private__seriesType === 'Line' || this._private__seriesType === 'Area') &&
+        var getValue = (this._private__seriesType === 'Line' || this._private__seriesType === 'Area' || this._private__seriesType === 'Baseline') &&
             this._private__options.crosshairMarkerVisible;
         if (!getValue) {
             return null;
@@ -6086,7 +6533,7 @@ var Series = /** @class */ (function (_super) {
         }
         // TODO: refactor this
         // series data is strongly hardcoded to keep bars
-        var plots = this._private__seriesType === 'Line' || this._private__seriesType === 'Area' || this._private__seriesType === 'Histogram'
+        var plots = this._private__seriesType === 'Line' || this._private__seriesType === 'Area' || this._private__seriesType === 'Baseline' || this._private__seriesType === 'Histogram'
             ? [3 /* Close */]
             : [2 /* Low */, 1 /* High */];
         var barsMinMax = this._private__data.minMaxOnRangeCached(startTimePoint, endTimePoint, plots);
@@ -6102,6 +6549,7 @@ var Series = /** @class */ (function (_super) {
         switch (this._private__seriesType) {
             case 'Line':
             case 'Area':
+            case 'Baseline':
                 return this._private__options.crosshairMarkerRadius;
         }
         return 0;
@@ -6109,19 +6557,21 @@ var Series = /** @class */ (function (_super) {
     Series.prototype._private__markerBorderColor = function () {
         switch (this._private__seriesType) {
             case 'Line':
-            case 'Area': {
+            case 'Area':
+            case 'Baseline': {
                 var crosshairMarkerBorderColor = this._private__options.crosshairMarkerBorderColor;
                 if (crosshairMarkerBorderColor.length !== 0) {
                     return crosshairMarkerBorderColor;
                 }
             }
         }
-        return this.model().options().layout.backgroundColor;
+        return null;
     };
     Series.prototype._private__markerBackgroundColor = function (index) {
         switch (this._private__seriesType) {
             case 'Line':
-            case 'Area': {
+            case 'Area':
+            case 'Baseline': {
                 var crosshairMarkerBackgroundColor = this._private__options.crosshairMarkerBackgroundColor;
                 if (crosshairMarkerBackgroundColor.length !== 0) {
                     return crosshairMarkerBackgroundColor;
@@ -6198,6 +6648,10 @@ var Series = /** @class */ (function (_super) {
             }
             case 'Area': {
                 this._private__paneView = new SeriesAreaPaneView(this, this.model());
+                break;
+            }
+            case 'Baseline': {
+                this._private__paneView = new SeriesBaselinePaneView(this, this.model());
                 break;
             }
             case 'Histogram': {
@@ -6545,6 +6999,16 @@ var Pane = /** @class */ (function () {
         }
         return priceScale;
     };
+    Pane.prototype.defaultVisiblePriceScale = function () {
+        var priceScale = null;
+        if (this._private__model.options().rightPriceScale.visible) {
+            priceScale = this._private__rightPriceScale;
+        }
+        else if (this._private__model.options().leftPriceScale.visible) {
+            priceScale = this._private__leftPriceScale;
+        }
+        return priceScale;
+    };
     Pane.prototype.recalculatePriceScale = function (priceScale) {
         if (priceScale === null || !priceScale.isAutoScale()) {
             return;
@@ -6801,6 +7265,9 @@ var Watermark = /** @class */ (function (_super) {
         _this._private__paneView = new WatermarkPaneView(_this);
         return _this;
     }
+    Watermark.prototype.priceAxisViews = function () {
+        return [];
+    };
     Watermark.prototype.paneViews = function () {
         return [this._private__paneView];
     };
@@ -6824,6 +7291,7 @@ var ChartModel = /** @class */ (function () {
         this._private__priceScalesOptionsChanged = new Delegate();
         this._private__crosshairMoved = new Delegate();
         this._private__customPriceLineDragged = new Delegate();
+        this._private__gradientColorsCache = null;
         this._private__invalidateHandler = invalidateHandler;
         this._private__options = options;
         this._private__rendererOptionsProvider = new PriceAxisRendererOptionsProvider(this);
@@ -6833,12 +7301,17 @@ var ChartModel = /** @class */ (function () {
         this._private__watermark = new Watermark(this, options.watermark);
         this.createPane();
         this._private__panes[0].setStretchFactor(DEFAULT_STRETCH_FACTOR * 2);
+        this._private__backgroundTopColor = this._private__getBackgroundColor(0 /* Top */);
+        this._private__backgroundBottomColor = this._private__getBackgroundColor(1 /* Bottom */);
     }
     ChartModel.prototype.fullUpdate = function () {
         this._private__invalidate(new InvalidateMask(3 /* Full */));
     };
     ChartModel.prototype.lightUpdate = function () {
         this._private__invalidate(new InvalidateMask(2 /* Light */));
+    };
+    ChartModel.prototype.cursorUpdate = function () {
+        this._private__invalidate(new InvalidateMask(1 /* Cursor */));
     };
     ChartModel.prototype.updateSource = function (source) {
         var inv = this._private__invalidationMaskForSource(source);
@@ -6872,9 +7345,23 @@ var ChartModel = /** @class */ (function () {
         if (options.leftPriceScale || options.rightPriceScale) {
             this._private__priceScalesOptionsChanged._internal_fire();
         }
+        this._private__backgroundTopColor = this._private__getBackgroundColor(0 /* Top */);
+        this._private__backgroundBottomColor = this._private__getBackgroundColor(1 /* Bottom */);
         this.fullUpdate();
     };
     ChartModel.prototype.applyPriceScaleOptions = function (priceScaleId, options) {
+        if (priceScaleId === "left" /* Left */) {
+            this.applyOptions({
+                leftPriceScale: options,
+            });
+            return;
+        }
+        else if (priceScaleId === "right" /* Right */) {
+            this.applyOptions({
+                rightPriceScale: options,
+            });
+            return;
+        }
         var res = this.findPriceScale(priceScaleId);
         if (res === null) {
             {
@@ -7053,13 +7540,13 @@ var ChartModel = /** @class */ (function () {
         }
         price = this._private__magnet._internal_align(price, index, pane);
         this._private__crosshair.setPosition(index, price, pane);
-        this._private__cursorUpdate();
+        this.cursorUpdate();
         this._private__crosshairMoved._internal_fire(this._private__crosshair.appliedIndex(), { x: x, y: y });
     };
     ChartModel.prototype.clearCurrentPosition = function () {
         var crosshair = this.crosshairSource();
         crosshair.clearPosition();
-        this._private__cursorUpdate();
+        this.cursorUpdate();
         this._private__crosshairMoved._internal_fire(null, null);
     };
     ChartModel.prototype.updateCrosshair = function () {
@@ -7072,10 +7559,10 @@ var ChartModel = /** @class */ (function () {
         }
         this._private__crosshair.updateAllViews();
     };
-    ChartModel.prototype.updateTimeScale = function (newBaseIndex, newPoints) {
+    ChartModel.prototype.updateTimeScale = function (newBaseIndex, newPoints, firstChangedPointIndex) {
         var oldFirstTime = this._private__timeScale.indexToTime(0);
-        if (newPoints !== undefined) {
-            this._private__timeScale.update(newPoints);
+        if (newPoints !== undefined && firstChangedPointIndex !== undefined) {
+            this._private__timeScale.update(newPoints, firstChangedPointIndex);
         }
         var newFirstTime = this._private__timeScale.indexToTime(0);
         var currentBaseIndex = this._private__timeScale.baseIndex();
@@ -7089,7 +7576,7 @@ var ChartModel = /** @class */ (function () {
             var isSeriesPointsAdded = newBaseIndex !== null && newBaseIndex > currentBaseIndex;
             var isSeriesPointsAddedToRight = isSeriesPointsAdded && !isLeftBarShiftToLeft;
             var needShiftVisibleRangeOnNewBar = isLastSeriesBarVisible && this._private__timeScale.options().shiftVisibleRangeOnNewBar;
-            if (isSeriesPointsAddedToRight && !needShiftVisibleRangeOnNewBar && newBaseIndex !== null) {
+            if (newBaseIndex !== null && isSeriesPointsAddedToRight && !needShiftVisibleRangeOnNewBar) {
                 var compensationShift = newBaseIndex - currentBaseIndex;
                 this._private__timeScale.setRightOffset(this._private__timeScale.rightOffset() - compensationShift);
             }
@@ -7197,6 +7684,40 @@ var ChartModel = /** @class */ (function () {
     ChartModel.prototype.defaultVisiblePriceScaleId = function () {
         return this._private__options.rightPriceScale.visible ? "right" /* Right */ : "left" /* Left */;
     };
+    ChartModel.prototype.backgroundBottomColor = function () {
+        return this._private__backgroundBottomColor;
+    };
+    ChartModel.prototype.backgroundTopColor = function () {
+        return this._private__backgroundTopColor;
+    };
+    ChartModel.prototype.backgroundColorAtYPercentFromTop = function (percent) {
+        var bottomColor = this._private__backgroundBottomColor;
+        var topColor = this._private__backgroundTopColor;
+        if (bottomColor === topColor) {
+            // solid background
+            return bottomColor;
+        }
+        // gradient background
+        // percent should be from 0 to 100 (we're using only integer values to make cache more efficient)
+        percent = Math.max(0, Math.min(100, Math.round(percent * 100)));
+        if (this._private__gradientColorsCache === null ||
+            this._private__gradientColorsCache._internal_topColor !== topColor || this._private__gradientColorsCache._internal_bottomColor !== bottomColor) {
+            this._private__gradientColorsCache = {
+                _internal_topColor: topColor,
+                _internal_bottomColor: bottomColor,
+                _internal_colors: new Map(),
+            };
+        }
+        else {
+            var cachedValue = this._private__gradientColorsCache._internal_colors.get(percent);
+            if (cachedValue !== undefined) {
+                return cachedValue;
+            }
+        }
+        var result = gradientColorAtPercent(topColor, bottomColor, percent / 100);
+        this._private__gradientColorsCache._internal_colors.set(percent, result);
+        return result;
+    };
     ChartModel.prototype._private__paneInvalidationMask = function (pane, level) {
         var inv = new InvalidateMask(level);
         if (pane !== null) {
@@ -7219,9 +7740,6 @@ var ChartModel = /** @class */ (function () {
         }
         this._private__panes.forEach(function (pane) { return pane.grid().paneView().update(); });
     };
-    ChartModel.prototype._private__cursorUpdate = function () {
-        this._private__invalidate(new InvalidateMask(1 /* Cursor */));
-    };
     ChartModel.prototype._private__createSeries = function (options, seriesType, pane) {
         var series = new Series(this, options, seriesType);
         var targetScaleId = options.priceScaleId !== undefined ? options.priceScaleId : this.defaultVisiblePriceScaleId();
@@ -7231,6 +7749,15 @@ var ChartModel = /** @class */ (function () {
             series.applyOptions(options);
         }
         return series;
+    };
+    ChartModel.prototype._private__getBackgroundColor = function (side) {
+        var layoutOptions = this._private__options.layout;
+        if (layoutOptions.background.type === "gradient" /* VerticalGradient */) {
+            return side === 0 /* Top */ ?
+                layoutOptions.background.topColor :
+                layoutOptions.background.bottomColor;
+        }
+        return layoutOptions.background.color;
     };
     return ChartModel;
 }());
@@ -7283,6 +7810,115 @@ function createBoundCanvas(parentElement, size) {
     return binding;
 }
 
+function distanceBetweenPoints(pos1, pos2) {
+    return pos1._internal_position - pos2._internal_position;
+}
+function speedPxPerMSec(pos1, pos2, maxSpeed) {
+    var speed = (pos1._internal_position - pos2._internal_position) / (pos1._internal_time - pos2._internal_time);
+    return Math.sign(speed) * Math.min(Math.abs(speed), maxSpeed);
+}
+function durationMSec(speed, dumpingCoeff) {
+    var lnDumpingCoeff = Math.log(dumpingCoeff);
+    return Math.log((1 /* EpsilonDistance */ * lnDumpingCoeff) / -speed) / (lnDumpingCoeff);
+}
+var KineticAnimation = /** @class */ (function () {
+    function KineticAnimation(minSpeed, maxSpeed, dumpingCoeff, minMove) {
+        this._private__position1 = null;
+        this._private__position2 = null;
+        this._private__position3 = null;
+        this._private__position4 = null;
+        this._private__animationStartPosition = null;
+        this._private__durationMsecs = 0;
+        this._private__speedPxPerMsec = 0;
+        this._private__terminated = false;
+        this._private__minSpeed = minSpeed;
+        this._private__maxSpeed = maxSpeed;
+        this._private__dumpingCoeff = dumpingCoeff;
+        this._private__minMove = minMove;
+    }
+    KineticAnimation.prototype._internal_addPosition = function (position, time) {
+        if (this._private__position1 !== null) {
+            if (this._private__position1._internal_time === time) {
+                this._private__position1._internal_position = position;
+                return;
+            }
+            if (Math.abs(this._private__position1._internal_position - position) < this._private__minMove) {
+                return;
+            }
+        }
+        this._private__position4 = this._private__position3;
+        this._private__position3 = this._private__position2;
+        this._private__position2 = this._private__position1;
+        this._private__position1 = { _internal_time: time, _internal_position: position };
+    };
+    KineticAnimation.prototype._internal_start = function (position, time) {
+        if (this._private__position1 === null || this._private__position2 === null) {
+            return;
+        }
+        if (time - this._private__position1._internal_time > 50 /* MaxStartDelay */) {
+            return;
+        }
+        // To calculate all the rest parameters we should calculate the speed af first
+        var totalDistance = 0;
+        var speed1 = speedPxPerMSec(this._private__position1, this._private__position2, this._private__maxSpeed);
+        var distance1 = distanceBetweenPoints(this._private__position1, this._private__position2);
+        // We're calculating weighted average speed
+        // Than more distance for a segment, than more its weight
+        var speedItems = [speed1];
+        var distanceItems = [distance1];
+        totalDistance += distance1;
+        if (this._private__position3 !== null) {
+            var speed2 = speedPxPerMSec(this._private__position2, this._private__position3, this._private__maxSpeed);
+            // stop at this moment if direction of the segment is opposite
+            if (Math.sign(speed2) === Math.sign(speed1)) {
+                var distance2 = distanceBetweenPoints(this._private__position2, this._private__position3);
+                speedItems.push(speed2);
+                distanceItems.push(distance2);
+                totalDistance += distance2;
+                if (this._private__position4 !== null) {
+                    var speed3 = speedPxPerMSec(this._private__position3, this._private__position4, this._private__maxSpeed);
+                    if (Math.sign(speed3) === Math.sign(speed1)) {
+                        var distance3 = distanceBetweenPoints(this._private__position3, this._private__position4);
+                        speedItems.push(speed3);
+                        distanceItems.push(distance3);
+                        totalDistance += distance3;
+                    }
+                }
+            }
+        }
+        var resultSpeed = 0;
+        for (var i = 0; i < speedItems.length; ++i) {
+            resultSpeed += distanceItems[i] / totalDistance * speedItems[i];
+        }
+        if (Math.abs(resultSpeed) < this._private__minSpeed) {
+            return;
+        }
+        this._private__animationStartPosition = { _internal_position: position, _internal_time: time };
+        this._private__speedPxPerMsec = resultSpeed;
+        this._private__durationMsecs = durationMSec(Math.abs(resultSpeed), this._private__dumpingCoeff);
+    };
+    KineticAnimation.prototype._internal_getPosition = function (time) {
+        var startPosition = ensureNotNull(this._private__animationStartPosition);
+        var durationMsecs = time - startPosition._internal_time;
+        return startPosition._internal_position + this._private__speedPxPerMsec * (Math.pow(this._private__dumpingCoeff, durationMsecs) - 1) / (Math.log(this._private__dumpingCoeff));
+    };
+    KineticAnimation.prototype._internal_finished = function (time) {
+        return this._private__animationStartPosition === null || this._private__progressDuration(time) === this._private__durationMsecs;
+    };
+    KineticAnimation.prototype._internal_terminated = function () {
+        return this._private__terminated;
+    };
+    KineticAnimation.prototype._internal_terminate = function () {
+        this._private__terminated = true;
+    };
+    KineticAnimation.prototype._private__progressDuration = function (time) {
+        var startPosition = ensureNotNull(this._private__animationStartPosition);
+        var progress = time - startPosition._internal_time;
+        return Math.min(progress, this._private__durationMsecs);
+    };
+    return KineticAnimation;
+}());
+
 /**
  * When you're trying to use the library in server-side context (for instance in SSR)
  * you don't have some browser-specific variables like navigator or window
@@ -7309,6 +7945,7 @@ function getMobileTouch() {
     if (!isRunningOnClientSide) {
         return false;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
     var touch = !!navigator.maxTouchPoints || !!navigator.msMaxTouchPoints || checkTouchEvents();
     // eslint-disable-next-line no-restricted-syntax
     return 'onorientationchange' in window && touch;
@@ -7859,9 +8496,6 @@ var PriceAxisWidget = /** @class */ (function () {
     PriceAxisWidget.prototype._internal_getElement = function () {
         return this._private__cell;
     };
-    PriceAxisWidget.prototype._internal_backgroundColor = function () {
-        return this._private__options.backgroundColor;
-    };
     PriceAxisWidget.prototype._internal_lineColor = function () {
         return ensureNotNull(this._private__priceScale).options().borderColor;
     };
@@ -7907,6 +8541,12 @@ var PriceAxisWidget = /** @class */ (function () {
             if (width > tickMarkMaxWidth) {
                 tickMarkMaxWidth = width;
             }
+        }
+        var firstValue = this._private__priceScale.firstValue();
+        if (firstValue !== null && this._private__size !== null) {
+            var topValue = this._private__priceScale.coordinateToPrice(1, firstValue);
+            var bottomValue = this._private__priceScale.coordinateToPrice(this._private__size._internal_h - 2, firstValue);
+            tickMarkMaxWidth = Math.max(tickMarkMaxWidth, this._private__widthCache.measureText(ctx, this._private__priceScale.formatPrice(Math.floor(Math.min(topValue, bottomValue)) + 0.11111111111111, firstValue)), this._private__widthCache.measureText(ctx, this._private__priceScale.formatPrice(Math.ceil(Math.max(topValue, bottomValue)) - 0.11111111111111, firstValue)));
         }
         tickMarkMaxWidth = Math.max(tickMarkMaxWidth, rendererOptions.width);
         var res = Math.ceil(rendererOptions.borderSize +
@@ -8136,7 +8776,15 @@ var PriceAxisWidget = /** @class */ (function () {
         var width = this._private__size._internal_w;
         var height = this._private__size._internal_h;
         drawScaled(ctx, pixelRatio, function () {
-            clearRect(ctx, 0, 0, width, height, _this._internal_backgroundColor());
+            var model = _this._private__pane._internal_state().model();
+            var topColor = model.backgroundTopColor();
+            var bottomColor = model.backgroundBottomColor();
+            if (topColor === bottomColor) {
+                clearRect(ctx, 0, 0, width, height, topColor);
+            }
+            else {
+                clearRectWithGradient(ctx, 0, 0, width, height, topColor, bottomColor);
+            }
         });
     };
     PriceAxisWidget.prototype._private__drawBorder = function (ctx, pixelRatio) {
@@ -8203,7 +8851,7 @@ var PriceAxisWidget = /** @class */ (function () {
         var paneState = pane._internal_state();
         var rendererOptions = this._internal_rendererOptions();
         // if we are default price scale, append labels from no-scale
-        var isDefault = this._private__priceScale === paneState.defaultPriceScale();
+        var isDefault = this._private__priceScale === paneState.defaultVisiblePriceScale();
         if (isDefault) {
             this._private__pane._internal_state().orderedSources().forEach(function (source) {
                 if (paneState.isOverlay(source)) {
@@ -8353,6 +9001,20 @@ var PriceAxisWidget = /** @class */ (function () {
 // actually we should check what event happened (touch or mouse)
 // not check current UA to detect "mobile" device
 var trackCrosshairOnlyAfterLongTap = isMobile;
+function drawBackground(renderer, ctx, pixelRatio, isHovered, hitTestData) {
+    if (renderer.drawBackground) {
+        renderer.drawBackground(ctx, pixelRatio, isHovered, hitTestData);
+    }
+}
+function drawForeground(renderer, ctx, pixelRatio, isHovered, hitTestData) {
+    renderer.draw(ctx, pixelRatio, isHovered, hitTestData);
+}
+function sourcePaneViews(source, pane) {
+    return source.paneViews(pane);
+}
+function sourceTopPaneViews(source, pane) {
+    return source.topPaneViews !== undefined ? source.topPaneViews(pane) : [];
+}
 var PaneWidget = /** @class */ (function () {
     function PaneWidget(chart, state) {
         var _this = this;
@@ -8367,6 +9029,7 @@ var PaneWidget = /** @class */ (function () {
         this._private__startTrackPoint = null;
         this._private__exitTrackingModeOnNextTry = false;
         this._private__initCrosshairPosition = null;
+        this._private__scrollXAnimation = null;
         this._private__canvasConfiguredHandler = function () { return _this._private__state && _this._private__model().lightUpdate(); };
         this._private__topCanvasConfiguredHandler = function () { return _this._private__state && _this._private__model().lightUpdate(); };
         this._private__chart = chart;
@@ -8486,6 +9149,7 @@ var PaneWidget = /** @class */ (function () {
         if (!this._private__state) {
             return;
         }
+        this._private__terminateKineticAnimation();
         if (document.activeElement !== document.body && document.activeElement !== document.documentElement) {
             // If any focusable element except the page itself is focused, remove the focus
             ensureNotNull(document.activeElement).blur();
@@ -8524,9 +9188,6 @@ var PaneWidget = /** @class */ (function () {
             this._private__setCrosshairPosition(x, y);
             var hitTest = this._internal_hitTest(x, y);
             this._private__model().setHoveredSource(hitTest && { source: hitTest._internal_source, object: hitTest._internal_object });
-            if (hitTest !== null && hitTest._internal_view.moveHandler !== undefined) {
-                hitTest._internal_view.moveHandler(x, y);
-            }
         }
     };
     PaneWidget.prototype._internal_mouseClickEvent = function (event) {
@@ -8535,10 +9196,6 @@ var PaneWidget = /** @class */ (function () {
         }
         var x = event._internal_localX;
         var y = event._internal_localY;
-        var hitTest = this._internal_hitTest(x, y);
-        if (hitTest !== null && hitTest._internal_view.clickHandler !== undefined) {
-            hitTest._internal_view.clickHandler(x, y);
-        }
         if (this._private__clicked._internal_hasListeners()) {
             var currentTime = this._private__model().crosshairSource().appliedIndex();
             this._private__clicked._internal_fire(currentTime, { x: x, y: y });
@@ -8567,27 +9224,41 @@ var PaneWidget = /** @class */ (function () {
         if (model.timeScale().isEmpty()) {
             return;
         }
-        var scrollOptions = this._private__chart._internal_options().handleScroll;
+        var chartOptions = this._private__chart._internal_options();
+        var scrollOptions = chartOptions.handleScroll;
+        var kineticScrollOptions = chartOptions.kineticScroll;
         if ((!scrollOptions.pressedMouseMove || event._internal_type === 'touch') &&
             (!scrollOptions.horzTouchDrag && !scrollOptions.vertTouchDrag || event._internal_type === 'mouse')) {
             return;
         }
         var priceScale = this._private__state.defaultPriceScale();
+        var now = performance.now();
         if (this._private__startScrollingPos === null && !this._private__preventScroll()) {
             this._private__startScrollingPos = {
                 x: event._internal_clientX,
                 y: event._internal_clientY,
+                _internal_timestamp: now,
+                _internal_localX: event._internal_localX,
+                _internal_localY: event._internal_localY,
             };
         }
+        if (this._private__scrollXAnimation !== null) {
+            this._private__scrollXAnimation._internal_addPosition(event._internal_localX, now);
+        }
         if (this._private__startScrollingPos !== null &&
+            !this._private__isScrolling &&
             (this._private__startScrollingPos.x !== event._internal_clientX || this._private__startScrollingPos.y !== event._internal_clientY)) {
-            if (!this._private__isScrolling) {
-                if (!priceScale.isEmpty()) {
-                    model.startScrollPrice(this._private__state, priceScale, event._internal_localY);
-                }
-                model.startScrollTime(event._internal_localX);
-                this._private__isScrolling = true;
+            if (this._private__scrollXAnimation === null && (event._internal_type === 'touch' && kineticScrollOptions.touch ||
+                event._internal_type === 'mouse' && kineticScrollOptions.mouse)) {
+                this._private__scrollXAnimation = new KineticAnimation(0.2 /* MinScrollSpeed */, 7 /* MaxScrollSpeed */, 0.997 /* DumpingCoeff */, 15 /* ScrollMinMove */);
+                this._private__scrollXAnimation._internal_addPosition(this._private__startScrollingPos._internal_localX, this._private__startScrollingPos._internal_timestamp);
+                this._private__scrollXAnimation._internal_addPosition(event._internal_localX, now);
             }
+            if (!priceScale.isEmpty()) {
+                model.startScrollPrice(this._private__state, priceScale, event._internal_localY);
+            }
+            model.startScrollTime(event._internal_localX);
+            this._private__isScrolling = true;
         }
         if (this._private__isScrolling) {
             // this allows scrolling not default price scales
@@ -8602,15 +9273,7 @@ var PaneWidget = /** @class */ (function () {
             return;
         }
         this._private__longTap = false;
-        var model = this._private__model();
-        if (this._private__isScrolling) {
-            var priceScale = this._private__state.defaultPriceScale();
-            // this allows scrolling not default price scales
-            model.endScrollPrice(this._private__state, priceScale);
-            model.endScrollTime();
-            this._private__startScrollingPos = null;
-            this._private__isScrolling = false;
-        }
+        this._private__endScroll(event);
     };
     PaneWidget.prototype._internal_longTapEvent = function (event) {
         this._private__longTap = true;
@@ -8633,6 +9296,7 @@ var PaneWidget = /** @class */ (function () {
     };
     PaneWidget.prototype._internal_pinchStartEvent = function () {
         this._private__prevPinchScale = 1;
+        this._private__terminateKineticAnimation();
     };
     PaneWidget.prototype._internal_pinchEvent = function (middlePoint, scale) {
         if (!this._private__chart._internal_options().handleScale.pinch) {
@@ -8720,16 +9384,17 @@ var PaneWidget = /** @class */ (function () {
         if (type !== 1 /* Cursor */) {
             var ctx = getContext2D(this._private__canvasBinding.canvas);
             ctx.save();
-            this._private__drawBackground(ctx, this._private__backgroundColor(), this._private__canvasBinding.pixelRatio);
+            this._private__drawBackground(ctx, this._private__canvasBinding.pixelRatio);
             if (this._private__state) {
                 this._private__drawGrid(ctx, this._private__canvasBinding.pixelRatio);
                 this._private__drawWatermark(ctx, this._private__canvasBinding.pixelRatio);
-                this._private__drawSources(ctx, this._private__canvasBinding.pixelRatio);
+                this._private__drawSources(ctx, this._private__canvasBinding.pixelRatio, sourcePaneViews);
             }
             ctx.restore();
         }
         var topCtx = getContext2D(this._private__topCanvasBinding.canvas);
         topCtx.clearRect(0, 0, Math.ceil(this._private__size._internal_w * this._private__topCanvasBinding.pixelRatio), Math.ceil(this._private__size._internal_h * this._private__topCanvasBinding.pixelRatio));
+        this._private__drawSources(topCtx, this._private__canvasBinding.pixelRatio, sourceTopPaneViews);
         this._private__drawCrosshair(topCtx, this._private__topCanvasBinding.pixelRatio);
     };
     PaneWidget.prototype._internal_leftPriceAxisWidget = function () {
@@ -8738,19 +9403,24 @@ var PaneWidget = /** @class */ (function () {
     PaneWidget.prototype._internal_rightPriceAxisWidget = function () {
         return this._private__rightPriceAxisWidget;
     };
-    PaneWidget.prototype._private__backgroundColor = function () {
-        return this._private__chart._internal_options().layout.backgroundColor;
-    };
     PaneWidget.prototype._private__onStateDestroyed = function () {
         if (this._private__state !== null) {
             this._private__state.onDestroyed().unsubscribeAll(this);
         }
         this._private__state = null;
     };
-    PaneWidget.prototype._private__drawBackground = function (ctx, color, pixelRatio) {
+    PaneWidget.prototype._private__drawBackground = function (ctx, pixelRatio) {
         var _this = this;
         drawScaled(ctx, pixelRatio, function () {
-            clearRect(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, color);
+            var model = _this._private__model();
+            var topColor = model.backgroundTopColor();
+            var bottomColor = model.backgroundBottomColor();
+            if (topColor === bottomColor) {
+                clearRect(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, bottomColor);
+            }
+            else {
+                clearRectWithGradient(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, topColor, bottomColor);
+            }
         });
     };
     PaneWidget.prototype._private__drawGrid = function (ctx, pixelRatio) {
@@ -8765,27 +9435,27 @@ var PaneWidget = /** @class */ (function () {
     };
     PaneWidget.prototype._private__drawWatermark = function (ctx, pixelRatio) {
         var source = this._private__model().watermarkSource();
-        this._private__drawSourceBackground(source, ctx, pixelRatio);
-        this._private__drawSource(source, ctx, pixelRatio);
+        this._private__drawSourceImpl(ctx, pixelRatio, sourcePaneViews, drawBackground, source);
+        this._private__drawSourceImpl(ctx, pixelRatio, sourcePaneViews, drawForeground, source);
     };
     PaneWidget.prototype._private__drawCrosshair = function (ctx, pixelRatio) {
-        this._private__drawSource(this._private__model().crosshairSource(), ctx, pixelRatio);
+        this._private__drawSourceImpl(ctx, pixelRatio, sourcePaneViews, drawForeground, this._private__model().crosshairSource());
     };
-    PaneWidget.prototype._private__drawSources = function (ctx, pixelRatio) {
+    PaneWidget.prototype._private__drawSources = function (ctx, pixelRatio, paneViewsGetter) {
         var state = ensureNotNull(this._private__state);
         var sources = state.orderedSources();
         for (var _i = 0, sources_2 = sources; _i < sources_2.length; _i++) {
             var source = sources_2[_i];
-            this._private__drawSourceBackground(source, ctx, pixelRatio);
+            this._private__drawSourceImpl(ctx, pixelRatio, paneViewsGetter, drawBackground, source);
         }
         for (var _a = 0, sources_3 = sources; _a < sources_3.length; _a++) {
             var source = sources_3[_a];
-            this._private__drawSource(source, ctx, pixelRatio);
+            this._private__drawSourceImpl(ctx, pixelRatio, paneViewsGetter, drawForeground, source);
         }
     };
-    PaneWidget.prototype._private__drawSource = function (source, ctx, pixelRatio) {
+    PaneWidget.prototype._private__drawSourceImpl = function (ctx, pixelRatio, paneViewsGetter, drawFn, source) {
         var state = ensureNotNull(this._private__state);
-        var paneViews = source.paneViews(state);
+        var paneViews = paneViewsGetter(source, state);
         var height = state.height();
         var width = state.width();
         var hoveredSource = state.model().hoveredSource();
@@ -8798,34 +9468,14 @@ var PaneWidget = /** @class */ (function () {
             var renderer = paneView.renderer(height, width);
             if (renderer !== null) {
                 ctx.save();
-                renderer.draw(ctx, pixelRatio, isHovered, objecId);
-                ctx.restore();
-            }
-        }
-    };
-    PaneWidget.prototype._private__drawSourceBackground = function (source, ctx, pixelRatio) {
-        var state = ensureNotNull(this._private__state);
-        var paneViews = source.paneViews(state);
-        var height = state.height();
-        var width = state.width();
-        var hoveredSource = state.model().hoveredSource();
-        var isHovered = hoveredSource !== null && hoveredSource.source === source;
-        var objecId = hoveredSource !== null && isHovered && hoveredSource.object !== undefined
-            ? hoveredSource.object.hitTestData
-            : undefined;
-        for (var _i = 0, paneViews_2 = paneViews; _i < paneViews_2.length; _i++) {
-            var paneView = paneViews_2[_i];
-            var renderer = paneView.renderer(height, width);
-            if (renderer !== null && renderer.drawBackground !== undefined) {
-                ctx.save();
-                renderer.drawBackground(ctx, pixelRatio, isHovered, objecId);
+                drawFn(renderer, ctx, pixelRatio, isHovered, objecId);
                 ctx.restore();
             }
         }
     };
     PaneWidget.prototype._private__hitTestPaneView = function (paneViews, x, y) {
-        for (var _i = 0, paneViews_3 = paneViews; _i < paneViews_3.length; _i++) {
-            var paneView = paneViews_3[_i];
+        for (var _i = 0, paneViews_2 = paneViews; _i < paneViews_2.length; _i++) {
+            var paneView = paneViews_2[_i];
             var renderer = paneView.renderer(this._private__size._internal_h, this._private__size._internal_w);
             if (renderer !== null && renderer.hitTest) {
                 var result = renderer.hitTest(x, y);
@@ -8844,22 +9494,24 @@ var PaneWidget = /** @class */ (function () {
             return;
         }
         var chart = this._private__chart;
-        if (!chart._internal_options().leftPriceScale.visible && this._private__leftPriceAxisWidget !== null) {
+        var leftAxisVisible = this._private__state.leftPriceScale().options().visible;
+        var rightAxisVisible = this._private__state.rightPriceScale().options().visible;
+        if (!leftAxisVisible && this._private__leftPriceAxisWidget !== null) {
             this._private__leftAxisCell.removeChild(this._private__leftPriceAxisWidget._internal_getElement());
             this._private__leftPriceAxisWidget.destroy();
             this._private__leftPriceAxisWidget = null;
         }
-        if (!chart._internal_options().rightPriceScale.visible && this._private__rightPriceAxisWidget !== null) {
+        if (!rightAxisVisible && this._private__rightPriceAxisWidget !== null) {
             this._private__rightAxisCell.removeChild(this._private__rightPriceAxisWidget._internal_getElement());
             this._private__rightPriceAxisWidget.destroy();
             this._private__rightPriceAxisWidget = null;
         }
         var rendererOptionsProvider = chart._internal_model().rendererOptionsProvider();
-        if (chart._internal_options().leftPriceScale.visible && this._private__leftPriceAxisWidget === null) {
+        if (leftAxisVisible && this._private__leftPriceAxisWidget === null) {
             this._private__leftPriceAxisWidget = new PriceAxisWidget(this, chart._internal_options().layout, rendererOptionsProvider, 'left');
             this._private__leftAxisCell.appendChild(this._private__leftPriceAxisWidget._internal_getElement());
         }
-        if (chart._internal_options().rightPriceScale.visible && this._private__rightPriceAxisWidget === null) {
+        if (rightAxisVisible && this._private__rightPriceAxisWidget === null) {
             this._private__rightPriceAxisWidget = new PriceAxisWidget(this, chart._internal_options().layout, rendererOptionsProvider, 'right');
             this._private__rightAxisCell.appendChild(this._private__rightPriceAxisWidget._internal_getElement());
         }
@@ -8898,11 +9550,73 @@ var PaneWidget = /** @class */ (function () {
     PaneWidget.prototype._private__model = function () {
         return this._private__chart._internal_model();
     };
+    PaneWidget.prototype._private__finishScroll = function () {
+        var model = this._private__model();
+        var state = this._internal_state();
+        var priceScale = state.defaultPriceScale();
+        model.endScrollPrice(state, priceScale);
+        model.endScrollTime();
+        this._private__startScrollingPos = null;
+        this._private__isScrolling = false;
+    };
+    PaneWidget.prototype._private__endScroll = function (event) {
+        var _this = this;
+        if (!this._private__isScrolling) {
+            return;
+        }
+        var startAnimationTime = performance.now();
+        if (this._private__scrollXAnimation !== null) {
+            this._private__scrollXAnimation._internal_start(event._internal_localX, startAnimationTime);
+        }
+        if ((this._private__scrollXAnimation === null || this._private__scrollXAnimation._internal_finished(startAnimationTime))) {
+            // animation is not needed
+            this._private__finishScroll();
+            return;
+        }
+        var model = this._private__model();
+        var timeScale = model.timeScale();
+        var scrollXAnimation = this._private__scrollXAnimation;
+        var animationFn = function () {
+            if ((scrollXAnimation._internal_terminated())) {
+                // animation terminated, see _terminateKineticAnimation
+                return;
+            }
+            var now = performance.now();
+            var xAnimationFinished = scrollXAnimation._internal_finished(now);
+            if (!scrollXAnimation._internal_terminated()) {
+                var prevRightOffset = timeScale.rightOffset();
+                model.scrollTimeTo(scrollXAnimation._internal_getPosition(now));
+                if (prevRightOffset === timeScale.rightOffset()) {
+                    xAnimationFinished = true;
+                    _this._private__scrollXAnimation = null;
+                }
+            }
+            if (xAnimationFinished) {
+                _this._private__finishScroll();
+                return;
+            }
+            requestAnimationFrame(animationFn);
+        };
+        requestAnimationFrame(animationFn);
+    };
+    PaneWidget.prototype._private__terminateKineticAnimation = function () {
+        var now = performance.now();
+        var xAnimationFinished = this._private__scrollXAnimation === null || this._private__scrollXAnimation._internal_finished(now);
+        if (this._private__scrollXAnimation !== null) {
+            if (!xAnimationFinished) {
+                this._private__finishScroll();
+            }
+        }
+        if (this._private__scrollXAnimation !== null) {
+            this._private__scrollXAnimation._internal_terminate();
+            this._private__scrollXAnimation = null;
+        }
+    };
     return PaneWidget;
 }());
 
 var PriceAxisStub = /** @class */ (function () {
-    function PriceAxisStub(side, options, params, borderVisible) {
+    function PriceAxisStub(side, options, params, borderVisible, bottomColor) {
         var _this = this;
         this._private__invalidated = true;
         this._private__size = new Size(0, 0);
@@ -8911,6 +9625,7 @@ var PriceAxisStub = /** @class */ (function () {
         this._private__rendererOptionsProvider = params._internal_rendererOptionsProvider;
         this._private__options = options;
         this._private__borderVisible = borderVisible;
+        this._private__bottomColor = bottomColor;
         this._private__cell = document.createElement('div');
         this._private__cell.style.width = '25px';
         this._private__cell.style.height = '100%';
@@ -8971,7 +9686,7 @@ var PriceAxisStub = /** @class */ (function () {
     PriceAxisStub.prototype._private__drawBackground = function (ctx, pixelRatio) {
         var _this = this;
         drawScaled(ctx, pixelRatio, function () {
-            clearRect(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, _this._private__options.layout.backgroundColor);
+            clearRect(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, _this._private__bottomColor());
         });
     };
     return PriceAxisStub;
@@ -8988,6 +9703,8 @@ var TimeAxisWidget = /** @class */ (function () {
         this._private__rendererOptions = null;
         this._private__mouseDown = false;
         this._private__size = new Size(0, 0);
+        this._private__sizeChanged = new Delegate();
+        this._private__widthCache = new TextWidthCache(5);
         this._private__canvasConfiguredHandler = function () { return _this._private__chart._internal_model().lightUpdate(); };
         this._private__topCanvasConfiguredHandler = function () { return _this._private__chart._internal_model().lightUpdate(); };
         this._private__chart = chartWidget;
@@ -9103,6 +9820,9 @@ var TimeAxisWidget = /** @class */ (function () {
     TimeAxisWidget.prototype._internal_getSize = function () {
         return this._private__size;
     };
+    TimeAxisWidget.prototype._internal_sizeChanged = function () {
+        return this._private__sizeChanged;
+    };
     TimeAxisWidget.prototype._internal_setSizes = function (timeAxisSize, leftStubWidth, rightStubWidth) {
         if (!this._private__size || !this._private__size._internal_equals(timeAxisSize)) {
             this._private__size = timeAxisSize;
@@ -9110,6 +9830,7 @@ var TimeAxisWidget = /** @class */ (function () {
             this._private__topCanvasBinding.resizeCanvas({ width: timeAxisSize._internal_w, height: timeAxisSize._internal_h });
             this._private__cell.style.width = timeAxisSize._internal_w + 'px';
             this._private__cell.style.height = timeAxisSize._internal_h + 'px';
+            this._private__sizeChanged._internal_fire(timeAxisSize);
         }
         if (this._private__leftStub !== null) {
             this._private__leftStub._internal_setSize(new Size(leftStubWidth, timeAxisSize._internal_h));
@@ -9162,7 +9883,7 @@ var TimeAxisWidget = /** @class */ (function () {
     TimeAxisWidget.prototype._private__drawBackground = function (ctx, pixelRatio) {
         var _this = this;
         drawScaled(ctx, pixelRatio, function () {
-            clearRect(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, _this._private__backgroundColor());
+            clearRect(ctx, 0, 0, _this._private__size._internal_w, _this._private__size._internal_h, _this._private__chart._internal_model().backgroundBottomColor());
         });
     };
     TimeAxisWidget.prototype._private__drawBorder = function (ctx, pixelRatio) {
@@ -9182,9 +9903,9 @@ var TimeAxisWidget = /** @class */ (function () {
         }
         var maxWeight = tickMarks.reduce(markWithGreaterWeight, tickMarks[0]).weight;
         // special case: it looks strange if 15:00 is bold but 14:00 is not
-        // so if maxWeight > 30 and < 40 reduce it to 30
-        if (maxWeight > 30 && maxWeight < 40) {
-            maxWeight = 30;
+        // so if maxWeight > TickMarkWeight.Hour1 and < TickMarkWeight.Day reduce it to TickMarkWeight.Hour1
+        if (maxWeight > 30 /* Hour1 */ && maxWeight < 50 /* Day */) {
+            maxWeight = 30 /* Hour1 */;
         }
         ctx.save();
         ctx.strokeStyle = this._private__lineColor();
@@ -9215,17 +9936,31 @@ var TimeAxisWidget = /** @class */ (function () {
             for (var _i = 0, tickMarks_1 = tickMarks; _i < tickMarks_1.length; _i++) {
                 var tickMark = tickMarks_1[_i];
                 if (tickMark.weight < maxWeight) {
-                    ctx.fillText(tickMark.label, tickMark.coord, yText);
+                    var coordinate = tickMark.needAlignCoordinate ? _this._private__alignTickMarkLabelCoordinate(ctx, tickMark.coord, tickMark.label) : tickMark.coord;
+                    ctx.fillText(tickMark.label, coordinate, yText);
                 }
             }
             ctx.font = _this._private__baseBoldFont();
             for (var _a = 0, tickMarks_2 = tickMarks; _a < tickMarks_2.length; _a++) {
                 var tickMark = tickMarks_2[_a];
                 if (tickMark.weight >= maxWeight) {
-                    ctx.fillText(tickMark.label, tickMark.coord, yText);
+                    var coordinate = tickMark.needAlignCoordinate ? _this._private__alignTickMarkLabelCoordinate(ctx, tickMark.coord, tickMark.label) : tickMark.coord;
+                    ctx.fillText(tickMark.label, coordinate, yText);
                 }
             }
         });
+    };
+    TimeAxisWidget.prototype._private__alignTickMarkLabelCoordinate = function (ctx, coordinate, labelText) {
+        var labelWidth = this._private__widthCache.measureText(ctx, labelText);
+        var labelWidthHalf = labelWidth / 2;
+        var leftTextCoordinate = Math.floor(coordinate - labelWidthHalf) + 0.5;
+        if (leftTextCoordinate < 0) {
+            coordinate = coordinate + Math.abs(0 - leftTextCoordinate);
+        }
+        else if (leftTextCoordinate + labelWidth > this._private__size._internal_w) {
+            coordinate = coordinate - Math.abs(this._private__size._internal_w - (leftTextCoordinate + labelWidth));
+        }
+        return coordinate;
     };
     TimeAxisWidget.prototype._private__drawLabels = function (sources, ctx, pixelRatio) {
         var rendererOptions = this._private__getRendererOptions();
@@ -9238,9 +9973,6 @@ var TimeAxisWidget = /** @class */ (function () {
                 ctx.restore();
             }
         }
-    };
-    TimeAxisWidget.prototype._private__backgroundColor = function () {
-        return this._private__options.backgroundColor;
     };
     TimeAxisWidget.prototype._private__lineColor = function () {
         return this._private__chart._internal_options().timeScale.borderColor;
@@ -9305,18 +10037,16 @@ var TimeAxisWidget = /** @class */ (function () {
         var params = {
             _internal_rendererOptionsProvider: rendererOptionsProvider,
         };
+        var borderVisibleGetter = function () {
+            return options.leftPriceScale.borderVisible && model.timeScale().options().borderVisible;
+        };
+        var bottomColorGetter = function () { return model.backgroundBottomColor(); };
         if (options.leftPriceScale.visible && this._private__leftStub === null) {
-            var borderVisibleGetter = function () {
-                return options.leftPriceScale.borderVisible && model.timeScale().options().borderVisible;
-            };
-            this._private__leftStub = new PriceAxisStub('left', this._private__chart._internal_options(), params, borderVisibleGetter);
+            this._private__leftStub = new PriceAxisStub('left', options, params, borderVisibleGetter, bottomColorGetter);
             this._private__leftStubCell.appendChild(this._private__leftStub._internal_getElement());
         }
         if (options.rightPriceScale.visible && this._private__rightStub === null) {
-            var borderVisibleGetter = function () {
-                return options.rightPriceScale.borderVisible && model.timeScale().options().borderVisible;
-            };
-            this._private__rightStub = new PriceAxisStub('right', this._private__chart._internal_options(), params, borderVisibleGetter);
+            this._private__rightStub = new PriceAxisStub('right', options, params, borderVisibleGetter, bottomColorGetter);
             this._private__rightStubCell.appendChild(this._private__rightStub._internal_getElement());
         }
     };
@@ -9388,6 +10118,9 @@ var ChartWidget = /** @class */ (function () {
     ChartWidget.prototype._internal_paneWidgets = function () {
         return this._private__paneWidgets;
     };
+    ChartWidget.prototype._internal_timeAxisWidget = function () {
+        return this._private__timeAxisWidget;
+    };
     ChartWidget.prototype.destroy = function () {
         this._private__element.removeEventListener('wheel', this._private__onWheelBound);
         if (this._private__drawRafId !== 0) {
@@ -9443,7 +10176,9 @@ var ChartWidget = /** @class */ (function () {
         for (var i = 0; i < this._private__paneWidgets.length; i++) {
             this._private__paneWidgets[i]._internal_paint(invalidateMask.invalidateForPane(i).level);
         }
-        this._private__timeAxisWidget._internal_paint(invalidateMask.fullInvalidation());
+        if (this._private__options.timeScale.visible) {
+            this._private__timeAxisWidget._internal_paint(invalidateMask.fullInvalidation());
+        }
     };
     ChartWidget.prototype._internal_applyOptions = function (options) {
         this._private__model.applyOptions(options);
@@ -9584,7 +10319,8 @@ var ChartWidget = /** @class */ (function () {
         // const separatorCount = this._paneSeparators.length;
         // const separatorHeight = SEPARATOR_HEIGHT;
         var separatorsHeight = 0; // separatorHeight * separatorCount;
-        var timeAxisHeight = this._private__options.timeScale.visible ? this._private__timeAxisWidget._internal_optimalHeight() : 0;
+        var timeAxisVisible = this._private__options.timeScale.visible;
+        var timeAxisHeight = timeAxisVisible ? this._private__timeAxisWidget._internal_optimalHeight() : 0;
         // TODO: Fix it better
         // on Hi-DPI CSS size * Device Pixel Ratio should be integer to avoid smoothing
         if (timeAxisHeight % 2) {
@@ -9618,7 +10354,7 @@ var ChartWidget = /** @class */ (function () {
                 this._private__model.setPaneHeight(paneWidget._internal_state(), paneHeight);
             }
         }
-        this._private__timeAxisWidget._internal_setSizes(new Size(paneWidth, timeAxisHeight), leftPriceAxisWidth, rightPriceAxisWidth);
+        this._private__timeAxisWidget._internal_setSizes(new Size(timeAxisVisible ? paneWidth : 0, timeAxisHeight), timeAxisVisible ? leftPriceAxisWidth : 0, timeAxisVisible ? rightPriceAxisWidth : 0);
         this._private__model.setWidth(paneWidth);
         if (this._private__leftPriceAxisWidth !== leftPriceAxisWidth) {
             this._private__leftPriceAxisWidth = leftPriceAxisWidth;
@@ -9833,10 +10569,10 @@ var ChartWidget = /** @class */ (function () {
         this._private__timeAxisWidget._internal_getElement().style.display = display;
     };
     ChartWidget.prototype._private__isLeftAxisVisible = function () {
-        return this._private__options.leftPriceScale.visible;
+        return this._private__paneWidgets[0]._internal_state().leftPriceScale().options().visible;
     };
     ChartWidget.prototype._private__isRightAxisVisible = function () {
-        return this._private__options.rightPriceScale.visible;
+        return this._private__paneWidgets[0]._internal_state().rightPriceScale().options().visible;
     };
     return ChartWidget;
 }());
@@ -9848,6 +10584,7 @@ function disableSelection(element) {
     element.style.msUserSelect = 'none';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
     element.style.MozUserSelect = 'none';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
     element.style.webkitTapHighlightColor = 'transparent';
 }
 
@@ -9887,6 +10624,7 @@ var seriesPlotRowFnMap = {
     Candlestick: wrapWhitespaceData(getOHLCBasedSeriesPlotRow),
     Bar: wrapWhitespaceData(getOHLCBasedSeriesPlotRow),
     Area: wrapWhitespaceData(getLineBasedSeriesPlotRow),
+    Baseline: wrapWhitespaceData(getLineBasedSeriesPlotRow),
     Histogram: wrapWhitespaceData(getLineBasedSeriesPlotRow),
     Line: wrapWhitespaceData(getLineBasedSeriesPlotRow),
 };
@@ -9904,56 +10642,56 @@ function seconds(count) {
     return count * 1000;
 }
 var intradayWeightDivisors = [
-    // TODO: divisor=1 means 1ms and it's strange that weight for 1ms > weight for 1s
-    { _internal_divisor: 1, _internal_weight: 20 },
-    { _internal_divisor: seconds(1), _internal_weight: 19 },
-    { _internal_divisor: minutes(1), _internal_weight: 20 },
-    { _internal_divisor: minutes(5), _internal_weight: 21 },
-    { _internal_divisor: minutes(30), _internal_weight: 22 },
-    { _internal_divisor: hours(1), _internal_weight: 30 },
-    { _internal_divisor: hours(3), _internal_weight: 31 },
-    { _internal_divisor: hours(6), _internal_weight: 32 },
-    { _internal_divisor: hours(12), _internal_weight: 33 },
+    { _internal_divisor: seconds(1), _internal_weight: 10 /* Second */ },
+    { _internal_divisor: minutes(1), _internal_weight: 20 /* Minute1 */ },
+    { _internal_divisor: minutes(5), _internal_weight: 21 /* Minute5 */ },
+    { _internal_divisor: minutes(30), _internal_weight: 22 /* Minute30 */ },
+    { _internal_divisor: hours(1), _internal_weight: 30 /* Hour1 */ },
+    { _internal_divisor: hours(3), _internal_weight: 31 /* Hour3 */ },
+    { _internal_divisor: hours(6), _internal_weight: 32 /* Hour6 */ },
+    { _internal_divisor: hours(12), _internal_weight: 33 /* Hour12 */ },
 ];
-function weightByTime(time, prevTime) {
-    if (prevTime !== null) {
-        var prevDate = new Date(prevTime * 1000);
-        var currentDate = new Date(time * 1000);
-        if (currentDate.getUTCFullYear() !== prevDate.getUTCFullYear()) {
-            return 70;
-        }
-        else if (currentDate.getUTCMonth() !== prevDate.getUTCMonth()) {
-            return 60;
-        }
-        else if (currentDate.getUTCDate() !== prevDate.getUTCDate()) {
-            return 50;
-        }
-        for (var i = intradayWeightDivisors.length - 1; i >= 0; --i) {
-            if (Math.floor(prevDate.getTime() / intradayWeightDivisors[i]._internal_divisor) !== Math.floor(currentDate.getTime() / intradayWeightDivisors[i]._internal_divisor)) {
-                return intradayWeightDivisors[i]._internal_weight;
-            }
+function weightByTime(currentDate, prevDate) {
+    if (currentDate.getUTCFullYear() !== prevDate.getUTCFullYear()) {
+        return 70 /* Year */;
+    }
+    else if (currentDate.getUTCMonth() !== prevDate.getUTCMonth()) {
+        return 60 /* Month */;
+    }
+    else if (currentDate.getUTCDate() !== prevDate.getUTCDate()) {
+        return 50 /* Day */;
+    }
+    for (var i = intradayWeightDivisors.length - 1; i >= 0; --i) {
+        if (Math.floor(prevDate.getTime() / intradayWeightDivisors[i]._internal_divisor) !== Math.floor(currentDate.getTime() / intradayWeightDivisors[i]._internal_divisor)) {
+            return intradayWeightDivisors[i]._internal_weight;
         }
     }
-    return 20;
+    return 0 /* LessThanSecond */;
 }
 function fillWeightsForPoints(sortedTimePoints, startIndex) {
     if (startIndex === void 0) { startIndex = 0; }
-    var prevTime = (startIndex === 0 || sortedTimePoints.length === 0)
-        ? null
-        : sortedTimePoints[startIndex - 1].time.timestamp;
+    if (sortedTimePoints.length === 0) {
+        return;
+    }
+    var prevTime = startIndex === 0 ? null : sortedTimePoints[startIndex - 1].time.timestamp;
+    var prevDate = prevTime !== null ? new Date(prevTime * 1000) : null;
     var totalTimeDiff = 0;
     for (var index = startIndex; index < sortedTimePoints.length; ++index) {
         var currentPoint = sortedTimePoints[index];
-        currentPoint.timeWeight = weightByTime(currentPoint.time.timestamp, prevTime);
+        var currentDate = new Date(currentPoint.time.timestamp * 1000);
+        if (prevDate !== null) {
+            currentPoint.timeWeight = weightByTime(currentDate, prevDate);
+        }
         totalTimeDiff += currentPoint.time.timestamp - (prevTime || currentPoint.time.timestamp);
         prevTime = currentPoint.time.timestamp;
+        prevDate = currentDate;
     }
     if (startIndex === 0 && sortedTimePoints.length > 1) {
         // let's guess a weight for the first point
         // let's say the previous point was average time back in the history
         var averageTimeDiff = Math.ceil(totalTimeDiff / (sortedTimePoints.length - 1));
-        var approxPrevTime = (sortedTimePoints[0].time.timestamp - averageTimeDiff);
-        sortedTimePoints[0].timeWeight = weightByTime(sortedTimePoints[0].time.timestamp, approxPrevTime);
+        var approxPrevDate = new Date((sortedTimePoints[0].time.timestamp - averageTimeDiff) * 1000);
+        sortedTimePoints[0].timeWeight = weightByTime(new Date(sortedTimePoints[0].time.timestamp * 1000), approxPrevDate);
     }
 }
 
@@ -10028,6 +10766,26 @@ function convertStringsToBusinessDays(data) {
 function createEmptyTimePointData(timePoint) {
     return { _internal_index: 0, _internal_mapping: new Map(), _internal_timePoint: timePoint };
 }
+function seriesRowsFirsAndLastTime(seriesRows) {
+    if (seriesRows === undefined || seriesRows.length === 0) {
+        return undefined;
+    }
+    return {
+        _internal_firstTime: seriesRows[0].time.timestamp,
+        _internal_lastTime: seriesRows[seriesRows.length - 1].time.timestamp,
+    };
+}
+function seriesUpdateInfo(seriesRows, prevSeriesRows) {
+    var firstAndLastTime = seriesRowsFirsAndLastTime(seriesRows);
+    var prevFirstAndLastTime = seriesRowsFirsAndLastTime(prevSeriesRows);
+    if (firstAndLastTime !== undefined && prevFirstAndLastTime !== undefined) {
+        return {
+            lastBarUpdatedOrNewBarsAddedToTheRight: firstAndLastTime._internal_lastTime >= prevFirstAndLastTime._internal_lastTime &&
+                firstAndLastTime._internal_firstTime >= prevFirstAndLastTime._internal_firstTime,
+        };
+    }
+    return undefined;
+}
 var DataLayer = /** @class */ (function () {
     function DataLayer() {
         // note that _pointDataByTimePoint and _seriesRowsBySeries shares THE SAME objects in their values between each other
@@ -10035,7 +10793,7 @@ var DataLayer = /** @class */ (function () {
         this._private__pointDataByTimePoint = new Map();
         this._private__seriesRowsBySeries = new Map();
         this._private__seriesLastTimePoint = new Map();
-        // this is kind of "dest" values (in opposite to "source" ones) - we don't need to modify it manually, the only by calling _syncIndexesAndApplyChanges method
+        // this is kind of "dest" values (in opposite to "source" ones) - we don't need to modify it manually, the only by calling _updateTimeScalePoints or updateSeriesData methods
         this._private__sortedTimePoints = [];
     }
     DataLayer.prototype._internal_destroy = function () {
@@ -10046,10 +10804,27 @@ var DataLayer = /** @class */ (function () {
     };
     DataLayer.prototype._internal_setSeriesData = function (series, data) {
         var _this = this;
-        // first, remove the series from data mappings if we have any data for that series
-        // note we can't use _seriesRowsBySeries here because we might don't have the data there in case of whitespaces
-        if (this._private__seriesLastTimePoint.has(series)) {
-            this._private__pointDataByTimePoint.forEach(function (pointData) { return pointData._internal_mapping.delete(series); });
+        var needCleanupPoints = this._private__pointDataByTimePoint.size !== 0;
+        var isTimeScaleAffected = false;
+        // save previous series rows data before it's replaced inside this._setRowsToSeries
+        var prevSeriesRows = this._private__seriesRowsBySeries.get(series);
+        if (prevSeriesRows !== undefined) {
+            if (this._private__seriesRowsBySeries.size === 1) {
+                needCleanupPoints = false;
+                isTimeScaleAffected = true;
+                // perf optimization - if there is only 1 series, then we can just clear and fill everything from scratch
+                this._private__pointDataByTimePoint.clear();
+            }
+            else {
+                // perf optimization - actually we have to use this._pointDataByTimePoint for going through here
+                // but as soon as this._sortedTimePoints is just a different form of _pointDataByTimePoint we can use it as well
+                for (var _i = 0, _a = this._private__sortedTimePoints; _i < _a.length; _i++) {
+                    var point = _a[_i];
+                    if (point.pointData._internal_mapping.delete(series)) {
+                        isTimeScaleAffected = true;
+                    }
+                }
+            }
         }
         var seriesRows = [];
         if (data.length !== 0) {
@@ -10063,17 +10838,31 @@ var DataLayer = /** @class */ (function () {
                     // the indexes will be sync later
                     timePointData = createEmptyTimePointData(time);
                     _this._private__pointDataByTimePoint.set(time.timestamp, timePointData);
+                    isTimeScaleAffected = true;
                 }
                 var row = createPlotRow_1(time, timePointData._internal_index, item);
                 timePointData._internal_mapping.set(series, row);
                 return row;
             });
         }
-        // we delete the old data from mapping and add the new ones
-        // so there might be empty points, let's remove them first
-        this._private__cleanupPointsData();
+        if (needCleanupPoints) {
+            // we deleted the old data from mapping and added the new ones
+            // so there might be empty points now, let's remove them first
+            this._private__cleanupPointsData();
+        }
         this._private__setRowsToSeries(series, seriesRows);
-        return this._private__syncIndexesAndApplyChanges(series);
+        var firstChangedPointIndex = -1;
+        if (isTimeScaleAffected) {
+            // then generate the time scale points
+            // timeWeight will be updates in _updateTimeScalePoints later
+            var newTimeScalePoints_1 = [];
+            this._private__pointDataByTimePoint.forEach(function (pointData) {
+                newTimeScalePoints_1.push({ timeWeight: 0, time: pointData._internal_timePoint, pointData: pointData });
+            });
+            newTimeScalePoints_1.sort(function (t1, t2) { return t1.time.timestamp - t2.time.timestamp; });
+            firstChangedPointIndex = this._private__replaceTimeScalePoints(newTimeScalePoints_1);
+        }
+        return this._private__getUpdateResponse(series, firstChangedPointIndex, seriesUpdateInfo(this._private__seriesRowsBySeries.get(series), prevSeriesRows));
     };
     DataLayer.prototype._internal_removeSeries = function (series) {
         return this._internal_setSeriesData(series, []);
@@ -10097,23 +10886,23 @@ var DataLayer = /** @class */ (function () {
         var createPlotRow = getSeriesPlotRowCreator(series.seriesType());
         var plotRow = createPlotRow(time, pointDataAtTime._internal_index, data);
         pointDataAtTime._internal_mapping.set(series, plotRow);
-        var seriesChanges = this._private__updateLastSeriesRow(series, plotRow);
+        this._private__updateLastSeriesRow(series, plotRow);
+        var info = { lastBarUpdatedOrNewBarsAddedToTheRight: isSeriesPlotRow(plotRow) };
         // if point already exist on the time scale - we don't need to make a full update and just make an incremental one
         if (!affectsTimeScale) {
-            var seriesUpdate = new Map();
-            if (seriesChanges !== null) {
-                seriesUpdate.set(series, seriesChanges);
-            }
-            return {
-                _internal_series: seriesUpdate,
-                _internal_timeScale: {
-                    // base index might be updated even if no time scale point is changed
-                    _internal_baseIndex: this._private__getBaseIndex(),
-                },
-            };
+            return this._private__getUpdateResponse(series, -1, info);
         }
-        // but if we don't have such point on the time scale - we need to generate "full" update (including time scale update)
-        return this._private__syncIndexesAndApplyChanges(series);
+        var newPoint = { timeWeight: 0, time: pointDataAtTime._internal_timePoint, pointData: pointDataAtTime };
+        var insertIndex = lowerbound(this._private__sortedTimePoints, newPoint.time.timestamp, function (a, b) { return a.time.timestamp < b; });
+        // yes, I know that this array is readonly and this change is intended to make it performative
+        // we marked _sortedTimePoints array as readonly to avoid modifying this array anywhere else
+        // but this place is exceptional case due performance reasons, sorry
+        this._private__sortedTimePoints.splice(insertIndex, 0, newPoint);
+        for (var index = insertIndex; index < this._private__sortedTimePoints.length; ++index) {
+            assignIndexToPointData(this._private__sortedTimePoints[index].pointData, index);
+        }
+        fillWeightsForPoints(this._private__sortedTimePoints, insertIndex);
+        return this._private__getUpdateResponse(series, insertIndex, info);
     };
     DataLayer.prototype._private__updateLastSeriesRow = function (series, plotRow) {
         var seriesData = this._private__seriesRowsBySeries.get(series);
@@ -10122,35 +10911,20 @@ var DataLayer = /** @class */ (function () {
             this._private__seriesRowsBySeries.set(series, seriesData);
         }
         var lastSeriesRow = seriesData.length !== 0 ? seriesData[seriesData.length - 1] : null;
-        var result = null;
         if (lastSeriesRow === null || plotRow.time.timestamp > lastSeriesRow.time.timestamp) {
             if (isSeriesPlotRow(plotRow)) {
                 seriesData.push(plotRow);
-                result = {
-                    _internal_fullUpdate: false,
-                    _internal_data: [plotRow],
-                };
             }
         }
         else {
             if (isSeriesPlotRow(plotRow)) {
                 seriesData[seriesData.length - 1] = plotRow;
-                result = {
-                    _internal_fullUpdate: false,
-                    _internal_data: [plotRow],
-                };
             }
             else {
                 seriesData.splice(-1, 1);
-                // we just removed point from series - needs generate full update
-                result = {
-                    _internal_fullUpdate: true,
-                    _internal_data: seriesData,
-                };
             }
         }
         this._private__seriesLastTimePoint.set(series, plotRow.time);
-        return result;
     };
     DataLayer.prototype._private__setRowsToSeries = function (series, seriesRows) {
         if (seriesRows.length !== 0) {
@@ -10163,23 +10937,23 @@ var DataLayer = /** @class */ (function () {
         }
     };
     DataLayer.prototype._private__cleanupPointsData = function () {
-        // create a copy remove from points items without series
-        // _pointDataByTimePoint is kind of "inbound" (or "source") value
-        // which should be used to update other dest values like _sortedTimePoints
-        var newPointsData = new Map();
-        this._private__pointDataByTimePoint.forEach(function (pointData, key) {
-            if (pointData._internal_mapping.size > 0) {
-                newPointsData.set(key, pointData);
+        // let's treat all current points as "potentially removed"
+        // we could create an array with actually potentially removed points
+        // but most likely this array will be similar to _sortedTimePoints so let's avoid using additional memory
+        // note that we can use _sortedTimePoints here since a point might be removed only it was here previously
+        for (var _i = 0, _a = this._private__sortedTimePoints; _i < _a.length; _i++) {
+            var point = _a[_i];
+            if (point.pointData._internal_mapping.size === 0) {
+                this._private__pointDataByTimePoint.delete(point.time.timestamp);
             }
-        });
-        this._private__pointDataByTimePoint = newPointsData;
+        }
     };
     /**
      * Sets new time scale and make indexes valid for all series
      *
-     * @returns An index of the first changed point
+     * @returns The index of the first changed point or `-1` if there is no change.
      */
-    DataLayer.prototype._private__updateTimeScalePoints = function (newTimePoints) {
+    DataLayer.prototype._private__replaceTimeScalePoints = function (newTimePoints) {
         var firstChangedPointIndex = -1;
         // search the first different point and "syncing" time weight by the way
         for (var index = 0; index < this._private__sortedTimePoints.length && index < newTimePoints.length; ++index) {
@@ -10191,6 +10965,7 @@ var DataLayer = /** @class */ (function () {
             }
             // re-assign point's time weight for points if time is the same (and all prior times was the same)
             newPoint.timeWeight = oldPoint.timeWeight;
+            assignIndexToPointData(newPoint.pointData, index);
         }
         if (firstChangedPointIndex === -1 && this._private__sortedTimePoints.length !== newTimePoints.length) {
             // the common part of the prev and the new points are the same
@@ -10201,20 +10976,10 @@ var DataLayer = /** @class */ (function () {
             // if no time scale changed, then do nothing
             return -1;
         }
-        var _loop_1 = function (index) {
-            var pointData = ensureDefined(this_1._private__pointDataByTimePoint.get(newTimePoints[index].time.timestamp));
-            // first, nevertheless update index of point data ("make it valid")
-            pointData._internal_index = index;
-            // and then we need to sync indexes for all series
-            pointData._internal_mapping.forEach(function (seriesRow) {
-                seriesRow.index = index;
-            });
-        };
-        var this_1 = this;
         // if time scale points are changed that means that we need to make full update to all series (with clearing points)
         // but first we need to synchronize indexes and re-fill time weights
         for (var index = firstChangedPointIndex; index < newTimePoints.length; ++index) {
-            _loop_1(index);
+            assignIndexToPointData(newTimePoints[index].pointData, index);
         }
         // re-fill time weights for point after the first changed one
         fillWeightsForPoints(newTimePoints, firstChangedPointIndex);
@@ -10234,16 +10999,7 @@ var DataLayer = /** @class */ (function () {
         });
         return baseIndex;
     };
-    /**
-     * Methods syncs indexes (recalculates them applies them to point/series data) between time scale, point data and series point
-     * and returns generated update for applied change.
-     */
-    DataLayer.prototype._private__syncIndexesAndApplyChanges = function (series) {
-        // then generate the time scale points
-        // timeWeight will be updates in _updateTimeScalePoints later
-        var newTimeScalePoints = Array.from(this._private__pointDataByTimePoint.values()).map(function (d) { return ({ timeWeight: 0, time: d._internal_timePoint }); });
-        newTimeScalePoints.sort(function (t1, t2) { return t1.time.timestamp - t2.time.timestamp; });
-        var firstChangedPointIndex = this._private__updateTimeScalePoints(newTimeScalePoints);
+    DataLayer.prototype._private__getUpdateResponse = function (updatedSeries, firstChangedPointIndex, info) {
         var dataUpdateResponse = {
             _internal_series: new Map(),
             _internal_timeScale: {
@@ -10251,29 +11007,40 @@ var DataLayer = /** @class */ (function () {
             },
         };
         if (firstChangedPointIndex !== -1) {
-            // time scale is changed, so we need to make "full" update for every series
             // TODO: it's possible to make perf improvements by checking what series has data after firstChangedPointIndex
             // but let's skip for now
             this._private__seriesRowsBySeries.forEach(function (data, s) {
-                dataUpdateResponse._internal_series.set(s, { _internal_data: data, _internal_fullUpdate: true });
+                dataUpdateResponse._internal_series.set(s, {
+                    _internal_data: data,
+                    _internal_info: s === updatedSeries ? info : undefined,
+                });
             });
-            // if the seires data was set to [] it will have already been removed from _seriesRowBySeries
+            // if the series data was set to [] it will have already been removed from _seriesRowBySeries
             // meaning the forEach above won't add the series to the data update response
             // so we handle that case here
-            if (!this._private__seriesRowsBySeries.has(series)) {
-                dataUpdateResponse._internal_series.set(series, { _internal_data: [], _internal_fullUpdate: true });
+            if (!this._private__seriesRowsBySeries.has(updatedSeries)) {
+                dataUpdateResponse._internal_series.set(updatedSeries, { _internal_data: [], _internal_info: info });
             }
             dataUpdateResponse._internal_timeScale._internal_points = this._private__sortedTimePoints;
+            dataUpdateResponse._internal_timeScale._internal_firstChangedPointIndex = firstChangedPointIndex;
         }
         else {
-            var seriesData = this._private__seriesRowsBySeries.get(series);
+            var seriesData = this._private__seriesRowsBySeries.get(updatedSeries);
             // if no seriesData found that means that we just removed the series
-            dataUpdateResponse._internal_series.set(series, { _internal_data: seriesData || [], _internal_fullUpdate: true });
+            dataUpdateResponse._internal_series.set(updatedSeries, { _internal_data: seriesData || [], _internal_info: info });
         }
         return dataUpdateResponse;
     };
     return DataLayer;
 }());
+function assignIndexToPointData(pointData, index) {
+    // first, nevertheless update index of point data ("make it valid")
+    pointData._internal_index = index;
+    // and then we need to sync indexes for all series
+    pointData._internal_mapping.forEach(function (seriesRow) {
+        seriesRow.index = index;
+    });
+}
 
 function checkPriceLineOptions(options) {
     // eslint-disable-next-line @typescript-eslint/tslint/config
@@ -10301,11 +11068,10 @@ function getChecker(type) {
         case 'Candlestick':
             return checkBarItem.bind(null, type);
         case 'Area':
+        case 'Baseline':
         case 'Line':
         case 'Histogram':
             return checkLineItem.bind(null, type);
-        default:
-            throw new Error("unsupported series type " + type);
     }
 }
 function checkBarItem(type, barItem) {
@@ -10515,7 +11281,10 @@ var gridOptionsDefaults = {
 };
 
 var layoutOptionsDefaults = {
-    backgroundColor: '#FFFFFF',
+    background: {
+        type: "solid" /* Solid */,
+        color: '#FFFFFF',
+    },
     textColor: '#191919',
     fontSize: 11,
     fontFamily: defaultFontFamily,
@@ -10595,6 +11364,10 @@ var chartOptionsDefaults = {
         mouseWheel: true,
         pinch: true,
     },
+    kineticScroll: {
+        mouse: false,
+        touch: true,
+    },
 };
 
 var candlestickStyleDefaults = {
@@ -10624,6 +11397,7 @@ var lineStyleDefaults = {
     crosshairMarkerRadius: 4,
     crosshairMarkerBorderColor: '',
     crosshairMarkerBackgroundColor: '',
+    lastPriceAnimation: 0 /* Disabled */,
 };
 var areaStyleDefaults = {
     topColor: 'rgba( 46, 220, 135, 0.4)',
@@ -10636,6 +11410,26 @@ var areaStyleDefaults = {
     crosshairMarkerRadius: 4,
     crosshairMarkerBorderColor: '',
     crosshairMarkerBackgroundColor: '',
+    lastPriceAnimation: 0 /* Disabled */,
+};
+var baselineStyleDefaults = {
+    baseValue: {
+        type: 'price',
+        price: 0,
+    },
+    topFillColor1: 'rgba(38, 166, 154, 0.28)',
+    topFillColor2: 'rgba(38, 166, 154, 0.05)',
+    topLineColor: 'rgba(38, 166, 154, 1)',
+    bottomFillColor1: 'rgba(239, 83, 80, 0.05)',
+    bottomFillColor2: 'rgba(239, 83, 80, 0.28)',
+    bottomLineColor: 'rgba(239, 83, 80, 1)',
+    lineWidth: 3,
+    lineStyle: 0 /* Solid */,
+    crosshairMarkerVisible: true,
+    crosshairMarkerRadius: 4,
+    crosshairMarkerBorderColor: '',
+    crosshairMarkerBackgroundColor: '',
+    lastPriceAnimation: 0 /* Disabled */,
 };
 var histogramStyleDefaults = {
     color: '#26a69a',
@@ -10689,34 +11483,41 @@ var PriceScaleApi = /** @class */ (function () {
 }());
 
 var TimeScaleApi = /** @class */ (function () {
-    function TimeScaleApi(model) {
+    function TimeScaleApi(model, timeAxisWidget) {
         this._private__timeRangeChanged = new Delegate();
         this._private__logicalRangeChanged = new Delegate();
+        this._private__sizeChanged = new Delegate();
         this._private__model = model;
-        this._private__timeScale().visibleBarsChanged().subscribe(this._private__onVisibleBarsChanged.bind(this));
-        this._private__timeScale().logicalRangeChanged().subscribe(this._private__onVisibleLogicalRangeChanged.bind(this));
+        this._private__timeScale = model.timeScale();
+        this._private__timeAxisWidget = timeAxisWidget;
+        this._private__timeScale.visibleBarsChanged().subscribe(this._private__onVisibleBarsChanged.bind(this));
+        this._private__timeScale.logicalRangeChanged().subscribe(this._private__onVisibleLogicalRangeChanged.bind(this));
+        this._private__timeAxisWidget._internal_sizeChanged().subscribe(this._private__onSizeChanged.bind(this));
     }
     TimeScaleApi.prototype.destroy = function () {
-        this._private__timeScale().visibleBarsChanged().unsubscribeAll(this);
-        this._private__timeScale().logicalRangeChanged().unsubscribeAll(this);
+        this._private__timeScale.visibleBarsChanged().unsubscribeAll(this);
+        this._private__timeScale.logicalRangeChanged().unsubscribeAll(this);
+        this._private__timeAxisWidget._internal_sizeChanged().unsubscribeAll(this);
         this._private__timeRangeChanged._internal_destroy();
+        this._private__logicalRangeChanged._internal_destroy();
+        this._private__sizeChanged._internal_destroy();
     };
     TimeScaleApi.prototype.scrollPosition = function () {
-        return this._private__timeScale().rightOffset();
+        return this._private__timeScale.rightOffset();
     };
     TimeScaleApi.prototype.scrollToPosition = function (position, animated) {
         if (!animated) {
             this._private__model.setRightOffset(position);
             return;
         }
-        this._private__timeScale().scrollToOffsetAnimated(position, 1000 /* AnimationDurationMs */);
+        this._private__timeScale.scrollToOffsetAnimated(position, 1000 /* AnimationDurationMs */);
     };
     TimeScaleApi.prototype.scrollToRealTime = function () {
-        this._private__timeScale().scrollToRealTime();
+        this._private__timeScale.scrollToRealTime();
     };
     TimeScaleApi.prototype.getVisibleRange = function () {
         var _a, _b;
-        var timeRange = this._private__timeScale().visibleTimeRange();
+        var timeRange = this._private__timeScale.visibleTimeRange();
         if (timeRange === null) {
             return null;
         }
@@ -10730,11 +11531,11 @@ var TimeScaleApi = /** @class */ (function () {
             from: convertTime(range.from),
             to: convertTime(range.to),
         };
-        var logicalRange = this._private__timeScale().logicalRangeForTimeRange(convertedRange);
+        var logicalRange = this._private__timeScale.logicalRangeForTimeRange(convertedRange);
         this._private__model.setTargetLogicalRange(logicalRange);
     };
     TimeScaleApi.prototype.getVisibleLogicalRange = function () {
-        var logicalRange = this._private__timeScale().visibleLogicalRange();
+        var logicalRange = this._private__timeScale.visibleLogicalRange();
         if (logicalRange === null) {
             return null;
         }
@@ -10763,22 +11564,20 @@ var TimeScaleApi = /** @class */ (function () {
         }
     };
     TimeScaleApi.prototype.coordinateToLogical = function (x) {
-        var timeScale = this._private__model.timeScale();
-        if (timeScale.isEmpty()) {
+        if (this._private__timeScale.isEmpty()) {
             return null;
         }
         else {
-            return timeScale.coordinateToIndex(x);
+            return this._private__timeScale.coordinateToIndex(x);
         }
     };
     TimeScaleApi.prototype.timeToCoordinate = function (time) {
         var timePoint = convertTime(time);
-        var timeScale = this._private__model.timeScale();
-        var timePointIndex = timeScale.timeToIndex(timePoint, false);
+        var timePointIndex = this._private__timeScale.timeToIndex(timePoint, false);
         if (timePointIndex === null) {
             return null;
         }
-        return timeScale.indexToCoordinate(timePointIndex);
+        return this._private__timeScale.indexToCoordinate(timePointIndex);
     };
     TimeScaleApi.prototype.coordinateToTime = function (x) {
         var _a;
@@ -10789,6 +11588,12 @@ var TimeScaleApi = /** @class */ (function () {
             return null;
         }
         return (_a = timePoint.businessDay) !== null && _a !== void 0 ? _a : timePoint.timestamp;
+    };
+    TimeScaleApi.prototype.width = function () {
+        return this._private__timeAxisWidget._internal_getSize()._internal_w;
+    };
+    TimeScaleApi.prototype.height = function () {
+        return this._private__timeAxisWidget._internal_getSize()._internal_h;
     };
     TimeScaleApi.prototype.subscribeVisibleTimeRangeChange = function (handler) {
         this._private__timeRangeChanged.subscribe(handler);
@@ -10802,14 +11607,17 @@ var TimeScaleApi = /** @class */ (function () {
     TimeScaleApi.prototype.unsubscribeVisibleLogicalRangeChange = function (handler) {
         this._private__logicalRangeChanged.unsubscribe(handler);
     };
+    TimeScaleApi.prototype.subscribeSizeChange = function (handler) {
+        this._private__sizeChanged.subscribe(handler);
+    };
+    TimeScaleApi.prototype.unsubscribeSizeChange = function (handler) {
+        this._private__sizeChanged.unsubscribe(handler);
+    };
     TimeScaleApi.prototype.applyOptions = function (options) {
-        this._private__timeScale().applyOptions(options);
+        this._private__timeScale.applyOptions(options);
     };
     TimeScaleApi.prototype.options = function () {
-        return clone(this._private__timeScale().options());
-    };
-    TimeScaleApi.prototype._private__timeScale = function () {
-        return this._private__model.timeScale();
+        return clone(this._private__timeScale.options());
     };
     TimeScaleApi.prototype._private__onVisibleBarsChanged = function () {
         if (this._private__timeRangeChanged._internal_hasListeners()) {
@@ -10820,6 +11628,9 @@ var TimeScaleApi = /** @class */ (function () {
         if (this._private__logicalRangeChanged._internal_hasListeners()) {
             this._private__logicalRangeChanged._internal_fire(this.getVisibleLogicalRange());
         }
+    };
+    TimeScaleApi.prototype._private__onSizeChanged = function (size) {
+        this._private__sizeChanged._internal_fire(size._internal_w, size._internal_h);
     };
     return TimeScaleApi;
 }());
@@ -10897,9 +11708,20 @@ function migratePriceScaleOptions(options) {
     }
     /* eslint-enable deprecation/deprecation */
 }
+function migrateLayoutOptions(options) {
+    /* eslint-disable deprecation/deprecation */
+    if (!options.layout) {
+        return;
+    }
+    if (options.layout.backgroundColor && !options.layout.background) {
+        options.layout.background = { type: "solid" /* Solid */, color: options.layout.backgroundColor };
+    }
+    /* eslint-enable deprecation/deprecation */
+}
 function toInternalOptions(options) {
     migrateHandleScaleScrollOptions(options);
     migratePriceScaleOptions(options);
+    migrateLayoutOptions(options);
     return options;
 }
 var ChartApi = /** @class */ (function () {
@@ -10931,7 +11753,7 @@ var ChartApi = /** @class */ (function () {
             }
         }, this);
         var model = this._private__chartWidget._internal_model();
-        this._private__timeScaleApi = new TimeScaleApi(model);
+        this._private__timeScaleApi = new TimeScaleApi(model, this._private__chartWidget._internal_timeAxisWidget());
     }
     ChartApi.prototype.remove = function () {
         this._private__chartWidget._internal_clicked().unsubscribeAll(this);
@@ -10955,6 +11777,18 @@ var ChartApi = /** @class */ (function () {
         patchPriceFormat(options.priceFormat);
         var strictOptions = merge(clone(seriesOptionsDefaults), areaStyleDefaults, options);
         var series = this._private__chartWidget._internal_model().createSeries('Area', strictOptions);
+        var res = new SeriesApi(series, this, this);
+        this._private__seriesMap.set(res, series);
+        this._private__seriesMapReversed.set(series, res);
+        return res;
+    };
+    ChartApi.prototype.addBaselineSeries = function (options) {
+        if (options === void 0) { options = {}; }
+        options = migrateOptions(options);
+        patchPriceFormat(options.priceFormat);
+        // to avoid assigning fields to defaults we have to clone them
+        var strictOptions = merge(clone(seriesOptionsDefaults), clone(baselineStyleDefaults), options);
+        var series = this._private__chartWidget._internal_model().createSeries('Baseline', strictOptions);
         var res = new SeriesApi(series, this, this);
         this._private__seriesMap.set(res, series);
         this._private__seriesMapReversed.set(series, res);
@@ -11069,8 +11903,8 @@ var ChartApi = /** @class */ (function () {
     };
     ChartApi.prototype._private__sendUpdateToChart = function (update) {
         var model = this._private__chartWidget._internal_model();
-        model.updateTimeScale(update._internal_timeScale._internal_baseIndex, update._internal_timeScale._internal_points);
-        update._internal_series.forEach(function (value, series) { return series.updateData(value._internal_data, value._internal_fullUpdate); });
+        model.updateTimeScale(update._internal_timeScale._internal_baseIndex, update._internal_timeScale._internal_points, update._internal_timeScale._internal_firstChangedPointIndex);
+        update._internal_series.forEach(function (value, series) { return series.setData(value._internal_data, value._internal_info); });
         model.recalculateAllPanes();
     };
     ChartApi.prototype._private__mapSeriesToApi = function (series) {
@@ -11101,11 +11935,11 @@ var ChartApi = /** @class */ (function () {
 }());
 
 /**
- * This function is the main entry point of the Lightweight Charting Library
+ * This function is the main entry point of the Lightweight Charting Library.
  *
- * @param container - id of HTML element or element itself
- * @param options - any subset of ChartOptions to be applied at start.
- * @returns an interface to the created chart
+ * @param container - ID of HTML element or element itself
+ * @param options - Any subset of options to be applied at start.
+ * @returns An interface to the created chart
  */
 function createChart(container, options) {
     var htmlElement;
@@ -11121,8 +11955,11 @@ function createChart(container, options) {
 }
 
 /// <reference types="_build-time-constants" />
+/**
+ * Returns the current version as a string. For example `'3.3.0'`.
+ */
 function version() {
-    return "3.5.0-dev+202108020110";
+    return "3.8.0-dev+202112190350";
 }
 
-export { CrosshairMode, LineStyle, LineType, PriceFormatter, PriceLineSource, PriceScaleMode, TickMarkType, createChart, isBusinessDay, isUTCTimestamp, version };
+export { ColorType, CrosshairMode, LastPriceAnimationMode as LasPriceAnimationMode, LastPriceAnimationMode, LineStyle, LineType, PriceFormatter, PriceLineSource, PriceScaleMode, TickMarkType, createChart, isBusinessDay, isUTCTimestamp, version };
