@@ -1,6 +1,6 @@
 /*!
  * @license
- * TradingView Lightweight Charts v3.8.0-dev+202112190350
+ * TradingView Lightweight Charts v3.8.0-dev+202202041418
  * Copyright (c) 2020 TradingView, Inc.
  * Licensed under Apache License 2.0 https://www.apache.org/licenses/LICENSE-2.0
  */
@@ -82,66 +82,6 @@ function strokeInPixel(ctx, drawFunction) {
     ctx.restore();
 }
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-    return extendStatics(d, b);
-};
-
-function __extends(d, b) {
-    if (typeof b !== "function" && b !== null)
-        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-var __assign = function() {
-    __assign = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-
-function __rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-}
-
-function __spreadArray(to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
-}
-
 /**
  * Checks an assertion. Throws if the assertion is failed.
  *
@@ -172,324 +112,6 @@ function ensure(value) {
  * Compile time check for never
  */
 function ensureNever(value) { }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function merge(dst) {
-    var sources = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        sources[_i - 1] = arguments[_i];
-    }
-    for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
-        var src = sources_1[_a];
-        // eslint-disable-next-line no-restricted-syntax
-        for (var i in src) {
-            if (src[i] === undefined) {
-                continue;
-            }
-            if ('object' !== typeof src[i] || dst[i] === undefined) {
-                dst[i] = src[i];
-            }
-            else {
-                merge(dst[i], src[i]);
-            }
-        }
-    }
-    return dst;
-}
-function isNumber(value) {
-    return (typeof value === 'number') && (isFinite(value));
-}
-function isInteger(value) {
-    return (typeof value === 'number') && ((value % 1) === 0);
-}
-function isString(value) {
-    return typeof value === 'string';
-}
-function isBoolean(value) {
-    return typeof value === 'boolean';
-}
-function clone(object) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    var o = object;
-    if (!o || 'object' !== typeof o) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return o;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    var c;
-    if (Array.isArray(o)) {
-        c = [];
-    }
-    else {
-        c = {};
-    }
-    var p;
-    var v;
-    // eslint-disable-next-line no-restricted-syntax
-    for (p in o) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,no-prototype-builtins
-        if (o.hasOwnProperty(p)) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            v = o[p];
-            if (v && 'object' === typeof v) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                c[p] = clone(v);
-            }
-            else {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                c[p] = v;
-            }
-        }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return c;
-}
-function notNull(t) {
-    return t !== null;
-}
-function undefinedIfNull(t) {
-    return (t === null) ? undefined : t;
-}
-
-var CompositeRenderer = /** @class */ (function () {
-    function CompositeRenderer() {
-        this._private__renderers = [];
-    }
-    CompositeRenderer.prototype._internal_setRenderers = function (renderers) {
-        this._private__renderers = renderers;
-    };
-    CompositeRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
-        this._private__renderers.forEach(function (r) {
-            ctx.save();
-            r.draw(ctx, pixelRatio, isHovered, hitTestData);
-            ctx.restore();
-        });
-    };
-    return CompositeRenderer;
-}());
-
-var ScaledRenderer = /** @class */ (function () {
-    function ScaledRenderer() {
-    }
-    ScaledRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
-        ctx.save();
-        // actually we must be sure that this scaling applied only once at the same time
-        // currently ScaledRenderer could be only nodes renderer (not top-level renderers like CompositeRenderer or something)
-        // so this "constraint" is fulfilled for now
-        ctx.scale(pixelRatio, pixelRatio);
-        this._internal__drawImpl(ctx, isHovered, hitTestData);
-        ctx.restore();
-    };
-    ScaledRenderer.prototype.drawBackground = function (ctx, pixelRatio, isHovered, hitTestData) {
-        ctx.save();
-        // actually we must be sure that this scaling applied only once at the same time
-        // currently ScaledRenderer could be only nodes renderer (not top-level renderers like CompositeRenderer or something)
-        // so this "constraint" is fulfilled for now
-        ctx.scale(pixelRatio, pixelRatio);
-        this._internal__drawBackgroundImpl(ctx, isHovered, hitTestData);
-        ctx.restore();
-    };
-    ScaledRenderer.prototype._internal__drawBackgroundImpl = function (ctx, isHovered, hitTestData) { };
-    return ScaledRenderer;
-}());
-
-var PaneRendererMarks = /** @class */ (function (_super) {
-    __extends(PaneRendererMarks, _super);
-    function PaneRendererMarks() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this._internal__data = null;
-        return _this;
-    }
-    PaneRendererMarks.prototype._internal_setData = function (data) {
-        this._internal__data = data;
-    };
-    PaneRendererMarks.prototype._internal__drawImpl = function (ctx) {
-        if (this._internal__data === null || this._internal__data._internal_visibleRange === null) {
-            return;
-        }
-        var visibleRange = this._internal__data._internal_visibleRange;
-        var data = this._internal__data;
-        var draw = function (radius) {
-            ctx.beginPath();
-            for (var i = visibleRange.to - 1; i >= visibleRange.from; --i) {
-                var point = data._internal_items[i];
-                ctx.moveTo(point.x, point.y);
-                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-            }
-            ctx.fill();
-        };
-        ctx.fillStyle = data._internal_backColor;
-        draw(data._internal_radius + 2);
-        ctx.fillStyle = data._internal_lineColor;
-        draw(data._internal_radius);
-    };
-    return PaneRendererMarks;
-}(ScaledRenderer));
-
-function createEmptyMarkerData() {
-    return {
-        _internal_items: [{
-                x: 0,
-                y: 0,
-                time: 0,
-                price: 0,
-            }],
-        _internal_lineColor: '',
-        _internal_backColor: '',
-        _internal_radius: 0,
-        _internal_visibleRange: null,
-    };
-}
-var rangeForSinglePoint = { from: 0, to: 1 };
-var CrosshairMarksPaneView = /** @class */ (function () {
-    function CrosshairMarksPaneView(chartModel, crosshair) {
-        this._private__compositeRenderer = new CompositeRenderer();
-        this._private__markersRenderers = [];
-        this._private__markersData = [];
-        this._private__invalidated = true;
-        this._private__chartModel = chartModel;
-        this._private__crosshair = crosshair;
-        this._private__compositeRenderer._internal_setRenderers(this._private__markersRenderers);
-    }
-    CrosshairMarksPaneView.prototype.update = function (updateType) {
-        var serieses = this._private__chartModel.serieses();
-        if (serieses.length !== this._private__markersRenderers.length) {
-            this._private__markersData = serieses.map(createEmptyMarkerData);
-            this._private__markersRenderers = this._private__markersData.map(function (data) {
-                var res = new PaneRendererMarks();
-                res._internal_setData(data);
-                return res;
-            });
-            this._private__compositeRenderer._internal_setRenderers(this._private__markersRenderers);
-        }
-        this._private__invalidated = true;
-    };
-    CrosshairMarksPaneView.prototype.renderer = function (height, width, addAnchors) {
-        if (this._private__invalidated) {
-            this._private__updateImpl(height);
-            this._private__invalidated = false;
-        }
-        return this._private__compositeRenderer;
-    };
-    CrosshairMarksPaneView.prototype._private__updateImpl = function (height) {
-        var _this = this;
-        var serieses = this._private__chartModel.serieses();
-        var timePointIndex = this._private__crosshair.appliedIndex();
-        var timeScale = this._private__chartModel.timeScale();
-        serieses.forEach(function (s, index) {
-            var _a;
-            var data = _this._private__markersData[index];
-            var seriesData = s.markerDataAtIndex(timePointIndex);
-            if (seriesData === null || !s.visible()) {
-                data._internal_visibleRange = null;
-                return;
-            }
-            var firstValue = ensureNotNull(s.firstValue());
-            data._internal_lineColor = seriesData.backgroundColor;
-            data._internal_radius = seriesData.radius;
-            data._internal_items[0].price = seriesData.price;
-            data._internal_items[0].y = s.priceScale().priceToCoordinate(seriesData.price, firstValue.value);
-            data._internal_backColor = (_a = seriesData.borderColor) !== null && _a !== void 0 ? _a : _this._private__chartModel.backgroundColorAtYPercentFromTop(data._internal_items[0].y / height);
-            data._internal_items[0].time = timePointIndex;
-            data._internal_items[0].x = timeScale.indexToCoordinate(timePointIndex);
-            data._internal_visibleRange = rangeForSinglePoint;
-        });
-    };
-    return CrosshairMarksPaneView;
-}());
-
-var CrosshairRenderer = /** @class */ (function () {
-    function CrosshairRenderer(data) {
-        this._private__data = data;
-    }
-    CrosshairRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
-        if (this._private__data === null) {
-            return;
-        }
-        var vertLinesVisible = this._private__data._internal_vertLine._internal_visible;
-        var horzLinesVisible = this._private__data._internal_horzLine._internal_visible;
-        if (!vertLinesVisible && !horzLinesVisible) {
-            return;
-        }
-        ctx.save();
-        var x = Math.round(this._private__data._internal_x * pixelRatio);
-        var y = Math.round(this._private__data._internal_y * pixelRatio);
-        var w = Math.ceil(this._private__data._internal_w * pixelRatio);
-        var h = Math.ceil(this._private__data._internal_h * pixelRatio);
-        ctx.lineCap = 'butt';
-        if (vertLinesVisible && x >= 0) {
-            ctx.lineWidth = Math.floor(this._private__data._internal_vertLine._internal_lineWidth * pixelRatio);
-            ctx.strokeStyle = this._private__data._internal_vertLine._internal_color;
-            ctx.fillStyle = this._private__data._internal_vertLine._internal_color;
-            setLineStyle(ctx, this._private__data._internal_vertLine._internal_lineStyle);
-            drawVerticalLine(ctx, x, 0, h);
-        }
-        if (horzLinesVisible && y >= 0) {
-            ctx.lineWidth = Math.floor(this._private__data._internal_horzLine._internal_lineWidth * pixelRatio);
-            ctx.strokeStyle = this._private__data._internal_horzLine._internal_color;
-            ctx.fillStyle = this._private__data._internal_horzLine._internal_color;
-            setLineStyle(ctx, this._private__data._internal_horzLine._internal_lineStyle);
-            drawHorizontalLine(ctx, y, 0, w);
-        }
-        ctx.restore();
-    };
-    return CrosshairRenderer;
-}());
-
-var CrosshairPaneView = /** @class */ (function () {
-    function CrosshairPaneView(source) {
-        this._private__invalidated = true;
-        this._private__rendererData = {
-            _internal_vertLine: {
-                _internal_lineWidth: 1,
-                _internal_lineStyle: 0,
-                _internal_color: '',
-                _internal_visible: false,
-            },
-            _internal_horzLine: {
-                _internal_lineWidth: 1,
-                _internal_lineStyle: 0,
-                _internal_color: '',
-                _internal_visible: false,
-            },
-            _internal_w: 0,
-            _internal_h: 0,
-            _internal_x: 0,
-            _internal_y: 0,
-        };
-        this._private__renderer = new CrosshairRenderer(this._private__rendererData);
-        this._private__source = source;
-    }
-    CrosshairPaneView.prototype._internal_update = function () {
-        this._private__invalidated = true;
-    };
-    CrosshairPaneView.prototype.renderer = function (height, width) {
-        if (this._private__invalidated) {
-            this._private__updateImpl();
-            this._private__invalidated = false;
-        }
-        return this._private__renderer;
-    };
-    CrosshairPaneView.prototype._private__updateImpl = function () {
-        var visible = this._private__source.visible();
-        var pane = ensureNotNull(this._private__source.pane());
-        var crosshairOptions = pane.model().options().crosshair;
-        var data = this._private__rendererData;
-        data._internal_horzLine._internal_visible = visible && this._private__source.horzLineVisible(pane);
-        data._internal_vertLine._internal_visible = visible && this._private__source.vertLineVisible();
-        data._internal_horzLine._internal_lineWidth = crosshairOptions.horzLine.width;
-        data._internal_horzLine._internal_lineStyle = crosshairOptions.horzLine.style;
-        data._internal_horzLine._internal_color = crosshairOptions.horzLine.color;
-        data._internal_vertLine._internal_lineWidth = crosshairOptions.vertLine.width;
-        data._internal_vertLine._internal_lineStyle = crosshairOptions.vertLine.style;
-        data._internal_vertLine._internal_color = crosshairOptions.vertLine.color;
-        data._internal_w = pane.width();
-        data._internal_h = pane.height();
-        data._internal_x = this._private__source.appliedX();
-        data._internal_y = this._private__source.appliedY();
-    };
-    return CrosshairPaneView;
-}());
 
 /**
  * Note this object should be explicitly marked as public so that dts-bundle-generator does not mangle the property names.
@@ -774,6 +396,498 @@ function gradientColorAtPercent(topColor, bottomColor, percent) {
     return "rgba(" + resultRgba[0] + ", " + resultRgba[1] + ", " + resultRgba[2] + ", " + resultRgba[3] + ")";
 }
 
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+    if (typeof b !== "function" && b !== null)
+        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+}
+
+function __spreadArray(to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+var Delegate = /** @class */ (function () {
+    function Delegate() {
+        this._private__listeners = [];
+    }
+    Delegate.prototype.subscribe = function (callback, linkedObject, singleshot) {
+        var listener = {
+            _internal_callback: callback,
+            _internal_linkedObject: linkedObject,
+            _internal_singleshot: singleshot === true,
+        };
+        this._private__listeners.push(listener);
+    };
+    Delegate.prototype.unsubscribe = function (callback) {
+        var index = this._private__listeners.findIndex(function (listener) { return callback === listener._internal_callback; });
+        if (index > -1) {
+            this._private__listeners.splice(index, 1);
+        }
+    };
+    Delegate.prototype.unsubscribeAll = function (linkedObject) {
+        this._private__listeners = this._private__listeners.filter(function (listener) { return listener._internal_linkedObject !== linkedObject; });
+    };
+    Delegate.prototype._internal_fire = function (param1, param2) {
+        var listenersSnapshot = __spreadArray([], this._private__listeners);
+        this._private__listeners = this._private__listeners.filter(function (listener) { return !listener._internal_singleshot; });
+        listenersSnapshot.forEach(function (listener) { return listener._internal_callback(param1, param2); });
+    };
+    Delegate.prototype._internal_hasListeners = function () {
+        return this._private__listeners.length > 0;
+    };
+    Delegate.prototype._internal_destroy = function () {
+        this._private__listeners = [];
+    };
+    return Delegate;
+}());
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function merge(dst) {
+    var sources = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        sources[_i - 1] = arguments[_i];
+    }
+    for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
+        var src = sources_1[_a];
+        // eslint-disable-next-line no-restricted-syntax
+        for (var i in src) {
+            if (src[i] === undefined) {
+                continue;
+            }
+            if ('object' !== typeof src[i] || dst[i] === undefined) {
+                dst[i] = src[i];
+            }
+            else {
+                merge(dst[i], src[i]);
+            }
+        }
+    }
+    return dst;
+}
+function isNumber(value) {
+    return (typeof value === 'number') && (isFinite(value));
+}
+function isInteger(value) {
+    return (typeof value === 'number') && ((value % 1) === 0);
+}
+function isString(value) {
+    return typeof value === 'string';
+}
+function isBoolean(value) {
+    return typeof value === 'boolean';
+}
+function clone(object) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    var o = object;
+    if (!o || 'object' !== typeof o) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return o;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    var c;
+    if (Array.isArray(o)) {
+        c = [];
+    }
+    else {
+        c = {};
+    }
+    var p;
+    var v;
+    // eslint-disable-next-line no-restricted-syntax
+    for (p in o) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,no-prototype-builtins
+        if (o.hasOwnProperty(p)) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            v = o[p];
+            if (v && 'object' === typeof v) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                c[p] = clone(v);
+            }
+            else {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                c[p] = v;
+            }
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return c;
+}
+function notNull(t) {
+    return t !== null;
+}
+function undefinedIfNull(t) {
+    return (t === null) ? undefined : t;
+}
+
+/**
+ * Default font family.
+ * Must be used to generate font string when font is not specified.
+ */
+var defaultFontFamily = "'Trebuchet MS', Roboto, Ubuntu, sans-serif";
+/**
+ * Generates a font string, which can be used to set in canvas' font property.
+ * If no family provided, {@link defaultFontFamily} will be used.
+ *
+ * @param size - Font size in pixels.
+ * @param family - Optional font family.
+ * @param style - Optional font style.
+ * @returns The font string.
+ */
+function makeFont(size, family, style) {
+    if (style !== undefined) {
+        style = style + " ";
+    }
+    else {
+        style = '';
+    }
+    if (family === undefined) {
+        family = defaultFontFamily;
+    }
+    return "" + style + size + "px " + family;
+}
+
+var PriceAxisRendererOptionsProvider = /** @class */ (function () {
+    function PriceAxisRendererOptionsProvider(chartModel) {
+        this._private__rendererOptions = {
+            borderSize: 1 /* BorderSize */,
+            tickLength: 4 /* TickLength */,
+            fontSize: NaN,
+            font: '',
+            fontFamily: '',
+            color: '',
+            paddingBottom: 0,
+            paddingInner: 0,
+            paddingOuter: 0,
+            paddingTop: 0,
+            baselineOffset: 0,
+            width: 0
+        };
+        this._private__chartModel = chartModel;
+    }
+    PriceAxisRendererOptionsProvider.prototype.options = function () {
+        var rendererOptions = this._private__rendererOptions;
+        var currentFontSize = this._private__fontSize();
+        var currentFontFamily = this._private__fontFamily();
+        if (rendererOptions.fontSize !== currentFontSize || rendererOptions.fontFamily !== currentFontFamily) {
+            rendererOptions.fontSize = currentFontSize;
+            rendererOptions.fontFamily = currentFontFamily;
+            rendererOptions.font = makeFont(currentFontSize, currentFontFamily);
+            rendererOptions.paddingTop = Math.floor(currentFontSize / 3.5);
+            rendererOptions.paddingBottom = rendererOptions.paddingTop;
+            rendererOptions.paddingInner = Math.max(Math.ceil(currentFontSize / 2 - rendererOptions.tickLength / 2), 0);
+            rendererOptions.paddingOuter = Math.ceil(currentFontSize / 2 + rendererOptions.tickLength / 2);
+            rendererOptions.baselineOffset = Math.round(currentFontSize / 10);
+        }
+        rendererOptions.color = this._private__textColor();
+        rendererOptions.width = this._private__width();
+        return this._private__rendererOptions;
+    };
+    PriceAxisRendererOptionsProvider.prototype._private__width = function () {
+        return this._private__chartModel.options().rightPriceScale.width;
+    };
+    PriceAxisRendererOptionsProvider.prototype._private__textColor = function () {
+        return this._private__chartModel.options().layout.textColor;
+    };
+    PriceAxisRendererOptionsProvider.prototype._private__fontSize = function () {
+        return this._private__chartModel.options().layout.fontSize;
+    };
+    PriceAxisRendererOptionsProvider.prototype._private__fontFamily = function () {
+        return this._private__chartModel.options().layout.fontFamily;
+    };
+    return PriceAxisRendererOptionsProvider;
+}());
+
+var CompositeRenderer = /** @class */ (function () {
+    function CompositeRenderer() {
+        this._private__renderers = [];
+    }
+    CompositeRenderer.prototype._internal_setRenderers = function (renderers) {
+        this._private__renderers = renderers;
+    };
+    CompositeRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
+        this._private__renderers.forEach(function (r) {
+            ctx.save();
+            r.draw(ctx, pixelRatio, isHovered, hitTestData);
+            ctx.restore();
+        });
+    };
+    return CompositeRenderer;
+}());
+
+var ScaledRenderer = /** @class */ (function () {
+    function ScaledRenderer() {
+    }
+    ScaledRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
+        ctx.save();
+        // actually we must be sure that this scaling applied only once at the same time
+        // currently ScaledRenderer could be only nodes renderer (not top-level renderers like CompositeRenderer or something)
+        // so this "constraint" is fulfilled for now
+        ctx.scale(pixelRatio, pixelRatio);
+        this._internal__drawImpl(ctx, isHovered, hitTestData);
+        ctx.restore();
+    };
+    ScaledRenderer.prototype.drawBackground = function (ctx, pixelRatio, isHovered, hitTestData) {
+        ctx.save();
+        // actually we must be sure that this scaling applied only once at the same time
+        // currently ScaledRenderer could be only nodes renderer (not top-level renderers like CompositeRenderer or something)
+        // so this "constraint" is fulfilled for now
+        ctx.scale(pixelRatio, pixelRatio);
+        this._internal__drawBackgroundImpl(ctx, isHovered, hitTestData);
+        ctx.restore();
+    };
+    ScaledRenderer.prototype._internal__drawBackgroundImpl = function (ctx, isHovered, hitTestData) { };
+    return ScaledRenderer;
+}());
+
+var PaneRendererMarks = /** @class */ (function (_super) {
+    __extends(PaneRendererMarks, _super);
+    function PaneRendererMarks() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._internal__data = null;
+        return _this;
+    }
+    PaneRendererMarks.prototype._internal_setData = function (data) {
+        this._internal__data = data;
+    };
+    PaneRendererMarks.prototype._internal__drawImpl = function (ctx) {
+        if (this._internal__data === null || this._internal__data._internal_visibleRange === null) {
+            return;
+        }
+        var visibleRange = this._internal__data._internal_visibleRange;
+        var data = this._internal__data;
+        var draw = function (radius) {
+            ctx.beginPath();
+            for (var i = visibleRange.to - 1; i >= visibleRange.from; --i) {
+                var point = data._internal_items[i];
+                ctx.moveTo(point.x, point.y);
+                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+            }
+            ctx.fill();
+        };
+        ctx.fillStyle = data._internal_backColor;
+        draw(data._internal_radius + 2);
+        ctx.fillStyle = data._internal_lineColor;
+        draw(data._internal_radius);
+    };
+    return PaneRendererMarks;
+}(ScaledRenderer));
+
+function createEmptyMarkerData() {
+    return {
+        _internal_items: [{
+                x: 0,
+                y: 0,
+                time: 0,
+                price: 0,
+            }],
+        _internal_lineColor: '',
+        _internal_backColor: '',
+        _internal_radius: 0,
+        _internal_visibleRange: null,
+    };
+}
+var rangeForSinglePoint = { from: 0, to: 1 };
+var CrosshairMarksPaneView = /** @class */ (function () {
+    function CrosshairMarksPaneView(chartModel, crosshair) {
+        this._private__compositeRenderer = new CompositeRenderer();
+        this._private__markersRenderers = [];
+        this._private__markersData = [];
+        this._private__invalidated = true;
+        this._private__chartModel = chartModel;
+        this._private__crosshair = crosshair;
+        this._private__compositeRenderer._internal_setRenderers(this._private__markersRenderers);
+    }
+    CrosshairMarksPaneView.prototype.update = function (updateType) {
+        var serieses = this._private__chartModel.serieses();
+        if (serieses.length !== this._private__markersRenderers.length) {
+            this._private__markersData = serieses.map(createEmptyMarkerData);
+            this._private__markersRenderers = this._private__markersData.map(function (data) {
+                var res = new PaneRendererMarks();
+                res._internal_setData(data);
+                return res;
+            });
+            this._private__compositeRenderer._internal_setRenderers(this._private__markersRenderers);
+        }
+        this._private__invalidated = true;
+    };
+    CrosshairMarksPaneView.prototype.renderer = function (height, width, addAnchors) {
+        if (this._private__invalidated) {
+            this._private__updateImpl(height);
+            this._private__invalidated = false;
+        }
+        return this._private__compositeRenderer;
+    };
+    CrosshairMarksPaneView.prototype._private__updateImpl = function (height) {
+        var _this = this;
+        var serieses = this._private__chartModel.serieses();
+        var timePointIndex = this._private__crosshair.appliedIndex();
+        var timeScale = this._private__chartModel.timeScale();
+        serieses.forEach(function (s, index) {
+            var _a;
+            var data = _this._private__markersData[index];
+            var seriesData = s.markerDataAtIndex(timePointIndex);
+            if (seriesData === null || !s.visible()) {
+                data._internal_visibleRange = null;
+                return;
+            }
+            var firstValue = ensureNotNull(s.firstValue());
+            data._internal_lineColor = seriesData.backgroundColor;
+            data._internal_radius = seriesData.radius;
+            data._internal_items[0].price = seriesData.price;
+            data._internal_items[0].y = s.priceScale().priceToCoordinate(seriesData.price, firstValue.value);
+            data._internal_backColor = (_a = seriesData.borderColor) !== null && _a !== void 0 ? _a : _this._private__chartModel.backgroundColorAtYPercentFromTop(data._internal_items[0].y / height);
+            data._internal_items[0].time = timePointIndex;
+            data._internal_items[0].x = timeScale.indexToCoordinate(timePointIndex);
+            data._internal_visibleRange = rangeForSinglePoint;
+        });
+    };
+    return CrosshairMarksPaneView;
+}());
+
+var CrosshairRenderer = /** @class */ (function () {
+    function CrosshairRenderer(data) {
+        this._private__data = data;
+    }
+    CrosshairRenderer.prototype.draw = function (ctx, pixelRatio, isHovered, hitTestData) {
+        if (this._private__data === null) {
+            return;
+        }
+        var vertLinesVisible = this._private__data._internal_vertLine._internal_visible;
+        var horzLinesVisible = this._private__data._internal_horzLine._internal_visible;
+        if (!vertLinesVisible && !horzLinesVisible) {
+            return;
+        }
+        ctx.save();
+        var x = Math.round(this._private__data._internal_x * pixelRatio);
+        var y = Math.round(this._private__data._internal_y * pixelRatio);
+        var w = Math.ceil(this._private__data._internal_w * pixelRatio);
+        var h = Math.ceil(this._private__data._internal_h * pixelRatio);
+        ctx.lineCap = 'butt';
+        if (vertLinesVisible && x >= 0) {
+            ctx.lineWidth = Math.floor(this._private__data._internal_vertLine._internal_lineWidth * pixelRatio);
+            ctx.strokeStyle = this._private__data._internal_vertLine._internal_color;
+            ctx.fillStyle = this._private__data._internal_vertLine._internal_color;
+            setLineStyle(ctx, this._private__data._internal_vertLine._internal_lineStyle);
+            drawVerticalLine(ctx, x, 0, h);
+        }
+        if (horzLinesVisible && y >= 0) {
+            ctx.lineWidth = Math.floor(this._private__data._internal_horzLine._internal_lineWidth * pixelRatio);
+            ctx.strokeStyle = this._private__data._internal_horzLine._internal_color;
+            ctx.fillStyle = this._private__data._internal_horzLine._internal_color;
+            setLineStyle(ctx, this._private__data._internal_horzLine._internal_lineStyle);
+            drawHorizontalLine(ctx, y, 0, w);
+        }
+        ctx.restore();
+    };
+    return CrosshairRenderer;
+}());
+
+var CrosshairPaneView = /** @class */ (function () {
+    function CrosshairPaneView(source) {
+        this._private__invalidated = true;
+        this._private__rendererData = {
+            _internal_vertLine: {
+                _internal_lineWidth: 1,
+                _internal_lineStyle: 0,
+                _internal_color: '',
+                _internal_visible: false,
+            },
+            _internal_horzLine: {
+                _internal_lineWidth: 1,
+                _internal_lineStyle: 0,
+                _internal_color: '',
+                _internal_visible: false,
+            },
+            _internal_w: 0,
+            _internal_h: 0,
+            _internal_x: 0,
+            _internal_y: 0,
+        };
+        this._private__renderer = new CrosshairRenderer(this._private__rendererData);
+        this._private__source = source;
+    }
+    CrosshairPaneView.prototype._internal_update = function () {
+        this._private__invalidated = true;
+    };
+    CrosshairPaneView.prototype.renderer = function (height, width) {
+        if (this._private__invalidated) {
+            this._private__updateImpl();
+            this._private__invalidated = false;
+        }
+        return this._private__renderer;
+    };
+    CrosshairPaneView.prototype._private__updateImpl = function () {
+        var visible = this._private__source.visible();
+        var pane = ensureNotNull(this._private__source.pane());
+        var crosshairOptions = pane.model().options().crosshair;
+        var data = this._private__rendererData;
+        data._internal_horzLine._internal_visible = visible && this._private__source.horzLineVisible(pane);
+        data._internal_vertLine._internal_visible = visible && this._private__source.vertLineVisible();
+        data._internal_horzLine._internal_lineWidth = crosshairOptions.horzLine.width;
+        data._internal_horzLine._internal_lineStyle = crosshairOptions.horzLine.style;
+        data._internal_horzLine._internal_color = crosshairOptions.horzLine.color;
+        data._internal_vertLine._internal_lineWidth = crosshairOptions.vertLine.width;
+        data._internal_vertLine._internal_lineStyle = crosshairOptions.vertLine.style;
+        data._internal_vertLine._internal_color = crosshairOptions.vertLine.color;
+        data._internal_w = pane.width();
+        data._internal_h = pane.height();
+        data._internal_x = this._private__source.appliedX();
+        data._internal_y = this._private__source.appliedY();
+    };
+    return CrosshairPaneView;
+}());
+
 /**
  * Fills rectangle's inner border (so, all the filled area is limited by the [x, x + width]*[y, y + height] region)
  * ```
@@ -963,6 +1077,7 @@ var PriceAxisView = /** @class */ (function () {
         this._private__paneRenderer = new (ctor || PriceAxisViewRenderer)(this._private__paneRendererData, this._private__commonRendererData);
     }
     PriceAxisView.prototype.text = function () {
+        this._private__updateRendererDataIfNeeded();
         return this._private__axisRendererData.text;
     };
     PriceAxisView.prototype.coordinate = function () {
@@ -1380,6 +1495,98 @@ var Crosshair = /** @class */ (function (_super) {
     return Crosshair;
 }(DataSource));
 
+function isDefaultPriceScale(priceScaleId) {
+    return priceScaleId === "left" /* Left */ || priceScaleId === "right" /* Right */;
+}
+
+function mergePaneInvalidation(beforeValue, newValue) {
+    if (beforeValue === undefined) {
+        return newValue;
+    }
+    var level = Math.max(beforeValue.level, newValue.level);
+    var autoScale = beforeValue.autoScale || newValue.autoScale;
+    return { level: level, autoScale: autoScale };
+}
+var InvalidateMask = /** @class */ (function () {
+    function InvalidateMask(globalLevel) {
+        this._private__invalidatedPanes = new Map();
+        this._private__timeScaleInvalidations = [];
+        this._private__globalLevel = globalLevel;
+    }
+    InvalidateMask.prototype.invalidatePane = function (paneIndex, invalidation) {
+        var prevValue = this._private__invalidatedPanes.get(paneIndex);
+        var newValue = mergePaneInvalidation(prevValue, invalidation);
+        this._private__invalidatedPanes.set(paneIndex, newValue);
+    };
+    InvalidateMask.prototype.fullInvalidation = function () {
+        return this._private__globalLevel;
+    };
+    InvalidateMask.prototype.invalidateForPane = function (paneIndex) {
+        var paneInvalidation = this._private__invalidatedPanes.get(paneIndex);
+        if (paneInvalidation === undefined) {
+            return {
+                level: this._private__globalLevel,
+            };
+        }
+        return {
+            level: Math.max(this._private__globalLevel, paneInvalidation.level),
+            autoScale: paneInvalidation.autoScale,
+        };
+    };
+    InvalidateMask.prototype.setFitContent = function () {
+        // modifies both bar spacing and right offset
+        this._private__timeScaleInvalidations = [{ type: 0 /* FitContent */ }];
+    };
+    InvalidateMask.prototype.applyRange = function (range) {
+        // modifies both bar spacing and right offset
+        this._private__timeScaleInvalidations = [{ type: 1 /* ApplyRange */, value: range }];
+    };
+    InvalidateMask.prototype.resetTimeScale = function () {
+        // modifies both bar spacing and right offset
+        this._private__timeScaleInvalidations = [{ type: 4 /* Reset */ }];
+    };
+    InvalidateMask.prototype.setBarSpacing = function (barSpacing) {
+        this._private__timeScaleInvalidations.push({ type: 2 /* ApplyBarSpacing */, value: barSpacing });
+    };
+    InvalidateMask.prototype.setRightOffset = function (offset) {
+        this._private__timeScaleInvalidations.push({ type: 3 /* ApplyRightOffset */, value: offset });
+    };
+    InvalidateMask.prototype.timeScaleInvalidations = function () {
+        return this._private__timeScaleInvalidations;
+    };
+    InvalidateMask.prototype.merge = function (other) {
+        var _this = this;
+        for (var _i = 0, _a = other._private__timeScaleInvalidations; _i < _a.length; _i++) {
+            var tsInvalidation = _a[_i];
+            this._private__applyTimeScaleInvalidation(tsInvalidation);
+        }
+        this._private__globalLevel = Math.max(this._private__globalLevel, other._private__globalLevel);
+        other._private__invalidatedPanes.forEach(function (invalidation, index) {
+            _this.invalidatePane(index, invalidation);
+        });
+    };
+    InvalidateMask.prototype._private__applyTimeScaleInvalidation = function (invalidation) {
+        switch (invalidation.type) {
+            case 0 /* FitContent */:
+                this.setFitContent();
+                break;
+            case 1 /* ApplyRange */:
+                this.applyRange(invalidation.value);
+                break;
+            case 2 /* ApplyBarSpacing */:
+                this.setBarSpacing(invalidation.value);
+                break;
+            case 3 /* ApplyRightOffset */:
+                this.setRightOffset(invalidation.value);
+                break;
+            case 4 /* Reset */:
+                this.resetTimeScale();
+                break;
+        }
+    };
+    return InvalidateMask;
+}());
+
 var formatterOptions = {
     _internal_decimalSign: '.',
     _internal_decimalSignFractional: '\'',
@@ -1475,2333 +1682,6 @@ var PercentageFormatter = /** @class */ (function (_super) {
     };
     return PercentageFormatter;
 }(PriceFormatter));
-
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-var Delegate = /** @class */ (function () {
-    function Delegate() {
-        this._private__listeners = [];
-    }
-    Delegate.prototype.subscribe = function (callback, linkedObject, singleshot) {
-        var listener = {
-            _internal_callback: callback,
-            _internal_linkedObject: linkedObject,
-            _internal_singleshot: singleshot === true,
-        };
-        this._private__listeners.push(listener);
-    };
-    Delegate.prototype.unsubscribe = function (callback) {
-        var index = this._private__listeners.findIndex(function (listener) { return callback === listener._internal_callback; });
-        if (index > -1) {
-            this._private__listeners.splice(index, 1);
-        }
-    };
-    Delegate.prototype.unsubscribeAll = function (linkedObject) {
-        this._private__listeners = this._private__listeners.filter(function (listener) { return listener._internal_linkedObject === linkedObject; });
-    };
-    Delegate.prototype._internal_fire = function (param1, param2) {
-        var listenersSnapshot = __spreadArray([], this._private__listeners);
-        this._private__listeners = this._private__listeners.filter(function (listener) { return !listener._internal_singleshot; });
-        listenersSnapshot.forEach(function (listener) { return listener._internal_callback(param1, param2); });
-    };
-    Delegate.prototype._internal_hasListeners = function () {
-        return this._private__listeners.length > 0;
-    };
-    Delegate.prototype._internal_destroy = function () {
-        this._private__listeners = [];
-    };
-    return Delegate;
-}());
-
-var PriceRangeImpl = /** @class */ (function () {
-    function PriceRangeImpl(minValue, maxValue) {
-        this._private__minValue = minValue;
-        this._private__maxValue = maxValue;
-    }
-    PriceRangeImpl.prototype.equals = function (pr) {
-        if (pr === null) {
-            return false;
-        }
-        return this._private__minValue === pr._private__minValue && this._private__maxValue === pr._private__maxValue;
-    };
-    PriceRangeImpl.prototype.clone = function () {
-        return new PriceRangeImpl(this._private__minValue, this._private__maxValue);
-    };
-    PriceRangeImpl.prototype.minValue = function () {
-        return this._private__minValue;
-    };
-    PriceRangeImpl.prototype.maxValue = function () {
-        return this._private__maxValue;
-    };
-    PriceRangeImpl.prototype.length = function () {
-        return this._private__maxValue - this._private__minValue;
-    };
-    PriceRangeImpl.prototype.isEmpty = function () {
-        return this._private__maxValue === this._private__minValue || Number.isNaN(this._private__maxValue) || Number.isNaN(this._private__minValue);
-    };
-    PriceRangeImpl.prototype.merge = function (anotherRange) {
-        if (anotherRange === null) {
-            return this;
-        }
-        return new PriceRangeImpl(Math.min(this.minValue(), anotherRange.minValue()), Math.max(this.maxValue(), anotherRange.maxValue()));
-    };
-    PriceRangeImpl.prototype.scaleAroundCenter = function (coeff) {
-        if (!isNumber(coeff)) {
-            return;
-        }
-        var delta = this._private__maxValue - this._private__minValue;
-        if (delta === 0) {
-            return;
-        }
-        var center = (this._private__maxValue + this._private__minValue) * 0.5;
-        var maxDelta = this._private__maxValue - center;
-        var minDelta = this._private__minValue - center;
-        maxDelta *= coeff;
-        minDelta *= coeff;
-        this._private__maxValue = center + maxDelta;
-        this._private__minValue = center + minDelta;
-    };
-    PriceRangeImpl.prototype.shift = function (delta) {
-        if (!isNumber(delta)) {
-            return;
-        }
-        this._private__maxValue += delta;
-        this._private__minValue += delta;
-    };
-    PriceRangeImpl.prototype.toRaw = function () {
-        return {
-            minValue: this._private__minValue,
-            maxValue: this._private__maxValue,
-        };
-    };
-    PriceRangeImpl.fromRaw = function (raw) {
-        return (raw === null) ? null : new PriceRangeImpl(raw.minValue, raw.maxValue);
-    };
-    return PriceRangeImpl;
-}());
-
-function clamp(value, minVal, maxVal) {
-    return Math.min(Math.max(value, minVal), maxVal);
-}
-function isBaseDecimal(value) {
-    if (value < 0) {
-        return false;
-    }
-    for (var current = value; current > 1; current /= 10) {
-        if ((current % 10) !== 0) {
-            return false;
-        }
-    }
-    return true;
-}
-function greaterOrEqual(x1, x2, epsilon) {
-    return (x2 - x1) <= epsilon;
-}
-function equal(x1, x2, epsilon) {
-    return Math.abs(x1 - x2) < epsilon;
-}
-function log10(x) {
-    if (x <= 0) {
-        return NaN;
-    }
-    return Math.log(x) / Math.log(10);
-}
-function min(arr) {
-    if (arr.length < 1) {
-        throw Error('array is empty');
-    }
-    var minVal = arr[0];
-    for (var i = 1; i < arr.length; ++i) {
-        if (arr[i] < minVal) {
-            minVal = arr[i];
-        }
-    }
-    return minVal;
-}
-function ceiledEven(x) {
-    var ceiled = Math.ceil(x);
-    return (ceiled % 2 !== 0) ? ceiled - 1 : ceiled;
-}
-function ceiledOdd(x) {
-    var ceiled = Math.ceil(x);
-    return (ceiled % 2 === 0) ? ceiled - 1 : ceiled;
-}
-
-var defLogFormula = {
-    _internal_logicalOffset: 4,
-    _internal_coordOffset: 0.0001,
-};
-function fromPercent(value, baseValue) {
-    if (baseValue < 0) {
-        value = -value;
-    }
-    return (value / 100) * baseValue + baseValue;
-}
-function toPercent(value, baseValue) {
-    var result = 100 * (value - baseValue) / baseValue;
-    return (baseValue < 0 ? -result : result);
-}
-function toPercentRange(priceRange, baseValue) {
-    var minPercent = toPercent(priceRange.minValue(), baseValue);
-    var maxPercent = toPercent(priceRange.maxValue(), baseValue);
-    return new PriceRangeImpl(minPercent, maxPercent);
-}
-function fromIndexedTo100(value, baseValue) {
-    value -= 100;
-    if (baseValue < 0) {
-        value = -value;
-    }
-    return (value / 100) * baseValue + baseValue;
-}
-function toIndexedTo100(value, baseValue) {
-    var result = 100 * (value - baseValue) / baseValue + 100;
-    return (baseValue < 0 ? -result : result);
-}
-function toIndexedTo100Range(priceRange, baseValue) {
-    var minPercent = toIndexedTo100(priceRange.minValue(), baseValue);
-    var maxPercent = toIndexedTo100(priceRange.maxValue(), baseValue);
-    return new PriceRangeImpl(minPercent, maxPercent);
-}
-function toLog(price, logFormula) {
-    var m = Math.abs(price);
-    if (m < 1e-15) {
-        return 0;
-    }
-    var res = log10(m + logFormula._internal_coordOffset) + logFormula._internal_logicalOffset;
-    return ((price < 0) ? -res : res);
-}
-function fromLog(logical, logFormula) {
-    var m = Math.abs(logical);
-    if (m < 1e-15) {
-        return 0;
-    }
-    var res = Math.pow(10, m - logFormula._internal_logicalOffset) - logFormula._internal_coordOffset;
-    return (logical < 0) ? -res : res;
-}
-function convertPriceRangeToLog(priceRange, logFormula) {
-    if (priceRange === null) {
-        return null;
-    }
-    var min = toLog(priceRange.minValue(), logFormula);
-    var max = toLog(priceRange.maxValue(), logFormula);
-    return new PriceRangeImpl(min, max);
-}
-function canConvertPriceRangeFromLog(priceRange, logFormula) {
-    if (priceRange === null) {
-        return false;
-    }
-    var min = fromLog(priceRange.minValue(), logFormula);
-    var max = fromLog(priceRange.maxValue(), logFormula);
-    return isFinite(min) && isFinite(max);
-}
-function convertPriceRangeFromLog(priceRange, logFormula) {
-    if (priceRange === null) {
-        return null;
-    }
-    var min = fromLog(priceRange.minValue(), logFormula);
-    var max = fromLog(priceRange.maxValue(), logFormula);
-    return new PriceRangeImpl(min, max);
-}
-function logFormulaForPriceRange(range) {
-    if (range === null) {
-        return defLogFormula;
-    }
-    var diff = Math.abs(range.maxValue() - range.minValue());
-    if (diff >= 1 || diff < 1e-15) {
-        return defLogFormula;
-    }
-    var digits = Math.ceil(Math.abs(Math.log10(diff)));
-    var logicalOffset = defLogFormula._internal_logicalOffset + digits;
-    var coordOffset = 1 / Math.pow(10, logicalOffset);
-    return {
-        _internal_logicalOffset: logicalOffset,
-        _internal_coordOffset: coordOffset,
-    };
-}
-function logFormulasAreSame(f1, f2) {
-    return f1._internal_logicalOffset === f2._internal_logicalOffset && f1._internal_coordOffset === f2._internal_coordOffset;
-}
-
-var PriceTickSpanCalculator = /** @class */ (function () {
-    function PriceTickSpanCalculator(base, integralDividers) {
-        this._private__base = base;
-        this._private__integralDividers = integralDividers;
-        if (isBaseDecimal(this._private__base)) {
-            this._private__fractionalDividers = [2, 2.5, 2];
-        }
-        else {
-            this._private__fractionalDividers = [];
-            for (var baseRest = this._private__base; baseRest !== 1;) {
-                if ((baseRest % 2) === 0) {
-                    this._private__fractionalDividers.push(2);
-                    baseRest /= 2;
-                }
-                else if ((baseRest % 5) === 0) {
-                    this._private__fractionalDividers.push(2, 2.5);
-                    baseRest /= 5;
-                }
-                else {
-                    throw new Error('unexpected base');
-                }
-                if (this._private__fractionalDividers.length > 100) {
-                    throw new Error('something wrong with base');
-                }
-            }
-        }
-    }
-    PriceTickSpanCalculator.prototype._internal_tickSpan = function (high, low, maxTickSpan) {
-        var minMovement = (this._private__base === 0) ? (0) : (1 / this._private__base);
-        var resultTickSpan = Math.pow(10, Math.max(0, Math.ceil(log10(high - low))));
-        var index = 0;
-        var c = this._private__integralDividers[0];
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            // the second part is actual for small with very small values like 1e-10
-            // greaterOrEqual fails for such values
-            var resultTickSpanLargerMinMovement = greaterOrEqual(resultTickSpan, minMovement, 1e-14 /* TickSpanEpsilon */) && resultTickSpan > (minMovement + 1e-14 /* TickSpanEpsilon */);
-            var resultTickSpanLargerMaxTickSpan = greaterOrEqual(resultTickSpan, maxTickSpan * c, 1e-14 /* TickSpanEpsilon */);
-            var resultTickSpanLarger1 = greaterOrEqual(resultTickSpan, 1, 1e-14 /* TickSpanEpsilon */);
-            var haveToContinue = resultTickSpanLargerMinMovement && resultTickSpanLargerMaxTickSpan && resultTickSpanLarger1;
-            if (!haveToContinue) {
-                break;
-            }
-            resultTickSpan /= c;
-            c = this._private__integralDividers[++index % this._private__integralDividers.length];
-        }
-        if (resultTickSpan <= (minMovement + 1e-14 /* TickSpanEpsilon */)) {
-            resultTickSpan = minMovement;
-        }
-        resultTickSpan = Math.max(1, resultTickSpan);
-        if ((this._private__fractionalDividers.length > 0) && equal(resultTickSpan, 1, 1e-14 /* TickSpanEpsilon */)) {
-            index = 0;
-            c = this._private__fractionalDividers[0];
-            while (greaterOrEqual(resultTickSpan, maxTickSpan * c, 1e-14 /* TickSpanEpsilon */) && resultTickSpan > (minMovement + 1e-14 /* TickSpanEpsilon */)) {
-                resultTickSpan /= c;
-                c = this._private__fractionalDividers[++index % this._private__fractionalDividers.length];
-            }
-        }
-        return resultTickSpan;
-    };
-    return PriceTickSpanCalculator;
-}());
-
-var TICK_DENSITY = 2.5;
-var PriceTickMarkBuilder = /** @class */ (function () {
-    function PriceTickMarkBuilder(priceScale, base, coordinateToLogicalFunc, logicalToCoordinateFunc) {
-        this._private__marks = [];
-        this._private__priceScale = priceScale;
-        this._private__base = base;
-        this._private__coordinateToLogicalFunc = coordinateToLogicalFunc;
-        this._private__logicalToCoordinateFunc = logicalToCoordinateFunc;
-    }
-    PriceTickMarkBuilder.prototype._internal_tickSpan = function (high, low) {
-        if (high < low) {
-            throw new Error('high < low');
-        }
-        var scaleHeight = this._private__priceScale.height();
-        var markHeight = this._private__tickMarkHeight();
-        var maxTickSpan = (high - low) * markHeight / scaleHeight;
-        var spanCalculator1 = new PriceTickSpanCalculator(this._private__base, [2, 2.5, 2]);
-        var spanCalculator2 = new PriceTickSpanCalculator(this._private__base, [2, 2, 2.5]);
-        var spanCalculator3 = new PriceTickSpanCalculator(this._private__base, [2.5, 2, 2]);
-        var spans = [];
-        spans.push(spanCalculator1._internal_tickSpan(high, low, maxTickSpan), spanCalculator2._internal_tickSpan(high, low, maxTickSpan), spanCalculator3._internal_tickSpan(high, low, maxTickSpan));
-        return min(spans);
-    };
-    PriceTickMarkBuilder.prototype._internal_rebuildTickMarks = function () {
-        var priceScale = this._private__priceScale;
-        var firstValue = priceScale.firstValue();
-        if (firstValue === null) {
-            this._private__marks = [];
-            return;
-        }
-        var scaleHeight = priceScale.height();
-        var bottom = this._private__coordinateToLogicalFunc(scaleHeight - 1, firstValue);
-        var top = this._private__coordinateToLogicalFunc(0, firstValue);
-        var extraTopBottomMargin = this._private__priceScale.options().entireTextOnly ? this._private__fontHeight() / 2 : 0;
-        var minCoord = extraTopBottomMargin;
-        var maxCoord = scaleHeight - 1 - extraTopBottomMargin;
-        var high = Math.max(bottom, top);
-        var low = Math.min(bottom, top);
-        if (high === low) {
-            this._private__marks = [];
-            return;
-        }
-        var span = this._internal_tickSpan(high, low);
-        var mod = high % span;
-        mod += mod < 0 ? span : 0;
-        var sign = (high >= low) ? 1 : -1;
-        var prevCoord = null;
-        var targetIndex = 0;
-        for (var logical = high - mod; logical > low; logical -= span) {
-            var coord = this._private__logicalToCoordinateFunc(logical, firstValue, true);
-            // check if there is place for it
-            // this is required for log scale
-            if (prevCoord !== null && Math.abs(coord - prevCoord) < this._private__tickMarkHeight()) {
-                continue;
-            }
-            // check if a tick mark is partially visible and skip it if entireTextOnly is true
-            if (coord < minCoord || coord > maxCoord) {
-                continue;
-            }
-            if (targetIndex < this._private__marks.length) {
-                this._private__marks[targetIndex].coord = coord;
-                this._private__marks[targetIndex].label = priceScale.formatLogical(logical);
-            }
-            else {
-                this._private__marks.push({
-                    coord: coord,
-                    label: priceScale.formatLogical(logical),
-                });
-            }
-            targetIndex++;
-            prevCoord = coord;
-            if (priceScale.isLog()) {
-                // recalc span
-                span = this._internal_tickSpan(logical * sign, low);
-            }
-        }
-        this._private__marks.length = targetIndex;
-    };
-    PriceTickMarkBuilder.prototype._internal_marks = function () {
-        return this._private__marks;
-    };
-    PriceTickMarkBuilder.prototype._private__fontHeight = function () {
-        return this._private__priceScale.fontSize();
-    };
-    PriceTickMarkBuilder.prototype._private__tickMarkHeight = function () {
-        return Math.ceil(this._private__fontHeight() * TICK_DENSITY);
-    };
-    return PriceTickMarkBuilder;
-}());
-
-function sortSources(sources) {
-    return sources.slice().sort(function (s1, s2) {
-        return (ensureNotNull(s1.zorder()) - ensureNotNull(s2.zorder()));
-    });
-}
-
-/**
- * Represents the price scale mode.
- */
-var PriceScaleMode;
-(function (PriceScaleMode) {
-    /**
-     * Price scale shows prices. Price range changes linearly.
-     */
-    PriceScaleMode[PriceScaleMode["Normal"] = 0] = "Normal";
-    /**
-     * Price scale shows prices. Price range changes logarithmically.
-     */
-    PriceScaleMode[PriceScaleMode["Logarithmic"] = 1] = "Logarithmic";
-    /**
-     * Price scale shows percentage values according the first visible value of the price scale.
-     * The first visible value is 0% in this mode.
-     */
-    PriceScaleMode[PriceScaleMode["Percentage"] = 2] = "Percentage";
-    /**
-     * The same as percentage mode, but the first value is moved to 100.
-     */
-    PriceScaleMode[PriceScaleMode["IndexedTo100"] = 3] = "IndexedTo100";
-})(PriceScaleMode || (PriceScaleMode = {}));
-var percentageFormatter = new PercentageFormatter();
-var defaultPriceFormatter = new PriceFormatter(100, 1);
-var PriceScale = /** @class */ (function () {
-    function PriceScale(id, options, layoutOptions, localizationOptions) {
-        this._private__height = 0;
-        this._private__internalHeightCache = null;
-        this._private__priceRange = null;
-        this._private__priceRangeSnapshot = null;
-        this._private__invalidatedForRange = { _internal_isValid: false, _internal_visibleBars: null };
-        this._private__marginAbove = 0;
-        this._private__marginBelow = 0;
-        this._private__onMarksChanged = new Delegate();
-        this._private__modeChanged = new Delegate();
-        this._private__dataSources = [];
-        this._private__cachedOrderedSources = null;
-        this._private__marksCache = null;
-        this._private__scaleStartPoint = null;
-        this._private__scrollStartPoint = null;
-        this._private__formatter = defaultPriceFormatter;
-        this._private__logFormula = logFormulaForPriceRange(null);
-        this._private__id = id;
-        this._private__options = options;
-        this._private__layoutOptions = layoutOptions;
-        this._private__localizationOptions = localizationOptions;
-        this._private__markBuilder = new PriceTickMarkBuilder(this, 100, this._private__coordinateToLogical.bind(this), this._private__logicalToCoordinate.bind(this));
-    }
-    PriceScale.prototype.id = function () {
-        return this._private__id;
-    };
-    PriceScale.prototype.options = function () {
-        return this._private__options;
-    };
-    PriceScale.prototype.applyOptions = function (options) {
-        merge(this._private__options, options);
-        this.updateFormatter();
-        if (options.mode !== undefined) {
-            this.setMode({ mode: options.mode });
-        }
-        if (options.scaleMargins !== undefined) {
-            var top_1 = ensureDefined(options.scaleMargins.top);
-            var bottom = ensureDefined(options.scaleMargins.bottom);
-            if (top_1 < 0 || top_1 > 1) {
-                throw new Error("Invalid top margin - expect value between 0 and 1, given=" + top_1);
-            }
-            if (bottom < 0 || bottom > 1 || top_1 + bottom > 1) {
-                throw new Error("Invalid bottom margin - expect value between 0 and 1, given=" + bottom);
-            }
-            if (top_1 + bottom > 1) {
-                throw new Error("Invalid margins - sum of margins must be less than 1, given=" + (top_1 + bottom));
-            }
-            this._private__invalidateInternalHeightCache();
-            this._private__marksCache = null;
-        }
-    };
-    PriceScale.prototype.isAutoScale = function () {
-        return this._private__options.autoScale;
-    };
-    PriceScale.prototype.isLog = function () {
-        return this._private__options.mode === 1 /* Logarithmic */;
-    };
-    PriceScale.prototype.isPercentage = function () {
-        return this._private__options.mode === 2 /* Percentage */;
-    };
-    PriceScale.prototype.isIndexedTo100 = function () {
-        return this._private__options.mode === 3 /* IndexedTo100 */;
-    };
-    PriceScale.prototype.mode = function () {
-        return {
-            autoScale: this._private__options.autoScale,
-            isInverted: this._private__options.invertScale,
-            mode: this._private__options.mode,
-        };
-    };
-    // eslint-disable-next-line complexity
-    PriceScale.prototype.setMode = function (newMode) {
-        var oldMode = this.mode();
-        var priceRange = null;
-        if (newMode.autoScale !== undefined) {
-            this._private__options.autoScale = newMode.autoScale;
-        }
-        if (newMode.mode !== undefined) {
-            this._private__options.mode = newMode.mode;
-            if (newMode.mode === 2 /* Percentage */ || newMode.mode === 3 /* IndexedTo100 */) {
-                this._private__options.autoScale = true;
-            }
-            // TODO: Remove after making rebuildTickMarks lazy
-            this._private__invalidatedForRange._internal_isValid = false;
-        }
-        // define which scale converted from
-        if (oldMode.mode === 1 /* Logarithmic */ && newMode.mode !== oldMode.mode) {
-            if (canConvertPriceRangeFromLog(this._private__priceRange, this._private__logFormula)) {
-                priceRange = convertPriceRangeFromLog(this._private__priceRange, this._private__logFormula);
-                if (priceRange !== null) {
-                    this.setPriceRange(priceRange);
-                }
-            }
-            else {
-                this._private__options.autoScale = true;
-            }
-        }
-        // define which scale converted to
-        if (newMode.mode === 1 /* Logarithmic */ && newMode.mode !== oldMode.mode) {
-            priceRange = convertPriceRangeToLog(this._private__priceRange, this._private__logFormula);
-            if (priceRange !== null) {
-                this.setPriceRange(priceRange);
-            }
-        }
-        var modeChanged = oldMode.mode !== this._private__options.mode;
-        if (modeChanged && (oldMode.mode === 2 /* Percentage */ || this.isPercentage())) {
-            this.updateFormatter();
-        }
-        if (modeChanged && (oldMode.mode === 3 /* IndexedTo100 */ || this.isIndexedTo100())) {
-            this.updateFormatter();
-        }
-        if (newMode.isInverted !== undefined && oldMode.isInverted !== newMode.isInverted) {
-            this._private__options.invertScale = newMode.isInverted;
-            this._private__onIsInvertedChanged();
-        }
-        this._private__modeChanged._internal_fire(oldMode, this.mode());
-    };
-    PriceScale.prototype.modeChanged = function () {
-        return this._private__modeChanged;
-    };
-    PriceScale.prototype.fontSize = function () {
-        return this._private__layoutOptions.fontSize;
-    };
-    PriceScale.prototype.height = function () {
-        return this._private__height;
-    };
-    PriceScale.prototype.setHeight = function (value) {
-        if (this._private__height === value) {
-            return;
-        }
-        this._private__height = value;
-        this._private__invalidateInternalHeightCache();
-        this._private__marksCache = null;
-    };
-    PriceScale.prototype.internalHeight = function () {
-        if (this._private__internalHeightCache) {
-            return this._private__internalHeightCache;
-        }
-        var res = this.height() - this._private__topMarginPx() - this._private__bottomMarginPx();
-        this._private__internalHeightCache = res;
-        return res;
-    };
-    PriceScale.prototype.priceRange = function () {
-        this._private__makeSureItIsValid();
-        return this._private__priceRange;
-    };
-    PriceScale.prototype.setPriceRange = function (newPriceRange, isForceSetValue) {
-        var oldPriceRange = this._private__priceRange;
-        if (!isForceSetValue &&
-            !(oldPriceRange === null && newPriceRange !== null) &&
-            (oldPriceRange === null || oldPriceRange.equals(newPriceRange))) {
-            return;
-        }
-        this._private__marksCache = null;
-        this._private__priceRange = newPriceRange;
-    };
-    PriceScale.prototype.isEmpty = function () {
-        this._private__makeSureItIsValid();
-        return this._private__height === 0 || !this._private__priceRange || this._private__priceRange.isEmpty();
-    };
-    PriceScale.prototype.invertedCoordinate = function (coordinate) {
-        return this.isInverted() ? coordinate : this.height() - 1 - coordinate;
-    };
-    PriceScale.prototype.priceToCoordinate = function (price, baseValue) {
-        if (this.isPercentage()) {
-            price = toPercent(price, baseValue);
-        }
-        else if (this.isIndexedTo100()) {
-            price = toIndexedTo100(price, baseValue);
-        }
-        return this._private__logicalToCoordinate(price, baseValue);
-    };
-    PriceScale.prototype.pointsArrayToCoordinates = function (points, baseValue, visibleRange) {
-        this._private__makeSureItIsValid();
-        var bh = this._private__bottomMarginPx();
-        var range = ensureNotNull(this.priceRange());
-        var min = range.minValue();
-        var max = range.maxValue();
-        var ih = (this.internalHeight() - 1);
-        var isInverted = this.isInverted();
-        var hmm = ih / (max - min);
-        var fromIndex = (visibleRange === undefined) ? 0 : visibleRange.from;
-        var toIndex = (visibleRange === undefined) ? points.length : visibleRange.to;
-        var transformFn = this._private__getCoordinateTransformer();
-        for (var i = fromIndex; i < toIndex; i++) {
-            var point = points[i];
-            var price = point.price;
-            if (isNaN(price)) {
-                continue;
-            }
-            var logical = price;
-            if (transformFn !== null) {
-                logical = transformFn(point.price, baseValue);
-            }
-            var invCoordinate = bh + hmm * (logical - min);
-            var coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
-            point.y = coordinate;
-        }
-    };
-    PriceScale.prototype.barPricesToCoordinates = function (pricesList, baseValue, visibleRange) {
-        this._private__makeSureItIsValid();
-        var bh = this._private__bottomMarginPx();
-        var range = ensureNotNull(this.priceRange());
-        var min = range.minValue();
-        var max = range.maxValue();
-        var ih = (this.internalHeight() - 1);
-        var isInverted = this.isInverted();
-        var hmm = ih / (max - min);
-        var fromIndex = (visibleRange === undefined) ? 0 : visibleRange.from;
-        var toIndex = (visibleRange === undefined) ? pricesList.length : visibleRange.to;
-        var transformFn = this._private__getCoordinateTransformer();
-        for (var i = fromIndex; i < toIndex; i++) {
-            var bar = pricesList[i];
-            var openLogical = bar.open;
-            var highLogical = bar.high;
-            var lowLogical = bar.low;
-            var closeLogical = bar.close;
-            if (transformFn !== null) {
-                openLogical = transformFn(bar.open, baseValue);
-                highLogical = transformFn(bar.high, baseValue);
-                lowLogical = transformFn(bar.low, baseValue);
-                closeLogical = transformFn(bar.close, baseValue);
-            }
-            var invCoordinate = bh + hmm * (openLogical - min);
-            var coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
-            bar.openY = coordinate;
-            invCoordinate = bh + hmm * (highLogical - min);
-            coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
-            bar.highY = coordinate;
-            invCoordinate = bh + hmm * (lowLogical - min);
-            coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
-            bar.lowY = coordinate;
-            invCoordinate = bh + hmm * (closeLogical - min);
-            coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
-            bar.closeY = coordinate;
-        }
-    };
-    PriceScale.prototype.coordinateToPrice = function (coordinate, baseValue) {
-        var logical = this._private__coordinateToLogical(coordinate, baseValue);
-        return this.logicalToPrice(logical, baseValue);
-    };
-    PriceScale.prototype.logicalToPrice = function (logical, baseValue) {
-        var value = logical;
-        if (this.isPercentage()) {
-            value = fromPercent(value, baseValue);
-        }
-        else if (this.isIndexedTo100()) {
-            value = fromIndexedTo100(value, baseValue);
-        }
-        return value;
-    };
-    PriceScale.prototype.dataSources = function () {
-        return this._private__dataSources;
-    };
-    PriceScale.prototype.orderedSources = function () {
-        if (this._private__cachedOrderedSources) {
-            return this._private__cachedOrderedSources;
-        }
-        var sources = [];
-        for (var i = 0; i < this._private__dataSources.length; i++) {
-            var ds = this._private__dataSources[i];
-            if (ds.zorder() === null) {
-                ds.setZorder(i + 1);
-            }
-            sources.push(ds);
-        }
-        sources = sortSources(sources);
-        this._private__cachedOrderedSources = sources;
-        return this._private__cachedOrderedSources;
-    };
-    PriceScale.prototype.addDataSource = function (source) {
-        if (this._private__dataSources.indexOf(source) !== -1) {
-            return;
-        }
-        this._private__dataSources.push(source);
-        this.updateFormatter();
-        this.invalidateSourcesCache();
-    };
-    PriceScale.prototype.removeDataSource = function (source) {
-        var index = this._private__dataSources.indexOf(source);
-        if (index === -1) {
-            throw new Error('source is not attached to scale');
-        }
-        this._private__dataSources.splice(index, 1);
-        if (this._private__dataSources.length === 0) {
-            this.setMode({
-                autoScale: true,
-            });
-            // if no sources on price scale let's clear price range cache as well as enabling auto scale
-            this.setPriceRange(null);
-        }
-        this.updateFormatter();
-        this.invalidateSourcesCache();
-    };
-    PriceScale.prototype.firstValue = function () {
-        // TODO: cache the result
-        var result = null;
-        for (var _i = 0, _a = this._private__dataSources; _i < _a.length; _i++) {
-            var source = _a[_i];
-            var firstValue = source.firstValue();
-            if (firstValue === null || firstValue.value === null) {
-                continue;
-            }
-            if (result === null || firstValue.timePoint < result.timePoint) {
-                result = firstValue;
-            }
-        }
-        return result === null ? null : result.value;
-    };
-    PriceScale.prototype.isInverted = function () {
-        return this._private__options.invertScale;
-    };
-    PriceScale.prototype.marks = function () {
-        if (this._private__marksCache) {
-            return this._private__marksCache;
-        }
-        this._private__markBuilder._internal_rebuildTickMarks();
-        this._private__marksCache = this._private__markBuilder._internal_marks();
-        this._private__onMarksChanged._internal_fire();
-        return this._private__marksCache;
-    };
-    PriceScale.prototype.onMarksChanged = function () {
-        return this._private__onMarksChanged;
-    };
-    PriceScale.prototype.startScale = function (x) {
-        if (this.isPercentage() || this.isIndexedTo100()) {
-            return;
-        }
-        if (this._private__scaleStartPoint !== null || this._private__priceRangeSnapshot !== null) {
-            return;
-        }
-        if (this.isEmpty()) {
-            return;
-        }
-        // invert x
-        this._private__scaleStartPoint = this._private__height - x;
-        this._private__priceRangeSnapshot = ensureNotNull(this.priceRange()).clone();
-    };
-    PriceScale.prototype.scaleTo = function (x) {
-        if (this.isPercentage() || this.isIndexedTo100()) {
-            return;
-        }
-        if (this._private__scaleStartPoint === null) {
-            return;
-        }
-        this.setMode({
-            autoScale: false,
-        });
-        // invert x
-        x = this._private__height - x;
-        if (x < 0) {
-            x = 0;
-        }
-        var scaleCoeff = (this._private__scaleStartPoint + (this._private__height - 1) * 0.2) / (x + (this._private__height - 1) * 0.2);
-        var newPriceRange = ensureNotNull(this._private__priceRangeSnapshot).clone();
-        scaleCoeff = Math.max(scaleCoeff, 0.1);
-        newPriceRange.scaleAroundCenter(scaleCoeff);
-        this.setPriceRange(newPriceRange);
-    };
-    PriceScale.prototype.endScale = function () {
-        if (this.isPercentage() || this.isIndexedTo100()) {
-            return;
-        }
-        this._private__scaleStartPoint = null;
-        this._private__priceRangeSnapshot = null;
-    };
-    PriceScale.prototype.startScroll = function (x) {
-        if (this.isAutoScale()) {
-            return;
-        }
-        if (this._private__scrollStartPoint !== null || this._private__priceRangeSnapshot !== null) {
-            return;
-        }
-        if (this.isEmpty()) {
-            return;
-        }
-        this._private__scrollStartPoint = x;
-        this._private__priceRangeSnapshot = ensureNotNull(this.priceRange()).clone();
-    };
-    PriceScale.prototype.scrollTo = function (x) {
-        if (this.isAutoScale()) {
-            return;
-        }
-        if (this._private__scrollStartPoint === null) {
-            return;
-        }
-        var priceUnitsPerPixel = ensureNotNull(this.priceRange()).length() / (this.internalHeight() - 1);
-        var pixelDelta = x - this._private__scrollStartPoint;
-        if (this.isInverted()) {
-            pixelDelta *= -1;
-        }
-        var priceDelta = pixelDelta * priceUnitsPerPixel;
-        var newPriceRange = ensureNotNull(this._private__priceRangeSnapshot).clone();
-        newPriceRange.shift(priceDelta);
-        this.setPriceRange(newPriceRange, true);
-        this._private__marksCache = null;
-    };
-    PriceScale.prototype.endScroll = function () {
-        if (this.isAutoScale()) {
-            return;
-        }
-        if (this._private__scrollStartPoint === null) {
-            return;
-        }
-        this._private__scrollStartPoint = null;
-        this._private__priceRangeSnapshot = null;
-    };
-    PriceScale.prototype.formatter = function () {
-        if (!this._private__formatter) {
-            this.updateFormatter();
-        }
-        return this._private__formatter;
-    };
-    PriceScale.prototype.formatPrice = function (price, firstValue) {
-        switch (this._private__options.mode) {
-            case 2 /* Percentage */:
-                return this.formatter().format(toPercent(price, firstValue));
-            case 3 /* IndexedTo100 */:
-                return this.formatter().format(toIndexedTo100(price, firstValue));
-            default:
-                return this._private__formatPrice(price);
-        }
-    };
-    PriceScale.prototype.formatLogical = function (logical) {
-        switch (this._private__options.mode) {
-            case 2 /* Percentage */:
-            case 3 /* IndexedTo100 */:
-                return this.formatter().format(logical);
-            default:
-                return this._private__formatPrice(logical);
-        }
-    };
-    PriceScale.prototype.formatPriceAbsolute = function (price) {
-        return this._private__formatPrice(price, ensureNotNull(this._private__formatterSource()).formatter());
-    };
-    PriceScale.prototype.formatPricePercentage = function (price, baseValue) {
-        price = toPercent(price, baseValue);
-        return percentageFormatter.format(price);
-    };
-    PriceScale.prototype.sourcesForAutoScale = function () {
-        return this._private__dataSources;
-    };
-    PriceScale.prototype.recalculatePriceRange = function (visibleBars) {
-        this._private__invalidatedForRange = {
-            _internal_visibleBars: visibleBars,
-            _internal_isValid: false,
-        };
-    };
-    PriceScale.prototype.updateAllViews = function () {
-        this._private__dataSources.forEach(function (s) { return s.updateAllViews(); });
-    };
-    PriceScale.prototype.updateFormatter = function () {
-        this._private__marksCache = null;
-        var formatterSource = this._private__formatterSource();
-        var base = 100;
-        if (formatterSource !== null) {
-            base = Math.round(1 / formatterSource.minMove());
-        }
-        this._private__formatter = defaultPriceFormatter;
-        if (this.isPercentage()) {
-            this._private__formatter = percentageFormatter;
-            base = 100;
-        }
-        else if (this.isIndexedTo100()) {
-            this._private__formatter = new PriceFormatter(100, 1);
-            base = 100;
-        }
-        else {
-            if (formatterSource !== null) {
-                // user
-                this._private__formatter = formatterSource.formatter();
-            }
-        }
-        this._private__markBuilder = new PriceTickMarkBuilder(this, base, this._private__coordinateToLogical.bind(this), this._private__logicalToCoordinate.bind(this));
-        this._private__markBuilder._internal_rebuildTickMarks();
-    };
-    PriceScale.prototype.invalidateSourcesCache = function () {
-        this._private__cachedOrderedSources = null;
-    };
-    /**
-     * @returns The {@link IPriceDataSource} that will be used as the "formatter source" (take minMove for formatter).
-     */
-    PriceScale.prototype._private__formatterSource = function () {
-        return this._private__dataSources[0] || null;
-    };
-    PriceScale.prototype._private__topMarginPx = function () {
-        return this.isInverted()
-            ? this._private__options.scaleMargins.bottom * this.height() + this._private__marginBelow
-            : this._private__options.scaleMargins.top * this.height() + this._private__marginAbove;
-    };
-    PriceScale.prototype._private__bottomMarginPx = function () {
-        return this.isInverted()
-            ? this._private__options.scaleMargins.top * this.height() + this._private__marginAbove
-            : this._private__options.scaleMargins.bottom * this.height() + this._private__marginBelow;
-    };
-    PriceScale.prototype._private__makeSureItIsValid = function () {
-        if (!this._private__invalidatedForRange._internal_isValid) {
-            this._private__invalidatedForRange._internal_isValid = true;
-            this._private__recalculatePriceRangeImpl();
-        }
-    };
-    PriceScale.prototype._private__invalidateInternalHeightCache = function () {
-        this._private__internalHeightCache = null;
-    };
-    PriceScale.prototype._private__logicalToCoordinate = function (logical, baseValue) {
-        this._private__makeSureItIsValid();
-        if (this.isEmpty()) {
-            return 0;
-        }
-        logical = this.isLog() && logical ? toLog(logical, this._private__logFormula) : logical;
-        var range = ensureNotNull(this.priceRange());
-        var invCoordinate = this._private__bottomMarginPx() +
-            (this.internalHeight() - 1) * (logical - range.minValue()) / range.length();
-        var coordinate = this.invertedCoordinate(invCoordinate);
-        return coordinate;
-    };
-    PriceScale.prototype._private__coordinateToLogical = function (coordinate, baseValue) {
-        this._private__makeSureItIsValid();
-        if (this.isEmpty()) {
-            return 0;
-        }
-        var invCoordinate = this.invertedCoordinate(coordinate);
-        var range = ensureNotNull(this.priceRange());
-        var logical = range.minValue() + range.length() *
-            ((invCoordinate - this._private__bottomMarginPx()) / (this.internalHeight() - 1));
-        return this.isLog() ? fromLog(logical, this._private__logFormula) : logical;
-    };
-    PriceScale.prototype._private__onIsInvertedChanged = function () {
-        this._private__marksCache = null;
-        this._private__markBuilder._internal_rebuildTickMarks();
-    };
-    // eslint-disable-next-line complexity
-    PriceScale.prototype._private__recalculatePriceRangeImpl = function () {
-        var visibleBars = this._private__invalidatedForRange._internal_visibleBars;
-        if (visibleBars === null) {
-            return;
-        }
-        var priceRange = null;
-        var sources = this.sourcesForAutoScale();
-        var marginAbove = 0;
-        var marginBelow = 0;
-        for (var _i = 0, sources_1 = sources; _i < sources_1.length; _i++) {
-            var source = sources_1[_i];
-            if (!source.visible()) {
-                continue;
-            }
-            var firstValue = source.firstValue();
-            if (firstValue === null) {
-                continue;
-            }
-            var autoScaleInfo = source.autoscaleInfo(visibleBars.left(), visibleBars.right());
-            var sourceRange = autoScaleInfo && autoScaleInfo.priceRange();
-            if (sourceRange !== null) {
-                switch (this._private__options.mode) {
-                    case 1 /* Logarithmic */:
-                        sourceRange = convertPriceRangeToLog(sourceRange, this._private__logFormula);
-                        break;
-                    case 2 /* Percentage */:
-                        sourceRange = toPercentRange(sourceRange, firstValue.value);
-                        break;
-                    case 3 /* IndexedTo100 */:
-                        sourceRange = toIndexedTo100Range(sourceRange, firstValue.value);
-                        break;
-                }
-                if (priceRange === null) {
-                    priceRange = sourceRange;
-                }
-                else {
-                    priceRange = priceRange.merge(ensureNotNull(sourceRange));
-                }
-                if (autoScaleInfo !== null) {
-                    var margins = autoScaleInfo.margins();
-                    if (margins !== null) {
-                        marginAbove = Math.max(marginAbove, margins.above);
-                        marginBelow = Math.max(marginAbove, margins.below);
-                    }
-                }
-            }
-        }
-        if (marginAbove !== this._private__marginAbove || marginBelow !== this._private__marginBelow) {
-            this._private__marginAbove = marginAbove;
-            this._private__marginBelow = marginBelow;
-            this._private__marksCache = null;
-            this._private__invalidateInternalHeightCache();
-        }
-        if (priceRange !== null) {
-            // keep current range is new is empty
-            if (priceRange.minValue() === priceRange.maxValue()) {
-                var formatterSource = this._private__formatterSource();
-                var minMove = formatterSource === null || this.isPercentage() || this.isIndexedTo100() ? 1 : formatterSource.minMove();
-                // if price range is degenerated to 1 point let's extend it by 10 min move values
-                // to avoid incorrect range and empty (blank) scale (in case of min tick much greater than 1)
-                var extendValue = 5 * minMove;
-                if (this.isLog()) {
-                    priceRange = convertPriceRangeFromLog(priceRange, this._private__logFormula);
-                }
-                priceRange = new PriceRangeImpl(priceRange.minValue() - extendValue, priceRange.maxValue() + extendValue);
-                if (this.isLog()) {
-                    priceRange = convertPriceRangeToLog(priceRange, this._private__logFormula);
-                }
-            }
-            if (this.isLog()) {
-                var rawRange = convertPriceRangeFromLog(priceRange, this._private__logFormula);
-                var newLogFormula = logFormulaForPriceRange(rawRange);
-                if (!logFormulasAreSame(newLogFormula, this._private__logFormula)) {
-                    var rawSnapshot = this._private__priceRangeSnapshot !== null ? convertPriceRangeFromLog(this._private__priceRangeSnapshot, this._private__logFormula) : null;
-                    this._private__logFormula = newLogFormula;
-                    priceRange = convertPriceRangeToLog(rawRange, newLogFormula);
-                    if (rawSnapshot !== null) {
-                        this._private__priceRangeSnapshot = convertPriceRangeToLog(rawSnapshot, newLogFormula);
-                    }
-                }
-            }
-            this.setPriceRange(priceRange);
-        }
-        else {
-            // reset empty to default
-            if (this._private__priceRange === null) {
-                this.setPriceRange(new PriceRangeImpl(-0.5, 0.5));
-                this._private__logFormula = logFormulaForPriceRange(null);
-            }
-        }
-        this._private__invalidatedForRange._internal_isValid = true;
-    };
-    PriceScale.prototype._private__getCoordinateTransformer = function () {
-        var _this = this;
-        if (this.isPercentage()) {
-            return toPercent;
-        }
-        else if (this.isIndexedTo100()) {
-            return toIndexedTo100;
-        }
-        else if (this.isLog()) {
-            return function (price) { return toLog(price, _this._private__logFormula); };
-        }
-        return null;
-    };
-    PriceScale.prototype._private__formatPrice = function (price, fallbackFormatter) {
-        if (this._private__localizationOptions.priceFormatter === undefined) {
-            if (fallbackFormatter === undefined) {
-                fallbackFormatter = this.formatter();
-            }
-            return fallbackFormatter.format(price);
-        }
-        return this._private__localizationOptions.priceFormatter(price);
-    };
-    return PriceScale;
-}());
-
-function fillUpDownCandlesticksColors(options) {
-    if (options.borderColor !== undefined) {
-        options.borderUpColor = options.borderColor;
-        options.borderDownColor = options.borderColor;
-    }
-    if (options.wickColor !== undefined) {
-        options.wickUpColor = options.wickColor;
-        options.wickDownColor = options.wickColor;
-    }
-}
-/**
- * Represents the type of the last price animation for series such as area or line.
- */
-var LastPriceAnimationMode;
-(function (LastPriceAnimationMode) {
-    /**
-     * Animation is always disabled
-     */
-    LastPriceAnimationMode[LastPriceAnimationMode["Disabled"] = 0] = "Disabled";
-    /**
-     * Animation is always enabled.
-     */
-    LastPriceAnimationMode[LastPriceAnimationMode["Continuous"] = 1] = "Continuous";
-    /**
-     * Animation is active after new data.
-     */
-    LastPriceAnimationMode[LastPriceAnimationMode["OnDataUpdate"] = 2] = "OnDataUpdate";
-})(LastPriceAnimationMode || (LastPriceAnimationMode = {}));
-function precisionByMinMove(minMove) {
-    if (minMove >= 1) {
-        return 0;
-    }
-    var i = 0;
-    for (; i < 8; i++) {
-        var intPart = Math.round(minMove);
-        var fractPart = Math.abs(intPart - minMove);
-        if (fractPart < 1e-8) {
-            return i;
-        }
-        minMove = minMove * 10;
-    }
-    return i;
-}
-/**
- * Represents the source of data to be used for the horizontal price line.
- */
-var PriceLineSource;
-(function (PriceLineSource) {
-    /**
-     * Use the last bar data.
-     */
-    PriceLineSource[PriceLineSource["LastBar"] = 0] = "LastBar";
-    /**
-     * Use the last visible data of the chart viewport.
-     */
-    PriceLineSource[PriceLineSource["LastVisible"] = 1] = "LastVisible";
-})(PriceLineSource || (PriceLineSource = {}));
-
-var getMonth = function (date) { return date.getUTCMonth() + 1; };
-var getDay = function (date) { return date.getUTCDate(); };
-var getYear = function (date) { return date.getUTCFullYear(); };
-var dd = function (date) { return numberToStringWithLeadingZero(getDay(date), 2); };
-var MMMM = function (date, locale) { return new Date(date.getUTCFullYear(), date.getUTCMonth(), 1)
-    .toLocaleString(locale, { month: 'long' }); };
-var MMM = function (date, locale) { return new Date(date.getUTCFullYear(), date.getUTCMonth(), 1)
-    .toLocaleString(locale, { month: 'short' }); };
-var MM = function (date) { return numberToStringWithLeadingZero(getMonth(date), 2); };
-var yy = function (date) { return numberToStringWithLeadingZero(getYear(date) % 100, 2); };
-var yyyy = function (date) { return numberToStringWithLeadingZero(getYear(date), 4); };
-function formatDate(date, format, locale) {
-    return format
-        .replace(/yyyy/g, yyyy(date))
-        .replace(/yy/g, yy(date))
-        .replace(/MMMM/g, MMMM(date, locale))
-        .replace(/MMM/g, MMM(date, locale))
-        .replace(/MM/g, MM(date))
-        .replace(/dd/g, dd(date));
-}
-
-var DateFormatter = /** @class */ (function () {
-    function DateFormatter(dateFormat, locale) {
-        if (dateFormat === void 0) { dateFormat = 'yyyy-MM-dd'; }
-        if (locale === void 0) { locale = 'default'; }
-        this._private__dateFormat = dateFormat;
-        this._private__locale = locale;
-    }
-    DateFormatter.prototype._internal_format = function (date) {
-        return formatDate(date, this._private__dateFormat, this._private__locale);
-    };
-    return DateFormatter;
-}());
-
-var TimeFormatter = /** @class */ (function () {
-    function TimeFormatter(format) {
-        this._private__formatStr = format || '%h:%m:%s';
-    }
-    TimeFormatter.prototype._internal_format = function (date) {
-        return this._private__formatStr.replace('%h', numberToStringWithLeadingZero(date.getUTCHours(), 2)).
-            replace('%m', numberToStringWithLeadingZero(date.getUTCMinutes(), 2)).
-            replace('%s', numberToStringWithLeadingZero(date.getUTCSeconds(), 2));
-    };
-    return TimeFormatter;
-}());
-
-var defaultParams = {
-    _internal_dateFormat: 'yyyy-MM-dd',
-    _internal_timeFormat: '%h:%m:%s',
-    _internal_dateTimeSeparator: ' ',
-    _internal_locale: 'default',
-};
-var DateTimeFormatter = /** @class */ (function () {
-    function DateTimeFormatter(params) {
-        if (params === void 0) { params = {}; }
-        var formatterParams = __assign(__assign({}, defaultParams), params);
-        this._private__dateFormatter = new DateFormatter(formatterParams._internal_dateFormat, formatterParams._internal_locale);
-        this._private__timeFormatter = new TimeFormatter(formatterParams._internal_timeFormat);
-        this._private__separator = formatterParams._internal_dateTimeSeparator;
-    }
-    DateTimeFormatter.prototype._internal_format = function (dateTime) {
-        return "" + this._private__dateFormatter._internal_format(dateTime) + this._private__separator + this._private__timeFormatter._internal_format(dateTime);
-    };
-    return DateTimeFormatter;
-}());
-
-/**
- * Binary function that accepts two arguments (the first of the type of array elements, and the second is always val), and returns a value convertible to bool.
- * The value returned indicates whether the first argument is considered to go before the second.
- * The function shall not modify any of its arguments.
- */
-function lowerbound(arr, value, compare, start, to) {
-    if (start === void 0) { start = 0; }
-    if (to === void 0) { to = arr.length; }
-    var count = to - start;
-    while (0 < count) {
-        var count2 = (count >> 1);
-        var mid = start + count2;
-        if (compare(arr[mid], value)) {
-            start = mid + 1;
-            count -= count2 + 1;
-        }
-        else {
-            count = count2;
-        }
-    }
-    return start;
-}
-function upperbound(arr, value, compare, start, to) {
-    if (start === void 0) { start = 0; }
-    if (to === void 0) { to = arr.length; }
-    var count = to - start;
-    while (0 < count) {
-        var count2 = (count >> 1);
-        var mid = start + count2;
-        if (!(compare(value, arr[mid]))) {
-            start = mid + 1;
-            count -= count2 + 1;
-        }
-        else {
-            count = count2;
-        }
-    }
-    return start;
-}
-
-function defaultTickMarkFormatter(timePoint, tickMarkType, locale) {
-    var formatOptions = {};
-    switch (tickMarkType) {
-        case 0 /* Year */:
-            formatOptions.year = 'numeric';
-            break;
-        case 1 /* Month */:
-            formatOptions.month = 'short';
-            break;
-        case 2 /* DayOfMonth */:
-            formatOptions.day = 'numeric';
-            break;
-        case 3 /* Time */:
-            formatOptions.hour12 = false;
-            formatOptions.hour = '2-digit';
-            formatOptions.minute = '2-digit';
-            break;
-        case 4 /* TimeWithSeconds */:
-            formatOptions.hour12 = false;
-            formatOptions.hour = '2-digit';
-            formatOptions.minute = '2-digit';
-            formatOptions.second = '2-digit';
-            break;
-    }
-    var date = timePoint.businessDay === undefined
-        ? new Date(timePoint.timestamp * 1000)
-        : new Date(Date.UTC(timePoint.businessDay.year, timePoint.businessDay.month - 1, timePoint.businessDay.day));
-    // from given date we should use only as UTC date or timestamp
-    // but to format as locale date we can convert UTC date to local date
-    var localDateFromUtc = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds());
-    return localDateFromUtc.toLocaleString(locale, formatOptions);
-}
-
-var FormattedLabelsCache = /** @class */ (function () {
-    function FormattedLabelsCache(format, size) {
-        if (size === void 0) { size = 50; }
-        this._private__actualSize = 0;
-        this._private__usageTick = 1;
-        this._private__oldestTick = 1;
-        this._private__cache = new Map();
-        this._private__tick2Labels = new Map();
-        this._private__format = format;
-        this._private__maxSize = size;
-    }
-    FormattedLabelsCache.prototype._internal_format = function (value) {
-        var cacheKey = value.businessDay === undefined
-            ? new Date(value.timestamp * 1000).getTime()
-            : new Date(Date.UTC(value.businessDay.year, value.businessDay.month - 1, value.businessDay.day)).getTime();
-        var tick = this._private__cache.get(cacheKey);
-        if (tick !== undefined) {
-            return tick._internal_string;
-        }
-        if (this._private__actualSize === this._private__maxSize) {
-            var oldestValue = this._private__tick2Labels.get(this._private__oldestTick);
-            this._private__tick2Labels.delete(this._private__oldestTick);
-            this._private__cache.delete(ensureDefined(oldestValue));
-            this._private__oldestTick++;
-            this._private__actualSize--;
-        }
-        var str = this._private__format(value);
-        this._private__cache.set(cacheKey, { _internal_string: str, _internal_tick: this._private__usageTick });
-        this._private__tick2Labels.set(this._private__usageTick, cacheKey);
-        this._private__actualSize++;
-        this._private__usageTick++;
-        return str;
-    };
-    return FormattedLabelsCache;
-}());
-
-var RangeImpl = /** @class */ (function () {
-    function RangeImpl(left, right) {
-        assert(left <= right, 'right should be >= left');
-        this._private__left = left;
-        this._private__right = right;
-    }
-    RangeImpl.prototype.left = function () {
-        return this._private__left;
-    };
-    RangeImpl.prototype.right = function () {
-        return this._private__right;
-    };
-    RangeImpl.prototype.count = function () {
-        return this._private__right - this._private__left + 1;
-    };
-    RangeImpl.prototype.contains = function (index) {
-        return this._private__left <= index && index <= this._private__right;
-    };
-    RangeImpl.prototype.equals = function (other) {
-        return this._private__left === other.left() && this._private__right === other.right();
-    };
-    return RangeImpl;
-}());
-function areRangesEqual(first, second) {
-    if (first === null || second === null) {
-        return first === second;
-    }
-    return first.equals(second);
-}
-
-var TickMarks = /** @class */ (function () {
-    function TickMarks() {
-        this._private__marksByWeight = new Map();
-        this._private__cache = null;
-    }
-    TickMarks.prototype._internal_setTimeScalePoints = function (newPoints, firstChangedPointIndex) {
-        this._private__removeMarksSinceIndex(firstChangedPointIndex);
-        this._private__cache = null;
-        for (var index = firstChangedPointIndex; index < newPoints.length; ++index) {
-            var point = newPoints[index];
-            var marksForWeight = this._private__marksByWeight.get(point.timeWeight);
-            if (marksForWeight === undefined) {
-                marksForWeight = [];
-                this._private__marksByWeight.set(point.timeWeight, marksForWeight);
-            }
-            marksForWeight.push({
-                _internal_index: index,
-                _internal_time: point.time,
-                _internal_weight: point.timeWeight,
-            });
-        }
-    };
-    TickMarks.prototype._internal_build = function (spacing, maxWidth) {
-        var maxIndexesPerMark = Math.ceil(maxWidth / spacing);
-        if (this._private__cache === null || this._private__cache._internal_maxIndexesPerMark !== maxIndexesPerMark) {
-            this._private__cache = {
-                _internal_marks: this._private__buildMarksImpl(maxIndexesPerMark),
-                _internal_maxIndexesPerMark: maxIndexesPerMark,
-            };
-        }
-        return this._private__cache._internal_marks;
-    };
-    TickMarks.prototype._private__removeMarksSinceIndex = function (sinceIndex) {
-        if (sinceIndex === 0) {
-            this._private__marksByWeight.clear();
-            return;
-        }
-        var weightsToClear = [];
-        this._private__marksByWeight.forEach(function (marks, timeWeight) {
-            if (sinceIndex <= marks[0]._internal_index) {
-                weightsToClear.push(timeWeight);
-            }
-            else {
-                marks.splice(lowerbound(marks, sinceIndex, function (tm) { return tm._internal_index < sinceIndex; }), Infinity);
-            }
-        });
-        for (var _i = 0, weightsToClear_1 = weightsToClear; _i < weightsToClear_1.length; _i++) {
-            var weight = weightsToClear_1[_i];
-            this._private__marksByWeight.delete(weight);
-        }
-    };
-    TickMarks.prototype._private__buildMarksImpl = function (maxIndexesPerMark) {
-        var marks = [];
-        for (var _i = 0, _a = Array.from(this._private__marksByWeight.keys()).sort(function (a, b) { return b - a; }); _i < _a.length; _i++) {
-            var weight = _a[_i];
-            if (!this._private__marksByWeight.get(weight)) {
-                continue;
-            }
-            // Built tickMarks are now prevMarks, and marks it as new array
-            var prevMarks = marks;
-            marks = [];
-            var prevMarksLength = prevMarks.length;
-            var prevMarksPointer = 0;
-            var currentWeight = ensureDefined(this._private__marksByWeight.get(weight));
-            var currentWeightLength = currentWeight.length;
-            var rightIndex = Infinity;
-            var leftIndex = -Infinity;
-            for (var i = 0; i < currentWeightLength; i++) {
-                var mark = currentWeight[i];
-                var currentIndex = mark._internal_index;
-                // Determine indexes with which current index will be compared
-                // All marks to the right is moved to new array
-                while (prevMarksPointer < prevMarksLength) {
-                    var lastMark = prevMarks[prevMarksPointer];
-                    var lastIndex = lastMark._internal_index;
-                    if (lastIndex < currentIndex) {
-                        prevMarksPointer++;
-                        marks.push(lastMark);
-                        leftIndex = lastIndex;
-                        rightIndex = Infinity;
-                    }
-                    else {
-                        rightIndex = lastIndex;
-                        break;
-                    }
-                }
-                if (rightIndex - currentIndex >= maxIndexesPerMark && currentIndex - leftIndex >= maxIndexesPerMark) {
-                    // TickMark fits. Place it into new array
-                    marks.push(mark);
-                    leftIndex = currentIndex;
-                }
-            }
-            // Place all unused tickMarks into new array;
-            for (; prevMarksPointer < prevMarksLength; prevMarksPointer++) {
-                marks.push(prevMarks[prevMarksPointer]);
-            }
-        }
-        return marks;
-    };
-    return TickMarks;
-}());
-
-var TimeScaleVisibleRange = /** @class */ (function () {
-    function TimeScaleVisibleRange(logicalRange) {
-        this._private__logicalRange = logicalRange;
-    }
-    TimeScaleVisibleRange.prototype._internal_strictRange = function () {
-        if (this._private__logicalRange === null) {
-            return null;
-        }
-        return new RangeImpl(Math.floor(this._private__logicalRange.left()), Math.ceil(this._private__logicalRange.right()));
-    };
-    TimeScaleVisibleRange.prototype._internal_logicalRange = function () {
-        return this._private__logicalRange;
-    };
-    TimeScaleVisibleRange._internal_invalid = function () {
-        return new TimeScaleVisibleRange(null);
-    };
-    return TimeScaleVisibleRange;
-}());
-
-/**
- * Represents the type of a tick mark on the time axis.
- */
-var TickMarkType;
-(function (TickMarkType) {
-    /**
-     * The start of the year (e.g. it's the first tick mark in a year).
-     */
-    TickMarkType[TickMarkType["Year"] = 0] = "Year";
-    /**
-     * The start of the month (e.g. it's the first tick mark in a month).
-     */
-    TickMarkType[TickMarkType["Month"] = 1] = "Month";
-    /**
-     * A day of the month.
-     */
-    TickMarkType[TickMarkType["DayOfMonth"] = 2] = "DayOfMonth";
-    /**
-     * A time without seconds.
-     */
-    TickMarkType[TickMarkType["Time"] = 3] = "Time";
-    /**
-     * A time with seconds.
-     */
-    TickMarkType[TickMarkType["TimeWithSeconds"] = 4] = "TimeWithSeconds";
-})(TickMarkType || (TickMarkType = {}));
-var TimeScale = /** @class */ (function () {
-    function TimeScale(model, options, localizationOptions) {
-        this._private__width = 0;
-        this._private__baseIndexOrNull = null;
-        this._private__points = [];
-        this._private__scrollStartPoint = null;
-        this._private__scaleStartPoint = null;
-        this._private__tickMarks = new TickMarks();
-        this._private__formattedByWeight = new Map();
-        this._private__visibleRange = TimeScaleVisibleRange._internal_invalid();
-        this._private__visibleRangeInvalidated = true;
-        this._private__visibleBarsChanged = new Delegate();
-        this._private__logicalRangeChanged = new Delegate();
-        this._private__optionsApplied = new Delegate();
-        this._private__commonTransitionStartState = null;
-        this._private__timeMarksCache = null;
-        this._private__labels = [];
-        this._private__options = options;
-        this._private__localizationOptions = localizationOptions;
-        this._private__rightOffset = options.rightOffset;
-        this._private__barSpacing = options.barSpacing;
-        this._private__model = model;
-        this._private__updateDateTimeFormatter();
-    }
-    TimeScale.prototype.options = function () {
-        return this._private__options;
-    };
-    TimeScale.prototype.applyLocalizationOptions = function (localizationOptions) {
-        merge(this._private__localizationOptions, localizationOptions);
-        this._private__invalidateTickMarks();
-        this._private__updateDateTimeFormatter();
-    };
-    TimeScale.prototype.applyOptions = function (options, localizationOptions) {
-        var _a;
-        merge(this._private__options, options);
-        if (this._private__options.fixLeftEdge) {
-            this._private__doFixLeftEdge();
-        }
-        if (this._private__options.fixRightEdge) {
-            this._private__doFixRightEdge();
-        }
-        // note that bar spacing should be applied before right offset
-        // because right offset depends on bar spacing
-        if (options.barSpacing !== undefined) {
-            this._private__model.setBarSpacing(options.barSpacing);
-        }
-        if (options.rightOffset !== undefined) {
-            this._private__model.setRightOffset(options.rightOffset);
-        }
-        if (options.minBarSpacing !== undefined) {
-            // yes, if we apply min bar spacing then we need to correct bar spacing
-            // the easiest way is to apply it once again
-            this._private__model.setBarSpacing((_a = options.barSpacing) !== null && _a !== void 0 ? _a : this._private__barSpacing);
-        }
-        this._private__invalidateTickMarks();
-        this._private__updateDateTimeFormatter();
-        this._private__optionsApplied._internal_fire();
-    };
-    TimeScale.prototype.indexToTime = function (index) {
-        var _a;
-        return ((_a = this._private__points[index]) === null || _a === void 0 ? void 0 : _a.time) || null;
-    };
-    TimeScale.prototype.timeToIndex = function (time, findNearest) {
-        if (this._private__points.length < 1) {
-            // no time points available
-            return null;
-        }
-        if (time.timestamp > this._private__points[this._private__points.length - 1].time.timestamp) {
-            // special case
-            return findNearest ? this._private__points.length - 1 : null;
-        }
-        var index = lowerbound(this._private__points, time.timestamp, function (a, b) { return a.time.timestamp < b; });
-        if (time.timestamp < this._private__points[index].time.timestamp) {
-            return findNearest ? index : null;
-        }
-        return index;
-    };
-    TimeScale.prototype.isEmpty = function () {
-        return this._private__width === 0 || this._private__points.length === 0 || this._private__baseIndexOrNull === null;
-    };
-    // strict range: integer indices of the bars in the visible range rounded in more wide direction
-    TimeScale.prototype.visibleStrictRange = function () {
-        this._private__updateVisibleRange();
-        return this._private__visibleRange._internal_strictRange();
-    };
-    TimeScale.prototype.visibleLogicalRange = function () {
-        this._private__updateVisibleRange();
-        return this._private__visibleRange._internal_logicalRange();
-    };
-    TimeScale.prototype.visibleTimeRange = function () {
-        var visibleBars = this.visibleStrictRange();
-        if (visibleBars === null) {
-            return null;
-        }
-        var range = {
-            from: visibleBars.left(),
-            to: visibleBars.right(),
-        };
-        return this.timeRangeForLogicalRange(range);
-    };
-    TimeScale.prototype.timeRangeForLogicalRange = function (range) {
-        var from = Math.round(range.from);
-        var to = Math.round(range.to);
-        var firstIndex = ensureNotNull(this._private__firstIndex());
-        var lastIndex = ensureNotNull(this._private__lastIndex());
-        return {
-            from: ensureNotNull(this.indexToTime(Math.max(firstIndex, from))),
-            to: ensureNotNull(this.indexToTime(Math.min(lastIndex, to))),
-        };
-    };
-    TimeScale.prototype.logicalRangeForTimeRange = function (range) {
-        return {
-            from: ensureNotNull(this.timeToIndex(range.from, true)),
-            to: ensureNotNull(this.timeToIndex(range.to, true)),
-        };
-    };
-    TimeScale.prototype.width = function () {
-        return this._private__width;
-    };
-    TimeScale.prototype.setWidth = function (width) {
-        if (!isFinite(width) || width <= 0) {
-            return;
-        }
-        if (this._private__width === width) {
-            return;
-        }
-        if (this._private__options.lockVisibleTimeRangeOnResize && this._private__width) {
-            // recalculate bar spacing
-            var newBarSpacing = this._private__barSpacing * width / this._private__width;
-            this._private__barSpacing = newBarSpacing;
-        }
-        // if time scale is scrolled to the end of data and we have fixed right edge
-        // keep left edge instead of right
-        // we need it to avoid "shaking" if the last bar visibility affects time scale width
-        if (this._private__options.fixLeftEdge) {
-            var visibleRange = this.visibleStrictRange();
-            if (visibleRange !== null) {
-                var firstVisibleBar = visibleRange.left();
-                // firstVisibleBar could be less than 0
-                // since index is a center of bar
-                if (firstVisibleBar <= 0) {
-                    var delta = this._private__width - width;
-                    // reduce  _rightOffset means move right
-                    // we could move more than required - this will be fixed by _correctOffset()
-                    this._private__rightOffset -= Math.round(delta / this._private__barSpacing) + 1;
-                }
-            }
-        }
-        this._private__width = width;
-        this._private__visibleRangeInvalidated = true;
-        // updating bar spacing should be first because right offset depends on it
-        this._private__correctBarSpacing();
-        this._private__correctOffset();
-    };
-    TimeScale.prototype.indexToCoordinate = function (index) {
-        if (this.isEmpty() || !isInteger(index)) {
-            return 0;
-        }
-        var baseIndex = this.baseIndex();
-        var deltaFromRight = baseIndex + this._private__rightOffset - index;
-        var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing - 1;
-        return coordinate;
-    };
-    TimeScale.prototype.indexesToCoordinates = function (points, visibleRange) {
-        var baseIndex = this.baseIndex();
-        var indexFrom = (visibleRange === undefined) ? 0 : visibleRange.from;
-        var indexTo = (visibleRange === undefined) ? points.length : visibleRange.to;
-        for (var i = indexFrom; i < indexTo; i++) {
-            var index = points[i].time;
-            var deltaFromRight = baseIndex + this._private__rightOffset - index;
-            var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing - 1;
-            points[i].x = coordinate;
-        }
-    };
-    TimeScale.prototype.coordinateToIndex = function (x) {
-        return Math.ceil(this._private__coordinateToFloatIndex(x));
-    };
-    TimeScale.prototype.setRightOffset = function (offset) {
-        this._private__visibleRangeInvalidated = true;
-        this._private__rightOffset = offset;
-        this._private__correctOffset();
-        this._private__model.recalculateAllPanes();
-        this._private__model.lightUpdate();
-    };
-    TimeScale.prototype.barSpacing = function () {
-        return this._private__barSpacing;
-    };
-    TimeScale.prototype.setBarSpacing = function (newBarSpacing) {
-        this._private__setBarSpacing(newBarSpacing);
-        // do not allow scroll out of visible bars
-        this._private__correctOffset();
-        this._private__model.recalculateAllPanes();
-        this._private__model.lightUpdate();
-    };
-    TimeScale.prototype.rightOffset = function () {
-        return this._private__rightOffset;
-    };
-    TimeScale.prototype.marks = function () {
-        if (this.isEmpty()) {
-            return null;
-        }
-        if (this._private__timeMarksCache !== null) {
-            return this._private__timeMarksCache;
-        }
-        var spacing = this._private__barSpacing;
-        var fontSize = this._private__model.options().layout.fontSize;
-        var maxLabelWidth = (fontSize + 4) * 5;
-        var indexPerLabel = Math.round(maxLabelWidth / spacing);
-        var visibleBars = ensureNotNull(this.visibleStrictRange());
-        var firstBar = Math.max(visibleBars.left(), visibleBars.left() - indexPerLabel);
-        var lastBar = Math.max(visibleBars.right(), visibleBars.right() - indexPerLabel);
-        var items = this._private__tickMarks._internal_build(spacing, maxLabelWidth);
-        // according to indexPerLabel value this value means "earliest index which _might be_ used as the second label on time scale"
-        var earliestIndexOfSecondLabel = this._private__firstIndex() + indexPerLabel;
-        // according to indexPerLabel value this value means "earliest index which _might be_ used as the second last label on time scale"
-        var indexOfSecondLastLabel = this._private__lastIndex() - indexPerLabel;
-        var targetIndex = 0;
-        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
-            var tm = items_1[_i];
-            if (!(firstBar <= tm._internal_index && tm._internal_index <= lastBar)) {
-                continue;
-            }
-            var label = void 0;
-            if (targetIndex < this._private__labels.length) {
-                label = this._private__labels[targetIndex];
-                label.coord = this.indexToCoordinate(tm._internal_index);
-                label.label = this._private__formatLabel(tm._internal_time, tm._internal_weight);
-                label.weight = tm._internal_weight;
-            }
-            else {
-                label = {
-                    needAlignCoordinate: false,
-                    coord: this.indexToCoordinate(tm._internal_index),
-                    label: this._private__formatLabel(tm._internal_time, tm._internal_weight),
-                    weight: tm._internal_weight,
-                };
-                this._private__labels.push(label);
-            }
-            if (this._private__barSpacing > (maxLabelWidth / 2)) {
-                // if there is enough space then let's show all tick marks as usual
-                label.needAlignCoordinate = false;
-            }
-            else {
-                // if a user is able to scroll after a tick mark then show it as usual, otherwise the coordinate might be aligned
-                // if the index is for the second (last) label or later (earlier) then most likely this label might be displayed without correcting the coordinate
-                label.needAlignCoordinate = this._private__options.fixLeftEdge && tm._internal_index <= earliestIndexOfSecondLabel || this._private__options.fixRightEdge && tm._internal_index >= indexOfSecondLastLabel;
-            }
-            targetIndex++;
-        }
-        this._private__labels.length = targetIndex;
-        this._private__timeMarksCache = this._private__labels;
-        return this._private__labels;
-    };
-    TimeScale.prototype.restoreDefault = function () {
-        this._private__visibleRangeInvalidated = true;
-        this.setBarSpacing(this._private__options.barSpacing);
-        this.setRightOffset(this._private__options.rightOffset);
-    };
-    TimeScale.prototype.setBaseIndex = function (baseIndex) {
-        this._private__visibleRangeInvalidated = true;
-        this._private__baseIndexOrNull = baseIndex;
-        this._private__correctOffset();
-        this._private__doFixLeftEdge();
-    };
-    /**
-     * Zoom in/out the scale around a `zoomPoint` on `scale` value.
-     *
-     * @param zoomPoint - X coordinate of the point to apply the zoom.
-     * If `rightBarStaysOnScroll` option is disabled, then will be used to restore right offset.
-     * @param scale - Zoom value (in 1/10 parts of current bar spacing).
-     * Negative value means zoom out, positive - zoom in.
-     */
-    TimeScale.prototype.zoom = function (zoomPoint, scale) {
-        var floatIndexAtZoomPoint = this._private__coordinateToFloatIndex(zoomPoint);
-        var barSpacing = this.barSpacing();
-        var newBarSpacing = barSpacing + scale * (barSpacing / 10);
-        // zoom in/out bar spacing
-        this.setBarSpacing(newBarSpacing);
-        if (!this._private__options.rightBarStaysOnScroll) {
-            // and then correct right offset to move index under zoomPoint back to its coordinate
-            this.setRightOffset(this.rightOffset() + (floatIndexAtZoomPoint - this._private__coordinateToFloatIndex(zoomPoint)));
-        }
-    };
-    TimeScale.prototype.startScale = function (x) {
-        if (this._private__scrollStartPoint) {
-            this.endScroll();
-        }
-        if (this._private__scaleStartPoint !== null || this._private__commonTransitionStartState !== null) {
-            return;
-        }
-        if (this.isEmpty()) {
-            return;
-        }
-        this._private__scaleStartPoint = x;
-        this._private__saveCommonTransitionsStartState();
-    };
-    TimeScale.prototype.scaleTo = function (x) {
-        if (this._private__commonTransitionStartState === null) {
-            return;
-        }
-        var startLengthFromRight = clamp(this._private__width - x, 0, this._private__width);
-        var currentLengthFromRight = clamp(this._private__width - ensureNotNull(this._private__scaleStartPoint), 0, this._private__width);
-        if (startLengthFromRight === 0 || currentLengthFromRight === 0) {
-            return;
-        }
-        this.setBarSpacing(this._private__commonTransitionStartState._internal_barSpacing * startLengthFromRight / currentLengthFromRight);
-    };
-    TimeScale.prototype.endScale = function () {
-        if (this._private__scaleStartPoint === null) {
-            return;
-        }
-        this._private__scaleStartPoint = null;
-        this._private__clearCommonTransitionsStartState();
-    };
-    TimeScale.prototype.startScroll = function (x) {
-        if (this._private__scrollStartPoint !== null || this._private__commonTransitionStartState !== null) {
-            return;
-        }
-        if (this.isEmpty()) {
-            return;
-        }
-        this._private__scrollStartPoint = x;
-        this._private__saveCommonTransitionsStartState();
-    };
-    TimeScale.prototype.scrollTo = function (x) {
-        if (this._private__scrollStartPoint === null) {
-            return;
-        }
-        var shiftInLogical = (this._private__scrollStartPoint - x) / this.barSpacing();
-        this._private__rightOffset = ensureNotNull(this._private__commonTransitionStartState)._internal_rightOffset + shiftInLogical;
-        this._private__visibleRangeInvalidated = true;
-        // do not allow scroll out of visible bars
-        this._private__correctOffset();
-    };
-    TimeScale.prototype.endScroll = function () {
-        if (this._private__scrollStartPoint === null) {
-            return;
-        }
-        this._private__scrollStartPoint = null;
-        this._private__clearCommonTransitionsStartState();
-    };
-    TimeScale.prototype.scrollToRealTime = function () {
-        this.scrollToOffsetAnimated(this._private__options.rightOffset);
-    };
-    TimeScale.prototype.scrollToOffsetAnimated = function (offset, animationDuration) {
-        var _this = this;
-        if (animationDuration === void 0) { animationDuration = 400 /* DefaultAnimationDuration */; }
-        if (!isFinite(offset)) {
-            throw new RangeError('offset is required and must be finite number');
-        }
-        if (!isFinite(animationDuration) || animationDuration <= 0) {
-            throw new RangeError('animationDuration (optional) must be finite positive number');
-        }
-        var source = this._private__rightOffset;
-        var animationStart = performance.now();
-        var animationFn = function () {
-            var animationProgress = (performance.now() - animationStart) / animationDuration;
-            var finishAnimation = animationProgress >= 1;
-            var rightOffset = finishAnimation ? offset : source + (offset - source) * animationProgress;
-            _this.setRightOffset(rightOffset);
-            if (!finishAnimation) {
-                setTimeout(animationFn, 20);
-            }
-        };
-        animationFn();
-    };
-    TimeScale.prototype.update = function (newPoints, firstChangedPointIndex) {
-        this._private__visibleRangeInvalidated = true;
-        this._private__points = newPoints;
-        this._private__tickMarks._internal_setTimeScalePoints(newPoints, firstChangedPointIndex);
-        this._private__correctOffset();
-    };
-    TimeScale.prototype.visibleBarsChanged = function () {
-        return this._private__visibleBarsChanged;
-    };
-    TimeScale.prototype.logicalRangeChanged = function () {
-        return this._private__logicalRangeChanged;
-    };
-    TimeScale.prototype.optionsApplied = function () {
-        return this._private__optionsApplied;
-    };
-    TimeScale.prototype.baseIndex = function () {
-        // null is used to known that baseIndex is not set yet
-        // so in methods which should known whether it is set or not
-        // we should check field `_baseIndexOrNull` instead of getter `baseIndex()`
-        // see minRightOffset for example
-        return this._private__baseIndexOrNull || 0;
-    };
-    TimeScale.prototype.setVisibleRange = function (range) {
-        var length = range.count();
-        this._private__setBarSpacing(this._private__width / length);
-        this._private__rightOffset = range.right() - this.baseIndex();
-        this._private__correctOffset();
-        this._private__visibleRangeInvalidated = true;
-        this._private__model.recalculateAllPanes();
-        this._private__model.lightUpdate();
-    };
-    TimeScale.prototype.fitContent = function () {
-        var first = this._private__firstIndex();
-        var last = this._private__lastIndex();
-        if (first === null || last === null) {
-            return;
-        }
-        this.setVisibleRange(new RangeImpl(first, last + this._private__options.rightOffset));
-    };
-    TimeScale.prototype.setLogicalRange = function (range) {
-        var barRange = new RangeImpl(range.from, range.to);
-        this.setVisibleRange(barRange);
-    };
-    TimeScale.prototype.formatDateTime = function (time) {
-        if (this._private__localizationOptions.timeFormatter !== undefined) {
-            return this._private__localizationOptions.timeFormatter(time.businessDay || time.timestamp);
-        }
-        return this._private__dateTimeFormatter._internal_format(new Date(time.timestamp * 1000));
-    };
-    TimeScale.prototype._private__firstIndex = function () {
-        return this._private__points.length === 0 ? null : 0;
-    };
-    TimeScale.prototype._private__lastIndex = function () {
-        return this._private__points.length === 0 ? null : (this._private__points.length - 1);
-    };
-    TimeScale.prototype._private__rightOffsetForCoordinate = function (x) {
-        return (this._private__width - 1 - x) / this._private__barSpacing;
-    };
-    TimeScale.prototype._private__coordinateToFloatIndex = function (x) {
-        var deltaFromRight = this._private__rightOffsetForCoordinate(x);
-        var baseIndex = this.baseIndex();
-        var index = baseIndex + this._private__rightOffset - deltaFromRight;
-        // JavaScript uses very strange rounding
-        // we need rounding to avoid problems with calculation errors
-        return Math.round(index * 1000000) / 1000000;
-    };
-    TimeScale.prototype._private__setBarSpacing = function (newBarSpacing) {
-        var oldBarSpacing = this._private__barSpacing;
-        this._private__barSpacing = newBarSpacing;
-        this._private__correctBarSpacing();
-        // this._barSpacing might be changed in _correctBarSpacing
-        if (oldBarSpacing !== this._private__barSpacing) {
-            this._private__visibleRangeInvalidated = true;
-            this._private__resetTimeMarksCache();
-        }
-    };
-    TimeScale.prototype._private__updateVisibleRange = function () {
-        if (!this._private__visibleRangeInvalidated) {
-            return;
-        }
-        this._private__visibleRangeInvalidated = false;
-        if (this.isEmpty()) {
-            this._private__setVisibleRange(TimeScaleVisibleRange._internal_invalid());
-            return;
-        }
-        var baseIndex = this.baseIndex();
-        var newBarsLength = this._private__width / this._private__barSpacing;
-        var rightBorder = this._private__rightOffset + baseIndex;
-        var leftBorder = rightBorder - newBarsLength + 1;
-        var logicalRange = new RangeImpl(leftBorder, rightBorder);
-        this._private__setVisibleRange(new TimeScaleVisibleRange(logicalRange));
-    };
-    TimeScale.prototype._private__correctBarSpacing = function () {
-        var minBarSpacing = this._private__minBarSpacing();
-        if (this._private__barSpacing < minBarSpacing) {
-            this._private__barSpacing = minBarSpacing;
-            this._private__visibleRangeInvalidated = true;
-        }
-        if (this._private__width !== 0) {
-            // make sure that this (1 / Constants.MinVisibleBarsCount) >= coeff in max bar spacing (it's 0.5 here)
-            var maxBarSpacing = this._private__width * 0.5;
-            if (this._private__barSpacing > maxBarSpacing) {
-                this._private__barSpacing = maxBarSpacing;
-                this._private__visibleRangeInvalidated = true;
-            }
-        }
-    };
-    TimeScale.prototype._private__minBarSpacing = function () {
-        // if both options are enabled then limit bar spacing so that zooming-out is not possible
-        // if it would cause either the first or last points to move too far from an edge
-        if (this._private__options.fixLeftEdge && this._private__options.fixRightEdge && this._private__points.length !== 0) {
-            return this._private__width / this._private__points.length;
-        }
-        return this._private__options.minBarSpacing;
-    };
-    TimeScale.prototype._private__correctOffset = function () {
-        // block scrolling of to future
-        var maxRightOffset = this._private__maxRightOffset();
-        if (this._private__rightOffset > maxRightOffset) {
-            this._private__rightOffset = maxRightOffset;
-            this._private__visibleRangeInvalidated = true;
-        }
-        // block scrolling of to past
-        var minRightOffset = this._private__minRightOffset();
-        if (minRightOffset !== null && this._private__rightOffset < minRightOffset) {
-            this._private__rightOffset = minRightOffset;
-            this._private__visibleRangeInvalidated = true;
-        }
-    };
-    TimeScale.prototype._private__minRightOffset = function () {
-        var firstIndex = this._private__firstIndex();
-        var baseIndex = this._private__baseIndexOrNull;
-        if (firstIndex === null || baseIndex === null) {
-            return null;
-        }
-        var barsEstimation = this._private__options.fixLeftEdge
-            ? this._private__width / this._private__barSpacing
-            : Math.min(2 /* MinVisibleBarsCount */, this._private__points.length);
-        return firstIndex - baseIndex - 1 + barsEstimation;
-    };
-    TimeScale.prototype._private__maxRightOffset = function () {
-        return this._private__options.fixRightEdge
-            ? 0
-            : (this._private__width / this._private__barSpacing) - Math.min(2 /* MinVisibleBarsCount */, this._private__points.length);
-    };
-    TimeScale.prototype._private__saveCommonTransitionsStartState = function () {
-        this._private__commonTransitionStartState = {
-            _internal_barSpacing: this.barSpacing(),
-            _internal_rightOffset: this.rightOffset(),
-        };
-    };
-    TimeScale.prototype._private__clearCommonTransitionsStartState = function () {
-        this._private__commonTransitionStartState = null;
-    };
-    TimeScale.prototype._private__formatLabel = function (time, weight) {
-        var _this = this;
-        var formatter = this._private__formattedByWeight.get(weight);
-        if (formatter === undefined) {
-            formatter = new FormattedLabelsCache(function (timePoint) {
-                return _this._private__formatLabelImpl(timePoint, weight);
-            });
-            this._private__formattedByWeight.set(weight, formatter);
-        }
-        return formatter._internal_format(time);
-    };
-    TimeScale.prototype._private__formatLabelImpl = function (timePoint, weight) {
-        var _a;
-        var tickMarkType = weightToTickMarkType(weight, this._private__options.timeVisible, this._private__options.secondsVisible);
-        if (this._private__options.tickMarkFormatter !== undefined) {
-            // this is temporary solution to make more consistency API
-            // it looks like that all time types in API should have the same form
-            // but for know defaultTickMarkFormatter is on model level and can't determine whether passed time is business day or UTCTimestamp
-            // because type guards are declared on API level
-            // in other hand, type guards couldn't be declared on model level so far
-            // because they are know about string representation of business day ¯\_(ツ)_/¯
-            // let's fix in for all cases for the whole API
-            return this._private__options.tickMarkFormatter((_a = timePoint.businessDay) !== null && _a !== void 0 ? _a : timePoint.timestamp, tickMarkType, this._private__localizationOptions.locale);
-        }
-        return defaultTickMarkFormatter(timePoint, tickMarkType, this._private__localizationOptions.locale);
-    };
-    TimeScale.prototype._private__setVisibleRange = function (newVisibleRange) {
-        var oldVisibleRange = this._private__visibleRange;
-        this._private__visibleRange = newVisibleRange;
-        if (!areRangesEqual(oldVisibleRange._internal_strictRange(), this._private__visibleRange._internal_strictRange())) {
-            this._private__visibleBarsChanged._internal_fire();
-        }
-        if (!areRangesEqual(oldVisibleRange._internal_logicalRange(), this._private__visibleRange._internal_logicalRange())) {
-            this._private__logicalRangeChanged._internal_fire();
-        }
-        // TODO: reset only coords in case when this._visibleBars has not been changed
-        this._private__resetTimeMarksCache();
-    };
-    TimeScale.prototype._private__resetTimeMarksCache = function () {
-        this._private__timeMarksCache = null;
-    };
-    TimeScale.prototype._private__invalidateTickMarks = function () {
-        this._private__resetTimeMarksCache();
-        this._private__formattedByWeight.clear();
-    };
-    TimeScale.prototype._private__updateDateTimeFormatter = function () {
-        var dateFormat = this._private__localizationOptions.dateFormat;
-        if (this._private__options.timeVisible) {
-            this._private__dateTimeFormatter = new DateTimeFormatter({
-                _internal_dateFormat: dateFormat,
-                _internal_timeFormat: this._private__options.secondsVisible ? '%h:%m:%s' : '%h:%m',
-                _internal_dateTimeSeparator: '   ',
-                _internal_locale: this._private__localizationOptions.locale,
-            });
-        }
-        else {
-            this._private__dateTimeFormatter = new DateFormatter(dateFormat, this._private__localizationOptions.locale);
-        }
-    };
-    TimeScale.prototype._private__doFixLeftEdge = function () {
-        if (!this._private__options.fixLeftEdge) {
-            return;
-        }
-        var firstIndex = this._private__firstIndex();
-        if (firstIndex === null) {
-            return;
-        }
-        var visibleRange = this.visibleStrictRange();
-        if (visibleRange === null) {
-            return;
-        }
-        var delta = visibleRange.left() - firstIndex;
-        if (delta < 0) {
-            var leftEdgeOffset = this._private__rightOffset - delta - 1;
-            this.setRightOffset(leftEdgeOffset);
-        }
-        this._private__correctBarSpacing();
-    };
-    TimeScale.prototype._private__doFixRightEdge = function () {
-        this._private__correctOffset();
-        this._private__correctBarSpacing();
-    };
-    return TimeScale;
-}());
-// eslint-disable-next-line complexity
-function weightToTickMarkType(weight, timeVisible, secondsVisible) {
-    switch (weight) {
-        case 0 /* LessThanSecond */:
-        case 10 /* Second */:
-            return timeVisible
-                ? (secondsVisible ? 4 /* TimeWithSeconds */ : 3 /* Time */)
-                : 2 /* DayOfMonth */;
-        case 20 /* Minute1 */:
-        case 21 /* Minute5 */:
-        case 22 /* Minute30 */:
-        case 30 /* Hour1 */:
-        case 31 /* Hour3 */:
-        case 32 /* Hour6 */:
-        case 33 /* Hour12 */:
-            return timeVisible ? 3 /* Time */ : 2 /* DayOfMonth */;
-        case 50 /* Day */:
-            return 2 /* DayOfMonth */;
-        case 60 /* Month */:
-            return 1 /* Month */;
-        case 70 /* Year */:
-            return 0 /* Year */;
-    }
-}
-
-/**
- * Represents a type of color.
- */
-var ColorType;
-(function (ColorType) {
-    /** Solid color */
-    ColorType["Solid"] = "solid";
-    /** Vertical gradient color */
-    ColorType["VerticalGradient"] = "gradient";
-})(ColorType || (ColorType = {}));
-
-/**
- * Check if a time value is a business day object.
- *
- * @param time - The time to check.
- * @returns `true` if `time` is a {@link BusinessDay} object, false otherwise.
- */
-function isBusinessDay(time) {
-    return !isNumber(time) && !isString(time);
-}
-/**
- * Check if a time value is a UTC timestamp number.
- *
- * @param time - The time to check.
- * @returns `true` if `time` is a {@link UTCTimestamp} number, false otherwise.
- */
-function isUTCTimestamp(time) {
-    return isNumber(time);
-}
-function isWhitespaceData(data) {
-    return data.open === undefined && data.value === undefined;
-}
-function isFulfilledData(data) {
-    return data.open !== undefined || data.value !== undefined;
-}
-
-/**
- * Default font family.
- * Must be used to generate font string when font is not specified.
- */
-var defaultFontFamily = "'Trebuchet MS', Roboto, Ubuntu, sans-serif";
-/**
- * Generates a font string, which can be used to set in canvas' font property.
- * If no family provided, {@link defaultFontFamily} will be used.
- *
- * @param size - Font size in pixels.
- * @param family - Optional font family.
- * @param style - Optional font style.
- * @returns The font string.
- */
-function makeFont(size, family, style) {
-    if (style !== undefined) {
-        style = style + " ";
-    }
-    else {
-        style = '';
-    }
-    if (family === undefined) {
-        family = defaultFontFamily;
-    }
-    return "" + style + size + "px " + family;
-}
-
-var PriceAxisRendererOptionsProvider = /** @class */ (function () {
-    function PriceAxisRendererOptionsProvider(chartModel) {
-        this._private__rendererOptions = {
-            borderSize: 1 /* BorderSize */,
-            tickLength: 4 /* TickLength */,
-            fontSize: NaN,
-            font: '',
-            fontFamily: '',
-            color: '',
-            paddingBottom: 0,
-            paddingInner: 0,
-            paddingOuter: 0,
-            paddingTop: 0,
-            baselineOffset: 0,
-            width: 0
-        };
-        this._private__chartModel = chartModel;
-    }
-    PriceAxisRendererOptionsProvider.prototype.options = function () {
-        var rendererOptions = this._private__rendererOptions;
-        var currentFontSize = this._private__fontSize();
-        var currentFontFamily = this._private__fontFamily();
-        if (rendererOptions.fontSize !== currentFontSize || rendererOptions.fontFamily !== currentFontFamily) {
-            rendererOptions.fontSize = currentFontSize;
-            rendererOptions.fontFamily = currentFontFamily;
-            rendererOptions.font = makeFont(currentFontSize, currentFontFamily);
-            rendererOptions.paddingTop = Math.floor(currentFontSize / 3.5);
-            rendererOptions.paddingBottom = rendererOptions.paddingTop;
-            rendererOptions.paddingInner = Math.max(Math.ceil(currentFontSize / 2 - rendererOptions.tickLength / 2), 0);
-            rendererOptions.paddingOuter = Math.ceil(currentFontSize / 2 + rendererOptions.tickLength / 2);
-            rendererOptions.baselineOffset = Math.round(currentFontSize / 10);
-        }
-        rendererOptions.color = this._private__textColor();
-        rendererOptions.width = this._private__width();
-        return this._private__rendererOptions;
-    };
-    PriceAxisRendererOptionsProvider.prototype._private__width = function () {
-        return this._private__chartModel.options().rightPriceScale.width;
-    };
-    PriceAxisRendererOptionsProvider.prototype._private__textColor = function () {
-        return this._private__chartModel.options().layout.textColor;
-    };
-    PriceAxisRendererOptionsProvider.prototype._private__fontSize = function () {
-        return this._private__chartModel.options().layout.fontSize;
-    };
-    PriceAxisRendererOptionsProvider.prototype._private__fontFamily = function () {
-        return this._private__chartModel.options().layout.fontFamily;
-    };
-    return PriceAxisRendererOptionsProvider;
-}());
-
-function isDefaultPriceScale(priceScaleId) {
-    return priceScaleId === "left" /* Left */ || priceScaleId === "right" /* Right */;
-}
-
-function mergePaneInvalidation(beforeValue, newValue) {
-    if (beforeValue === undefined) {
-        return newValue;
-    }
-    var level = Math.max(beforeValue.level, newValue.level);
-    var autoScale = beforeValue.autoScale || newValue.autoScale;
-    return { level: level, autoScale: autoScale };
-}
-var InvalidateMask = /** @class */ (function () {
-    function InvalidateMask(globalLevel) {
-        this._private__invalidatedPanes = new Map();
-        this._private__force = false;
-        this._private__timeScaleInvalidations = [];
-        this._private__globalLevel = globalLevel;
-    }
-    InvalidateMask.prototype.invalidatePane = function (paneIndex, invalidation) {
-        var prevValue = this._private__invalidatedPanes.get(paneIndex);
-        var newValue = mergePaneInvalidation(prevValue, invalidation);
-        this._private__invalidatedPanes.set(paneIndex, newValue);
-    };
-    InvalidateMask.prototype.fullInvalidation = function () {
-        return this._private__globalLevel;
-    };
-    InvalidateMask.prototype.invalidateForPane = function (paneIndex) {
-        var paneInvalidation = this._private__invalidatedPanes.get(paneIndex);
-        if (paneInvalidation === undefined) {
-            return {
-                level: this._private__globalLevel,
-            };
-        }
-        return {
-            level: Math.max(this._private__globalLevel, paneInvalidation.level),
-            autoScale: paneInvalidation.autoScale,
-        };
-    };
-    InvalidateMask.prototype.setFitContent = function () {
-        // modifies both bar spacing and right offset
-        this._private__timeScaleInvalidations = [{ type: 0 /* FitContent */ }];
-    };
-    InvalidateMask.prototype.applyRange = function (range) {
-        // modifies both bar spacing and right offset
-        this._private__timeScaleInvalidations = [{ type: 1 /* ApplyRange */, value: range }];
-    };
-    InvalidateMask.prototype.resetTimeScale = function () {
-        // modifies both bar spacing and right offset
-        this._private__timeScaleInvalidations = [{ type: 4 /* Reset */ }];
-    };
-    InvalidateMask.prototype.setBarSpacing = function (barSpacing) {
-        this._private__timeScaleInvalidations.push({ type: 2 /* ApplyBarSpacing */, value: barSpacing });
-    };
-    InvalidateMask.prototype.setRightOffset = function (offset) {
-        this._private__timeScaleInvalidations.push({ type: 3 /* ApplyRightOffset */, value: offset });
-    };
-    InvalidateMask.prototype.timeScaleInvalidations = function () {
-        return this._private__timeScaleInvalidations;
-    };
-    InvalidateMask.prototype.merge = function (other) {
-        var _this = this;
-        this._private__force = this._private__force || other._private__force;
-        this._private__timeScaleInvalidations = this._private__timeScaleInvalidations.concat(other._private__timeScaleInvalidations);
-        for (var _i = 0, _a = other._private__timeScaleInvalidations; _i < _a.length; _i++) {
-            var tsInvalidation = _a[_i];
-            this._private__applyTimeScaleInvalidation(tsInvalidation);
-        }
-        this._private__globalLevel = Math.max(this._private__globalLevel, other._private__globalLevel);
-        other._private__invalidatedPanes.forEach(function (invalidation, index) {
-            _this.invalidatePane(index, invalidation);
-        });
-    };
-    InvalidateMask.prototype._private__applyTimeScaleInvalidation = function (invalidation) {
-        switch (invalidation.type) {
-            case 0 /* FitContent */:
-                this.setFitContent();
-                break;
-            case 1 /* ApplyRange */:
-                this.applyRange(invalidation.value);
-                break;
-            case 2 /* ApplyBarSpacing */:
-                this.setBarSpacing(invalidation.value);
-                break;
-            case 3 /* ApplyRightOffset */:
-                this.setRightOffset(invalidation.value);
-                break;
-            case 4 /* Reset */:
-                this.resetTimeScale();
-                break;
-        }
-    };
-    return InvalidateMask;
-}());
 
 var VolumeFormatter = /** @class */ (function () {
     function VolumeFormatter(precision) {
@@ -3966,15 +1846,23 @@ var PaneRendererLineBase = /** @class */ (function (_super) {
         setLineStyle(ctx, this._internal__data._internal_lineStyle);
         ctx.strokeStyle = this._internal__strokeStyle(ctx);
         ctx.lineJoin = 'round';
-        ctx.beginPath();
         if (this._internal__data._internal_items.length === 1) {
+            ctx.beginPath();
             var point = this._internal__data._internal_items[0];
             ctx.moveTo(point.x - this._internal__data._internal_barWidth / 2, point.y);
             ctx.lineTo(point.x + this._internal__data._internal_barWidth / 2, point.y);
+            if (point._internal_color !== undefined) {
+                ctx.strokeStyle = point._internal_color;
+            }
+            ctx.stroke();
         }
         else {
-            walkLine(ctx, this._internal__data._internal_items, this._internal__data._internal_lineType, this._internal__data._internal_visibleRange);
+            this._internal__drawLine(ctx, this._internal__data);
         }
+    };
+    PaneRendererLineBase.prototype._internal__drawLine = function (ctx, data) {
+        ctx.beginPath();
+        walkLine(ctx, data._internal_items, data._internal_lineType, data._internal_visibleRange);
         ctx.stroke();
     };
     return PaneRendererLineBase;
@@ -3984,12 +1872,122 @@ var PaneRendererLine = /** @class */ (function (_super) {
     function PaneRendererLine() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    /**
+     * Similar to {@link walkLine}, but supports color changes
+     */
+    PaneRendererLine.prototype._internal__drawLine = function (ctx, data) {
+        var _a, _b, _c, _d;
+        var items = data._internal_items, visibleRange = data._internal_visibleRange, lineType = data._internal_lineType, lineColor = data._internal_lineColor;
+        if (items.length === 0 || visibleRange === null) {
+            return;
+        }
+        ctx.beginPath();
+        var i = visibleRange.from;
+        var firstItem = items[i];
+        ctx.moveTo(firstItem.x, firstItem.y);
+        var prevStrokeStyle = (_a = firstItem._internal_color) !== null && _a !== void 0 ? _a : lineColor;
+        ctx.strokeStyle = prevStrokeStyle;
+        var changeColor = function (color) {
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            prevStrokeStyle = color;
+        };
+        i++;
+        if (lineType === 1 /* WithSteps */) {
+            for (; i < visibleRange.to; i++) {
+                var currItem = items[i];
+                var prevItem = items[i - 1];
+                var currentStrokeStyle = (_b = currItem._internal_color) !== null && _b !== void 0 ? _b : lineColor;
+                ctx.lineTo(currItem.x, prevItem.y);
+                if (currentStrokeStyle !== prevStrokeStyle) {
+                    changeColor(currentStrokeStyle);
+                    ctx.moveTo(currItem.x, prevItem.y);
+                }
+                ctx.lineTo(currItem.x, currItem.y);
+            }
+        }
+        else if (lineType === 2 /* WithGaps */) {
+            var isGap = true;
+            for (; i < visibleRange.to; i++) {
+                var currItem = items[i];
+                var prevItem = items[i - 1];
+                var currentStrokeStyle = (_c = currItem._internal_color) !== null && _c !== void 0 ? _c : lineColor;
+                var currPrice = currItem.price;
+                if (currentStrokeStyle !== prevStrokeStyle) {
+                    changeColor(currentStrokeStyle);
+                    ctx.moveTo(currItem.x, prevItem.y);
+                }
+                if (currPrice === null) {
+                    isGap = true;
+                    continue;
+                }
+                if (isGap) {
+                    ctx.moveTo(currItem.x, currItem.y);
+                    isGap = false;
+                }
+                ctx.lineTo(currItem.x, currItem.y);
+            }
+        }
+        else {
+            for (; i < visibleRange.to; i++) {
+                var currItem = items[i];
+                var currentStrokeStyle = (_d = currItem._internal_color) !== null && _d !== void 0 ? _d : lineColor;
+                ctx.lineTo(currItem.x, currItem.y);
+                if (currentStrokeStyle !== prevStrokeStyle) {
+                    changeColor(currentStrokeStyle);
+                    ctx.moveTo(currItem.x, currItem.y);
+                }
+            }
+        }
+        ctx.stroke();
+    };
     PaneRendererLine.prototype._internal__strokeStyle = function () {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this._internal__data._internal_lineColor;
     };
     return PaneRendererLine;
 }(PaneRendererLineBase));
+
+/**
+ * Binary function that accepts two arguments (the first of the type of array elements, and the second is always val), and returns a value convertible to bool.
+ * The value returned indicates whether the first argument is considered to go before the second.
+ * The function shall not modify any of its arguments.
+ */
+function lowerbound(arr, value, compare, start, to) {
+    if (start === void 0) { start = 0; }
+    if (to === void 0) { to = arr.length; }
+    var count = to - start;
+    while (0 < count) {
+        var count2 = (count >> 1);
+        var mid = start + count2;
+        if (compare(arr[mid], value)) {
+            start = mid + 1;
+            count -= count2 + 1;
+        }
+        else {
+            count = count2;
+        }
+    }
+    return start;
+}
+function upperbound(arr, value, compare, start, to) {
+    if (start === void 0) { start = 0; }
+    if (to === void 0) { to = arr.length; }
+    var count = to - start;
+    while (0 < count) {
+        var count2 = (count >> 1);
+        var mid = start + count2;
+        if (!(compare(value, arr[mid]))) {
+            start = mid + 1;
+            count -= count2 + 1;
+        }
+        else {
+            count = count2;
+        }
+    }
+    return start;
+}
 
 function lowerBoundItemsCompare(item, time) {
     return item.time < time;
@@ -4311,6 +2309,53 @@ var SeriesBarsPaneView = /** @class */ (function (_super) {
     };
     return SeriesBarsPaneView;
 }(BarsPaneViewBase));
+
+function clamp(value, minVal, maxVal) {
+    return Math.min(Math.max(value, minVal), maxVal);
+}
+function isBaseDecimal(value) {
+    if (value < 0) {
+        return false;
+    }
+    for (var current = value; current > 1; current /= 10) {
+        if ((current % 10) !== 0) {
+            return false;
+        }
+    }
+    return true;
+}
+function greaterOrEqual(x1, x2, epsilon) {
+    return (x2 - x1) <= epsilon;
+}
+function equal(x1, x2, epsilon) {
+    return Math.abs(x1 - x2) < epsilon;
+}
+function log10(x) {
+    if (x <= 0) {
+        return NaN;
+    }
+    return Math.log(x) / Math.log(10);
+}
+function min(arr) {
+    if (arr.length < 1) {
+        throw Error('array is empty');
+    }
+    var minVal = arr[0];
+    for (var i = 1; i < arr.length; ++i) {
+        if (arr[i] < minVal) {
+            minVal = arr[i];
+        }
+    }
+    return minVal;
+}
+function ceiledEven(x) {
+    var ceiled = Math.ceil(x);
+    return (ceiled % 2 !== 0) ? ceiled - 1 : ceiled;
+}
+function ceiledOdd(x) {
+    var ceiled = Math.ceil(x);
+    return (ceiled % 2 === 0) ? ceiled - 1 : ceiled;
+}
 
 var PaneRendererBaselineArea = /** @class */ (function (_super) {
     __extends(PaneRendererBaselineArea, _super);
@@ -4815,8 +2860,16 @@ var SeriesLinePaneView = /** @class */ (function (_super) {
         this._private__lineRenderer._internal_setData(data);
         return this._private__lineRenderer;
     };
-    SeriesLinePaneView.prototype._internal__createRawItem = function (time, price) {
-        return this._internal__createRawItemBase(time, price);
+    SeriesLinePaneView.prototype._internal__updateOptions = function () {
+        var _this = this;
+        this._internal__items.forEach(function (item) {
+            item._internal_color = _this._internal__series.barColorer().barStyle(item.time).barColor;
+        });
+    };
+    SeriesLinePaneView.prototype._internal__createRawItem = function (time, price, colorer) {
+        var item = this._internal__createRawItemBase(time, price);
+        item._internal_color = colorer.barStyle(time).barColor;
+        return item;
     };
     return SeriesLinePaneView;
 }(LinePaneViewBase));
@@ -5788,6 +3841,73 @@ var SeriesPriceAxisView = /** @class */ (function (_super) {
     return SeriesPriceAxisView;
 }(PriceAxisView));
 
+var PriceRangeImpl = /** @class */ (function () {
+    function PriceRangeImpl(minValue, maxValue) {
+        this._private__minValue = minValue;
+        this._private__maxValue = maxValue;
+    }
+    PriceRangeImpl.prototype.equals = function (pr) {
+        if (pr === null) {
+            return false;
+        }
+        return this._private__minValue === pr._private__minValue && this._private__maxValue === pr._private__maxValue;
+    };
+    PriceRangeImpl.prototype.clone = function () {
+        return new PriceRangeImpl(this._private__minValue, this._private__maxValue);
+    };
+    PriceRangeImpl.prototype.minValue = function () {
+        return this._private__minValue;
+    };
+    PriceRangeImpl.prototype.maxValue = function () {
+        return this._private__maxValue;
+    };
+    PriceRangeImpl.prototype.length = function () {
+        return this._private__maxValue - this._private__minValue;
+    };
+    PriceRangeImpl.prototype.isEmpty = function () {
+        return this._private__maxValue === this._private__minValue || Number.isNaN(this._private__maxValue) || Number.isNaN(this._private__minValue);
+    };
+    PriceRangeImpl.prototype.merge = function (anotherRange) {
+        if (anotherRange === null) {
+            return this;
+        }
+        return new PriceRangeImpl(Math.min(this.minValue(), anotherRange.minValue()), Math.max(this.maxValue(), anotherRange.maxValue()));
+    };
+    PriceRangeImpl.prototype.scaleAroundCenter = function (coeff) {
+        if (!isNumber(coeff)) {
+            return;
+        }
+        var delta = this._private__maxValue - this._private__minValue;
+        if (delta === 0) {
+            return;
+        }
+        var center = (this._private__maxValue + this._private__minValue) * 0.5;
+        var maxDelta = this._private__maxValue - center;
+        var minDelta = this._private__minValue - center;
+        maxDelta *= coeff;
+        minDelta *= coeff;
+        this._private__maxValue = center + maxDelta;
+        this._private__minValue = center + minDelta;
+    };
+    PriceRangeImpl.prototype.shift = function (delta) {
+        if (!isNumber(delta)) {
+            return;
+        }
+        this._private__maxValue += delta;
+        this._private__minValue += delta;
+    };
+    PriceRangeImpl.prototype.toRaw = function () {
+        return {
+            minValue: this._private__minValue,
+            maxValue: this._private__maxValue,
+        };
+    };
+    PriceRangeImpl.fromRaw = function (raw) {
+        return (raw === null) ? null : new PriceRangeImpl(raw.minValue, raw.maxValue);
+    };
+    return PriceRangeImpl;
+}());
+
 var AutoscaleInfoImpl = /** @class */ (function () {
     function AutoscaleInfoImpl(priceRange, margins) {
         this._private__priceRange = priceRange;
@@ -5824,14 +3944,14 @@ var CustomPriceLinePaneView = /** @class */ (function (_super) {
     CustomPriceLinePaneView.prototype._internal__updateImpl = function (height, width) {
         var data = this._internal__lineRendererData;
         data._internal_visible = false;
-        if (!this._internal__series.visible()) {
+        var lineOptions = this._private__priceLine.options();
+        if (!this._internal__series.visible() || !lineOptions.lineVisible) {
             return;
         }
         var y = this._private__priceLine.yCoord();
         if (y === null) {
             return;
         }
-        var lineOptions = this._private__priceLine.options();
         data._internal_visible = true;
         data._internal_y = y;
         data._internal_color = lineOptions.color;
@@ -5957,7 +4077,7 @@ var SeriesBarColorer = /** @class */ (function () {
         var seriesOptions = this._private__series.options();
         switch (targetType) {
             case 'Line':
-                return this._private__lineStyle(seriesOptions);
+                return this._private__lineStyle(seriesOptions, barIndex, precomputedBars);
             case 'Area':
                 return this._private__areaStyle(seriesOptions);
             case 'Baseline':
@@ -5979,11 +4099,18 @@ var SeriesBarColorer = /** @class */ (function () {
         var borderDownColor = downColor;
         var currentBar = ensureNotNull(this._private__findBar(barIndex, precomputedBars));
         var isUp = ensure(currentBar.value[0 /* Open */]) <= ensure(currentBar.value[3 /* Close */]);
-        result.barColor = isUp ? upColor : downColor;
-        result.barBorderColor = isUp ? borderUpColor : borderDownColor;
+        if (currentBar.color !== undefined) {
+            result.barColor = currentBar.color;
+            result.barBorderColor = currentBar.color;
+        }
+        else {
+            result.barColor = isUp ? upColor : downColor;
+            result.barBorderColor = isUp ? borderUpColor : borderDownColor;
+        }
         return result;
     };
     SeriesBarColorer.prototype._private__candleStyle = function (candlestickStyle, barIndex, precomputedBars) {
+        var _a, _b, _c;
         var result = __assign({}, emptyResult);
         var upColor = candlestickStyle.upColor;
         var downColor = candlestickStyle.downColor;
@@ -5993,9 +4120,9 @@ var SeriesBarColorer = /** @class */ (function () {
         var wickDownColor = candlestickStyle.wickDownColor;
         var currentBar = ensureNotNull(this._private__findBar(barIndex, precomputedBars));
         var isUp = ensure(currentBar.value[0 /* Open */]) <= ensure(currentBar.value[3 /* Close */]);
-        result.barColor = isUp ? upColor : downColor;
-        result.barBorderColor = isUp ? borderUpColor : borderDownColor;
-        result.barWickColor = isUp ? wickUpColor : wickDownColor;
+        result.barColor = (_a = currentBar.color) !== null && _a !== void 0 ? _a : (isUp ? upColor : downColor);
+        result.barBorderColor = (_b = currentBar.borderColor) !== null && _b !== void 0 ? _b : (isUp ? borderUpColor : borderDownColor);
+        result.barWickColor = (_c = currentBar.wickColor) !== null && _c !== void 0 ? _c : (isUp ? wickUpColor : wickDownColor);
         return result;
     };
     SeriesBarColorer.prototype._private__areaStyle = function (areaStyle) {
@@ -6006,8 +4133,10 @@ var SeriesBarColorer = /** @class */ (function () {
         var isAboveBaseline = currentBar.value[3 /* Close */] >= baselineStyle.baseValue.price;
         return __assign(__assign({}, emptyResult), { barColor: isAboveBaseline ? baselineStyle.topLineColor : baselineStyle.bottomLineColor });
     };
-    SeriesBarColorer.prototype._private__lineStyle = function (lineStyle) {
-        return __assign(__assign({}, emptyResult), { barColor: lineStyle.color });
+    SeriesBarColorer.prototype._private__lineStyle = function (lineStyle, barIndex, precomputedBars) {
+        var _a;
+        var currentBar = ensureNotNull(this._private__findBar(barIndex, precomputedBars));
+        return __assign(__assign({}, emptyResult), { barColor: (_a = currentBar.color) !== null && _a !== void 0 ? _a : lineStyle.color });
     };
     SeriesBarColorer.prototype._private__histogramStyle = function (histogramStyle, barIndex, precomputedBars) {
         var result = __assign({}, emptyResult);
@@ -6331,6 +4460,11 @@ var Series = /** @class */ (function (_super) {
         }
         if (options.priceFormat !== undefined) {
             this._private__recreateFormatter();
+            // updated formatter might affect rendering  and as a consequence of this the width of price axis might be changed
+            // thus we need to force the chart to do a full update to apply changes correctly
+            // full update is quite heavy operation in terms of performance
+            // but updating formatter looks like quite rare so forcing a full update here shouldn't affect the performance a lot
+            this.model().fullUpdate();
         }
         this.model().updateSource(this);
         // a series might affect crosshair by some options (like crosshair markers)
@@ -6798,6 +4932,944 @@ var Grid = /** @class */ (function () {
     return Grid;
 }());
 
+var defLogFormula = {
+    _internal_logicalOffset: 4,
+    _internal_coordOffset: 0.0001,
+};
+function fromPercent(value, baseValue) {
+    if (baseValue < 0) {
+        value = -value;
+    }
+    return (value / 100) * baseValue + baseValue;
+}
+function toPercent(value, baseValue) {
+    var result = 100 * (value - baseValue) / baseValue;
+    return (baseValue < 0 ? -result : result);
+}
+function toPercentRange(priceRange, baseValue) {
+    var minPercent = toPercent(priceRange.minValue(), baseValue);
+    var maxPercent = toPercent(priceRange.maxValue(), baseValue);
+    return new PriceRangeImpl(minPercent, maxPercent);
+}
+function fromIndexedTo100(value, baseValue) {
+    value -= 100;
+    if (baseValue < 0) {
+        value = -value;
+    }
+    return (value / 100) * baseValue + baseValue;
+}
+function toIndexedTo100(value, baseValue) {
+    var result = 100 * (value - baseValue) / baseValue + 100;
+    return (baseValue < 0 ? -result : result);
+}
+function toIndexedTo100Range(priceRange, baseValue) {
+    var minPercent = toIndexedTo100(priceRange.minValue(), baseValue);
+    var maxPercent = toIndexedTo100(priceRange.maxValue(), baseValue);
+    return new PriceRangeImpl(minPercent, maxPercent);
+}
+function toLog(price, logFormula) {
+    var m = Math.abs(price);
+    if (m < 1e-15) {
+        return 0;
+    }
+    var res = log10(m + logFormula._internal_coordOffset) + logFormula._internal_logicalOffset;
+    return ((price < 0) ? -res : res);
+}
+function fromLog(logical, logFormula) {
+    var m = Math.abs(logical);
+    if (m < 1e-15) {
+        return 0;
+    }
+    var res = Math.pow(10, m - logFormula._internal_logicalOffset) - logFormula._internal_coordOffset;
+    return (logical < 0) ? -res : res;
+}
+function convertPriceRangeToLog(priceRange, logFormula) {
+    if (priceRange === null) {
+        return null;
+    }
+    var min = toLog(priceRange.minValue(), logFormula);
+    var max = toLog(priceRange.maxValue(), logFormula);
+    return new PriceRangeImpl(min, max);
+}
+function canConvertPriceRangeFromLog(priceRange, logFormula) {
+    if (priceRange === null) {
+        return false;
+    }
+    var min = fromLog(priceRange.minValue(), logFormula);
+    var max = fromLog(priceRange.maxValue(), logFormula);
+    return isFinite(min) && isFinite(max);
+}
+function convertPriceRangeFromLog(priceRange, logFormula) {
+    if (priceRange === null) {
+        return null;
+    }
+    var min = fromLog(priceRange.minValue(), logFormula);
+    var max = fromLog(priceRange.maxValue(), logFormula);
+    return new PriceRangeImpl(min, max);
+}
+function logFormulaForPriceRange(range) {
+    if (range === null) {
+        return defLogFormula;
+    }
+    var diff = Math.abs(range.maxValue() - range.minValue());
+    if (diff >= 1 || diff < 1e-15) {
+        return defLogFormula;
+    }
+    var digits = Math.ceil(Math.abs(Math.log10(diff)));
+    var logicalOffset = defLogFormula._internal_logicalOffset + digits;
+    var coordOffset = 1 / Math.pow(10, logicalOffset);
+    return {
+        _internal_logicalOffset: logicalOffset,
+        _internal_coordOffset: coordOffset,
+    };
+}
+function logFormulasAreSame(f1, f2) {
+    return f1._internal_logicalOffset === f2._internal_logicalOffset && f1._internal_coordOffset === f2._internal_coordOffset;
+}
+
+var PriceTickSpanCalculator = /** @class */ (function () {
+    function PriceTickSpanCalculator(base, integralDividers) {
+        this._private__base = base;
+        this._private__integralDividers = integralDividers;
+        if (isBaseDecimal(this._private__base)) {
+            this._private__fractionalDividers = [2, 2.5, 2];
+        }
+        else {
+            this._private__fractionalDividers = [];
+            for (var baseRest = this._private__base; baseRest !== 1;) {
+                if ((baseRest % 2) === 0) {
+                    this._private__fractionalDividers.push(2);
+                    baseRest /= 2;
+                }
+                else if ((baseRest % 5) === 0) {
+                    this._private__fractionalDividers.push(2, 2.5);
+                    baseRest /= 5;
+                }
+                else {
+                    throw new Error('unexpected base');
+                }
+                if (this._private__fractionalDividers.length > 100) {
+                    throw new Error('something wrong with base');
+                }
+            }
+        }
+    }
+    PriceTickSpanCalculator.prototype._internal_tickSpan = function (high, low, maxTickSpan) {
+        var minMovement = (this._private__base === 0) ? (0) : (1 / this._private__base);
+        var resultTickSpan = Math.pow(10, Math.max(0, Math.ceil(log10(high - low))));
+        var index = 0;
+        var c = this._private__integralDividers[0];
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            // the second part is actual for small with very small values like 1e-10
+            // greaterOrEqual fails for such values
+            var resultTickSpanLargerMinMovement = greaterOrEqual(resultTickSpan, minMovement, 1e-14 /* TickSpanEpsilon */) && resultTickSpan > (minMovement + 1e-14 /* TickSpanEpsilon */);
+            var resultTickSpanLargerMaxTickSpan = greaterOrEqual(resultTickSpan, maxTickSpan * c, 1e-14 /* TickSpanEpsilon */);
+            var resultTickSpanLarger1 = greaterOrEqual(resultTickSpan, 1, 1e-14 /* TickSpanEpsilon */);
+            var haveToContinue = resultTickSpanLargerMinMovement && resultTickSpanLargerMaxTickSpan && resultTickSpanLarger1;
+            if (!haveToContinue) {
+                break;
+            }
+            resultTickSpan /= c;
+            c = this._private__integralDividers[++index % this._private__integralDividers.length];
+        }
+        if (resultTickSpan <= (minMovement + 1e-14 /* TickSpanEpsilon */)) {
+            resultTickSpan = minMovement;
+        }
+        resultTickSpan = Math.max(1, resultTickSpan);
+        if ((this._private__fractionalDividers.length > 0) && equal(resultTickSpan, 1, 1e-14 /* TickSpanEpsilon */)) {
+            index = 0;
+            c = this._private__fractionalDividers[0];
+            while (greaterOrEqual(resultTickSpan, maxTickSpan * c, 1e-14 /* TickSpanEpsilon */) && resultTickSpan > (minMovement + 1e-14 /* TickSpanEpsilon */)) {
+                resultTickSpan /= c;
+                c = this._private__fractionalDividers[++index % this._private__fractionalDividers.length];
+            }
+        }
+        return resultTickSpan;
+    };
+    return PriceTickSpanCalculator;
+}());
+
+var TICK_DENSITY = 2.5;
+var PriceTickMarkBuilder = /** @class */ (function () {
+    function PriceTickMarkBuilder(priceScale, base, coordinateToLogicalFunc, logicalToCoordinateFunc) {
+        this._private__marks = [];
+        this._private__priceScale = priceScale;
+        this._private__base = base;
+        this._private__coordinateToLogicalFunc = coordinateToLogicalFunc;
+        this._private__logicalToCoordinateFunc = logicalToCoordinateFunc;
+    }
+    PriceTickMarkBuilder.prototype._internal_tickSpan = function (high, low) {
+        if (high < low) {
+            throw new Error('high < low');
+        }
+        var scaleHeight = this._private__priceScale.height();
+        var markHeight = this._private__tickMarkHeight();
+        var maxTickSpan = (high - low) * markHeight / scaleHeight;
+        var spanCalculator1 = new PriceTickSpanCalculator(this._private__base, [2, 2.5, 2]);
+        var spanCalculator2 = new PriceTickSpanCalculator(this._private__base, [2, 2, 2.5]);
+        var spanCalculator3 = new PriceTickSpanCalculator(this._private__base, [2.5, 2, 2]);
+        var spans = [];
+        spans.push(spanCalculator1._internal_tickSpan(high, low, maxTickSpan), spanCalculator2._internal_tickSpan(high, low, maxTickSpan), spanCalculator3._internal_tickSpan(high, low, maxTickSpan));
+        return min(spans);
+    };
+    PriceTickMarkBuilder.prototype._internal_rebuildTickMarks = function () {
+        var priceScale = this._private__priceScale;
+        var firstValue = priceScale.firstValue();
+        if (firstValue === null) {
+            this._private__marks = [];
+            return;
+        }
+        var scaleHeight = priceScale.height();
+        var bottom = this._private__coordinateToLogicalFunc(scaleHeight - 1, firstValue);
+        var top = this._private__coordinateToLogicalFunc(0, firstValue);
+        var extraTopBottomMargin = this._private__priceScale.options().entireTextOnly ? this._private__fontHeight() / 2 : 0;
+        var minCoord = extraTopBottomMargin;
+        var maxCoord = scaleHeight - 1 - extraTopBottomMargin;
+        var high = Math.max(bottom, top);
+        var low = Math.min(bottom, top);
+        if (high === low) {
+            this._private__marks = [];
+            return;
+        }
+        var span = this._internal_tickSpan(high, low);
+        var mod = high % span;
+        mod += mod < 0 ? span : 0;
+        var sign = (high >= low) ? 1 : -1;
+        var prevCoord = null;
+        var targetIndex = 0;
+        for (var logical = high - mod; logical > low; logical -= span) {
+            var coord = this._private__logicalToCoordinateFunc(logical, firstValue, true);
+            // check if there is place for it
+            // this is required for log scale
+            if (prevCoord !== null && Math.abs(coord - prevCoord) < this._private__tickMarkHeight()) {
+                continue;
+            }
+            // check if a tick mark is partially visible and skip it if entireTextOnly is true
+            if (coord < minCoord || coord > maxCoord) {
+                continue;
+            }
+            if (targetIndex < this._private__marks.length) {
+                this._private__marks[targetIndex].coord = coord;
+                this._private__marks[targetIndex].label = priceScale.formatLogical(logical);
+            }
+            else {
+                this._private__marks.push({
+                    coord: coord,
+                    label: priceScale.formatLogical(logical),
+                });
+            }
+            targetIndex++;
+            prevCoord = coord;
+            if (priceScale.isLog()) {
+                // recalc span
+                span = this._internal_tickSpan(logical * sign, low);
+            }
+        }
+        this._private__marks.length = targetIndex;
+    };
+    PriceTickMarkBuilder.prototype._internal_marks = function () {
+        return this._private__marks;
+    };
+    PriceTickMarkBuilder.prototype._private__fontHeight = function () {
+        return this._private__priceScale.fontSize();
+    };
+    PriceTickMarkBuilder.prototype._private__tickMarkHeight = function () {
+        return Math.ceil(this._private__fontHeight() * TICK_DENSITY);
+    };
+    return PriceTickMarkBuilder;
+}());
+
+function sortSources(sources) {
+    return sources.slice().sort(function (s1, s2) {
+        return (ensureNotNull(s1.zorder()) - ensureNotNull(s2.zorder()));
+    });
+}
+
+/**
+ * Represents the price scale mode.
+ */
+var PriceScaleMode;
+(function (PriceScaleMode) {
+    /**
+     * Price scale shows prices. Price range changes linearly.
+     */
+    PriceScaleMode[PriceScaleMode["Normal"] = 0] = "Normal";
+    /**
+     * Price scale shows prices. Price range changes logarithmically.
+     */
+    PriceScaleMode[PriceScaleMode["Logarithmic"] = 1] = "Logarithmic";
+    /**
+     * Price scale shows percentage values according the first visible value of the price scale.
+     * The first visible value is 0% in this mode.
+     */
+    PriceScaleMode[PriceScaleMode["Percentage"] = 2] = "Percentage";
+    /**
+     * The same as percentage mode, but the first value is moved to 100.
+     */
+    PriceScaleMode[PriceScaleMode["IndexedTo100"] = 3] = "IndexedTo100";
+})(PriceScaleMode || (PriceScaleMode = {}));
+var percentageFormatter = new PercentageFormatter();
+var defaultPriceFormatter = new PriceFormatter(100, 1);
+var PriceScale = /** @class */ (function () {
+    function PriceScale(id, options, layoutOptions, localizationOptions) {
+        this._private__height = 0;
+        this._private__internalHeightCache = null;
+        this._private__priceRange = null;
+        this._private__priceRangeSnapshot = null;
+        this._private__invalidatedForRange = { _internal_isValid: false, _internal_visibleBars: null };
+        this._private__marginAbove = 0;
+        this._private__marginBelow = 0;
+        this._private__onMarksChanged = new Delegate();
+        this._private__modeChanged = new Delegate();
+        this._private__dataSources = [];
+        this._private__cachedOrderedSources = null;
+        this._private__marksCache = null;
+        this._private__scaleStartPoint = null;
+        this._private__scrollStartPoint = null;
+        this._private__formatter = defaultPriceFormatter;
+        this._private__logFormula = logFormulaForPriceRange(null);
+        this._private__id = id;
+        this._private__options = options;
+        this._private__layoutOptions = layoutOptions;
+        this._private__localizationOptions = localizationOptions;
+        this._private__markBuilder = new PriceTickMarkBuilder(this, 100, this._private__coordinateToLogical.bind(this), this._private__logicalToCoordinate.bind(this));
+    }
+    PriceScale.prototype.id = function () {
+        return this._private__id;
+    };
+    PriceScale.prototype.options = function () {
+        return this._private__options;
+    };
+    PriceScale.prototype.applyOptions = function (options) {
+        merge(this._private__options, options);
+        this.updateFormatter();
+        if (options.mode !== undefined) {
+            this.setMode({ mode: options.mode });
+        }
+        if (options.scaleMargins !== undefined) {
+            var top_1 = ensureDefined(options.scaleMargins.top);
+            var bottom = ensureDefined(options.scaleMargins.bottom);
+            if (top_1 < 0 || top_1 > 1) {
+                throw new Error("Invalid top margin - expect value between 0 and 1, given=" + top_1);
+            }
+            if (bottom < 0 || bottom > 1 || top_1 + bottom > 1) {
+                throw new Error("Invalid bottom margin - expect value between 0 and 1, given=" + bottom);
+            }
+            if (top_1 + bottom > 1) {
+                throw new Error("Invalid margins - sum of margins must be less than 1, given=" + (top_1 + bottom));
+            }
+            this._private__invalidateInternalHeightCache();
+            this._private__marksCache = null;
+        }
+    };
+    PriceScale.prototype.isAutoScale = function () {
+        return this._private__options.autoScale;
+    };
+    PriceScale.prototype.isLog = function () {
+        return this._private__options.mode === 1 /* Logarithmic */;
+    };
+    PriceScale.prototype.isPercentage = function () {
+        return this._private__options.mode === 2 /* Percentage */;
+    };
+    PriceScale.prototype.isIndexedTo100 = function () {
+        return this._private__options.mode === 3 /* IndexedTo100 */;
+    };
+    PriceScale.prototype.mode = function () {
+        return {
+            autoScale: this._private__options.autoScale,
+            isInverted: this._private__options.invertScale,
+            mode: this._private__options.mode,
+        };
+    };
+    // eslint-disable-next-line complexity
+    PriceScale.prototype.setMode = function (newMode) {
+        var oldMode = this.mode();
+        var priceRange = null;
+        if (newMode.autoScale !== undefined) {
+            this._private__options.autoScale = newMode.autoScale;
+        }
+        if (newMode.mode !== undefined) {
+            this._private__options.mode = newMode.mode;
+            if (newMode.mode === 2 /* Percentage */ || newMode.mode === 3 /* IndexedTo100 */) {
+                this._private__options.autoScale = true;
+            }
+            // TODO: Remove after making rebuildTickMarks lazy
+            this._private__invalidatedForRange._internal_isValid = false;
+        }
+        // define which scale converted from
+        if (oldMode.mode === 1 /* Logarithmic */ && newMode.mode !== oldMode.mode) {
+            if (canConvertPriceRangeFromLog(this._private__priceRange, this._private__logFormula)) {
+                priceRange = convertPriceRangeFromLog(this._private__priceRange, this._private__logFormula);
+                if (priceRange !== null) {
+                    this.setPriceRange(priceRange);
+                }
+            }
+            else {
+                this._private__options.autoScale = true;
+            }
+        }
+        // define which scale converted to
+        if (newMode.mode === 1 /* Logarithmic */ && newMode.mode !== oldMode.mode) {
+            priceRange = convertPriceRangeToLog(this._private__priceRange, this._private__logFormula);
+            if (priceRange !== null) {
+                this.setPriceRange(priceRange);
+            }
+        }
+        var modeChanged = oldMode.mode !== this._private__options.mode;
+        if (modeChanged && (oldMode.mode === 2 /* Percentage */ || this.isPercentage())) {
+            this.updateFormatter();
+        }
+        if (modeChanged && (oldMode.mode === 3 /* IndexedTo100 */ || this.isIndexedTo100())) {
+            this.updateFormatter();
+        }
+        if (newMode.isInverted !== undefined && oldMode.isInverted !== newMode.isInverted) {
+            this._private__options.invertScale = newMode.isInverted;
+            this._private__onIsInvertedChanged();
+        }
+        this._private__modeChanged._internal_fire(oldMode, this.mode());
+    };
+    PriceScale.prototype.modeChanged = function () {
+        return this._private__modeChanged;
+    };
+    PriceScale.prototype.fontSize = function () {
+        return this._private__layoutOptions.fontSize;
+    };
+    PriceScale.prototype.height = function () {
+        return this._private__height;
+    };
+    PriceScale.prototype.setHeight = function (value) {
+        if (this._private__height === value) {
+            return;
+        }
+        this._private__height = value;
+        this._private__invalidateInternalHeightCache();
+        this._private__marksCache = null;
+    };
+    PriceScale.prototype.internalHeight = function () {
+        if (this._private__internalHeightCache) {
+            return this._private__internalHeightCache;
+        }
+        var res = this.height() - this._private__topMarginPx() - this._private__bottomMarginPx();
+        this._private__internalHeightCache = res;
+        return res;
+    };
+    PriceScale.prototype.priceRange = function () {
+        this._private__makeSureItIsValid();
+        return this._private__priceRange;
+    };
+    PriceScale.prototype.setPriceRange = function (newPriceRange, isForceSetValue) {
+        var oldPriceRange = this._private__priceRange;
+        if (!isForceSetValue &&
+            !(oldPriceRange === null && newPriceRange !== null) &&
+            (oldPriceRange === null || oldPriceRange.equals(newPriceRange))) {
+            return;
+        }
+        this._private__marksCache = null;
+        this._private__priceRange = newPriceRange;
+    };
+    PriceScale.prototype.isEmpty = function () {
+        this._private__makeSureItIsValid();
+        return this._private__height === 0 || !this._private__priceRange || this._private__priceRange.isEmpty();
+    };
+    PriceScale.prototype.invertedCoordinate = function (coordinate) {
+        return this.isInverted() ? coordinate : this.height() - 1 - coordinate;
+    };
+    PriceScale.prototype.priceToCoordinate = function (price, baseValue) {
+        if (this.isPercentage()) {
+            price = toPercent(price, baseValue);
+        }
+        else if (this.isIndexedTo100()) {
+            price = toIndexedTo100(price, baseValue);
+        }
+        return this._private__logicalToCoordinate(price, baseValue);
+    };
+    PriceScale.prototype.pointsArrayToCoordinates = function (points, baseValue, visibleRange) {
+        this._private__makeSureItIsValid();
+        var bh = this._private__bottomMarginPx();
+        var range = ensureNotNull(this.priceRange());
+        var min = range.minValue();
+        var max = range.maxValue();
+        var ih = (this.internalHeight() - 1);
+        var isInverted = this.isInverted();
+        var hmm = ih / (max - min);
+        var fromIndex = (visibleRange === undefined) ? 0 : visibleRange.from;
+        var toIndex = (visibleRange === undefined) ? points.length : visibleRange.to;
+        var transformFn = this._private__getCoordinateTransformer();
+        for (var i = fromIndex; i < toIndex; i++) {
+            var point = points[i];
+            var price = point.price;
+            if (isNaN(price)) {
+                continue;
+            }
+            var logical = price;
+            if (transformFn !== null) {
+                logical = transformFn(point.price, baseValue);
+            }
+            var invCoordinate = bh + hmm * (logical - min);
+            var coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
+            point.y = coordinate;
+        }
+    };
+    PriceScale.prototype.barPricesToCoordinates = function (pricesList, baseValue, visibleRange) {
+        this._private__makeSureItIsValid();
+        var bh = this._private__bottomMarginPx();
+        var range = ensureNotNull(this.priceRange());
+        var min = range.minValue();
+        var max = range.maxValue();
+        var ih = (this.internalHeight() - 1);
+        var isInverted = this.isInverted();
+        var hmm = ih / (max - min);
+        var fromIndex = (visibleRange === undefined) ? 0 : visibleRange.from;
+        var toIndex = (visibleRange === undefined) ? pricesList.length : visibleRange.to;
+        var transformFn = this._private__getCoordinateTransformer();
+        for (var i = fromIndex; i < toIndex; i++) {
+            var bar = pricesList[i];
+            var openLogical = bar.open;
+            var highLogical = bar.high;
+            var lowLogical = bar.low;
+            var closeLogical = bar.close;
+            if (transformFn !== null) {
+                openLogical = transformFn(bar.open, baseValue);
+                highLogical = transformFn(bar.high, baseValue);
+                lowLogical = transformFn(bar.low, baseValue);
+                closeLogical = transformFn(bar.close, baseValue);
+            }
+            var invCoordinate = bh + hmm * (openLogical - min);
+            var coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
+            bar.openY = coordinate;
+            invCoordinate = bh + hmm * (highLogical - min);
+            coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
+            bar.highY = coordinate;
+            invCoordinate = bh + hmm * (lowLogical - min);
+            coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
+            bar.lowY = coordinate;
+            invCoordinate = bh + hmm * (closeLogical - min);
+            coordinate = isInverted ? invCoordinate : this._private__height - 1 - invCoordinate;
+            bar.closeY = coordinate;
+        }
+    };
+    PriceScale.prototype.coordinateToPrice = function (coordinate, baseValue) {
+        var logical = this._private__coordinateToLogical(coordinate, baseValue);
+        return this.logicalToPrice(logical, baseValue);
+    };
+    PriceScale.prototype.logicalToPrice = function (logical, baseValue) {
+        var value = logical;
+        if (this.isPercentage()) {
+            value = fromPercent(value, baseValue);
+        }
+        else if (this.isIndexedTo100()) {
+            value = fromIndexedTo100(value, baseValue);
+        }
+        return value;
+    };
+    PriceScale.prototype.dataSources = function () {
+        return this._private__dataSources;
+    };
+    PriceScale.prototype.orderedSources = function () {
+        if (this._private__cachedOrderedSources) {
+            return this._private__cachedOrderedSources;
+        }
+        var sources = [];
+        for (var i = 0; i < this._private__dataSources.length; i++) {
+            var ds = this._private__dataSources[i];
+            if (ds.zorder() === null) {
+                ds.setZorder(i + 1);
+            }
+            sources.push(ds);
+        }
+        sources = sortSources(sources);
+        this._private__cachedOrderedSources = sources;
+        return this._private__cachedOrderedSources;
+    };
+    PriceScale.prototype.addDataSource = function (source) {
+        if (this._private__dataSources.indexOf(source) !== -1) {
+            return;
+        }
+        this._private__dataSources.push(source);
+        this.updateFormatter();
+        this.invalidateSourcesCache();
+    };
+    PriceScale.prototype.removeDataSource = function (source) {
+        var index = this._private__dataSources.indexOf(source);
+        if (index === -1) {
+            throw new Error('source is not attached to scale');
+        }
+        this._private__dataSources.splice(index, 1);
+        if (this._private__dataSources.length === 0) {
+            this.setMode({
+                autoScale: true,
+            });
+            // if no sources on price scale let's clear price range cache as well as enabling auto scale
+            this.setPriceRange(null);
+        }
+        this.updateFormatter();
+        this.invalidateSourcesCache();
+    };
+    PriceScale.prototype.firstValue = function () {
+        // TODO: cache the result
+        var result = null;
+        for (var _i = 0, _a = this._private__dataSources; _i < _a.length; _i++) {
+            var source = _a[_i];
+            var firstValue = source.firstValue();
+            if (firstValue === null || firstValue.value === null) {
+                continue;
+            }
+            if (result === null || firstValue.timePoint < result.timePoint) {
+                result = firstValue;
+            }
+        }
+        return result === null ? null : result.value;
+    };
+    PriceScale.prototype.isInverted = function () {
+        return this._private__options.invertScale;
+    };
+    PriceScale.prototype.marks = function () {
+        var firstValueIsNull = this.firstValue() === null;
+        // do not recalculate marks if firstValueIsNull is true because in this case we'll always get empty result
+        // this could happen in case when a series had some data and then you set empty data to it (in a simplified case)
+        // we could display an empty price scale, but this is not good from UX
+        // so in this case we need to keep an previous marks to display them on the scale
+        // as one of possible examples for this situation could be the following:
+        // let's say you have a study/indicator attached to a price scale and then you decide to stop it, i.e. remove its data because of its visibility
+        // a user will see the previous marks on the scale until you turn on your study back or remove it from the chart completely
+        if (this._private__marksCache !== null && (firstValueIsNull || this._private__marksCache._internal_firstValueIsNull === firstValueIsNull)) {
+            return this._private__marksCache._internal_marks;
+        }
+        this._private__markBuilder._internal_rebuildTickMarks();
+        var marks = this._private__markBuilder._internal_marks();
+        this._private__marksCache = { _internal_marks: marks, _internal_firstValueIsNull: firstValueIsNull };
+        this._private__onMarksChanged._internal_fire();
+        return marks;
+    };
+    PriceScale.prototype.onMarksChanged = function () {
+        return this._private__onMarksChanged;
+    };
+    PriceScale.prototype.startScale = function (x) {
+        if (this.isPercentage() || this.isIndexedTo100()) {
+            return;
+        }
+        if (this._private__scaleStartPoint !== null || this._private__priceRangeSnapshot !== null) {
+            return;
+        }
+        if (this.isEmpty()) {
+            return;
+        }
+        // invert x
+        this._private__scaleStartPoint = this._private__height - x;
+        this._private__priceRangeSnapshot = ensureNotNull(this.priceRange()).clone();
+    };
+    PriceScale.prototype.scaleTo = function (x) {
+        if (this.isPercentage() || this.isIndexedTo100()) {
+            return;
+        }
+        if (this._private__scaleStartPoint === null) {
+            return;
+        }
+        this.setMode({
+            autoScale: false,
+        });
+        // invert x
+        x = this._private__height - x;
+        if (x < 0) {
+            x = 0;
+        }
+        var scaleCoeff = (this._private__scaleStartPoint + (this._private__height - 1) * 0.2) / (x + (this._private__height - 1) * 0.2);
+        var newPriceRange = ensureNotNull(this._private__priceRangeSnapshot).clone();
+        scaleCoeff = Math.max(scaleCoeff, 0.1);
+        newPriceRange.scaleAroundCenter(scaleCoeff);
+        this.setPriceRange(newPriceRange);
+    };
+    PriceScale.prototype.endScale = function () {
+        if (this.isPercentage() || this.isIndexedTo100()) {
+            return;
+        }
+        this._private__scaleStartPoint = null;
+        this._private__priceRangeSnapshot = null;
+    };
+    PriceScale.prototype.startScroll = function (x) {
+        if (this.isAutoScale()) {
+            return;
+        }
+        if (this._private__scrollStartPoint !== null || this._private__priceRangeSnapshot !== null) {
+            return;
+        }
+        if (this.isEmpty()) {
+            return;
+        }
+        this._private__scrollStartPoint = x;
+        this._private__priceRangeSnapshot = ensureNotNull(this.priceRange()).clone();
+    };
+    PriceScale.prototype.scrollTo = function (x) {
+        if (this.isAutoScale()) {
+            return;
+        }
+        if (this._private__scrollStartPoint === null) {
+            return;
+        }
+        var priceUnitsPerPixel = ensureNotNull(this.priceRange()).length() / (this.internalHeight() - 1);
+        var pixelDelta = x - this._private__scrollStartPoint;
+        if (this.isInverted()) {
+            pixelDelta *= -1;
+        }
+        var priceDelta = pixelDelta * priceUnitsPerPixel;
+        var newPriceRange = ensureNotNull(this._private__priceRangeSnapshot).clone();
+        newPriceRange.shift(priceDelta);
+        this.setPriceRange(newPriceRange, true);
+        this._private__marksCache = null;
+    };
+    PriceScale.prototype.endScroll = function () {
+        if (this.isAutoScale()) {
+            return;
+        }
+        if (this._private__scrollStartPoint === null) {
+            return;
+        }
+        this._private__scrollStartPoint = null;
+        this._private__priceRangeSnapshot = null;
+    };
+    PriceScale.prototype.formatter = function () {
+        if (!this._private__formatter) {
+            this.updateFormatter();
+        }
+        return this._private__formatter;
+    };
+    PriceScale.prototype.formatPrice = function (price, firstValue) {
+        switch (this._private__options.mode) {
+            case 2 /* Percentage */:
+                return this.formatter().format(toPercent(price, firstValue));
+            case 3 /* IndexedTo100 */:
+                return this.formatter().format(toIndexedTo100(price, firstValue));
+            default:
+                return this._private__formatPrice(price);
+        }
+    };
+    PriceScale.prototype.formatLogical = function (logical) {
+        switch (this._private__options.mode) {
+            case 2 /* Percentage */:
+            case 3 /* IndexedTo100 */:
+                return this.formatter().format(logical);
+            default:
+                return this._private__formatPrice(logical);
+        }
+    };
+    PriceScale.prototype.formatPriceAbsolute = function (price) {
+        return this._private__formatPrice(price, ensureNotNull(this._private__formatterSource()).formatter());
+    };
+    PriceScale.prototype.formatPricePercentage = function (price, baseValue) {
+        price = toPercent(price, baseValue);
+        return percentageFormatter.format(price);
+    };
+    PriceScale.prototype.sourcesForAutoScale = function () {
+        return this._private__dataSources;
+    };
+    PriceScale.prototype.recalculatePriceRange = function (visibleBars) {
+        this._private__invalidatedForRange = {
+            _internal_visibleBars: visibleBars,
+            _internal_isValid: false,
+        };
+    };
+    PriceScale.prototype.updateAllViews = function () {
+        this._private__dataSources.forEach(function (s) { return s.updateAllViews(); });
+    };
+    PriceScale.prototype.updateFormatter = function () {
+        this._private__marksCache = null;
+        var formatterSource = this._private__formatterSource();
+        var base = 100;
+        if (formatterSource !== null) {
+            base = Math.round(1 / formatterSource.minMove());
+        }
+        this._private__formatter = defaultPriceFormatter;
+        if (this.isPercentage()) {
+            this._private__formatter = percentageFormatter;
+            base = 100;
+        }
+        else if (this.isIndexedTo100()) {
+            this._private__formatter = new PriceFormatter(100, 1);
+            base = 100;
+        }
+        else {
+            if (formatterSource !== null) {
+                // user
+                this._private__formatter = formatterSource.formatter();
+            }
+        }
+        this._private__markBuilder = new PriceTickMarkBuilder(this, base, this._private__coordinateToLogical.bind(this), this._private__logicalToCoordinate.bind(this));
+        this._private__markBuilder._internal_rebuildTickMarks();
+    };
+    PriceScale.prototype.invalidateSourcesCache = function () {
+        this._private__cachedOrderedSources = null;
+    };
+    /**
+     * @returns The {@link IPriceDataSource} that will be used as the "formatter source" (take minMove for formatter).
+     */
+    PriceScale.prototype._private__formatterSource = function () {
+        return this._private__dataSources[0] || null;
+    };
+    PriceScale.prototype._private__topMarginPx = function () {
+        return this.isInverted()
+            ? this._private__options.scaleMargins.bottom * this.height() + this._private__marginBelow
+            : this._private__options.scaleMargins.top * this.height() + this._private__marginAbove;
+    };
+    PriceScale.prototype._private__bottomMarginPx = function () {
+        return this.isInverted()
+            ? this._private__options.scaleMargins.top * this.height() + this._private__marginAbove
+            : this._private__options.scaleMargins.bottom * this.height() + this._private__marginBelow;
+    };
+    PriceScale.prototype._private__makeSureItIsValid = function () {
+        if (!this._private__invalidatedForRange._internal_isValid) {
+            this._private__invalidatedForRange._internal_isValid = true;
+            this._private__recalculatePriceRangeImpl();
+        }
+    };
+    PriceScale.prototype._private__invalidateInternalHeightCache = function () {
+        this._private__internalHeightCache = null;
+    };
+    PriceScale.prototype._private__logicalToCoordinate = function (logical, baseValue) {
+        this._private__makeSureItIsValid();
+        if (this.isEmpty()) {
+            return 0;
+        }
+        logical = this.isLog() && logical ? toLog(logical, this._private__logFormula) : logical;
+        var range = ensureNotNull(this.priceRange());
+        var invCoordinate = this._private__bottomMarginPx() +
+            (this.internalHeight() - 1) * (logical - range.minValue()) / range.length();
+        var coordinate = this.invertedCoordinate(invCoordinate);
+        return coordinate;
+    };
+    PriceScale.prototype._private__coordinateToLogical = function (coordinate, baseValue) {
+        this._private__makeSureItIsValid();
+        if (this.isEmpty()) {
+            return 0;
+        }
+        var invCoordinate = this.invertedCoordinate(coordinate);
+        var range = ensureNotNull(this.priceRange());
+        var logical = range.minValue() + range.length() *
+            ((invCoordinate - this._private__bottomMarginPx()) / (this.internalHeight() - 1));
+        return this.isLog() ? fromLog(logical, this._private__logFormula) : logical;
+    };
+    PriceScale.prototype._private__onIsInvertedChanged = function () {
+        this._private__marksCache = null;
+        this._private__markBuilder._internal_rebuildTickMarks();
+    };
+    // eslint-disable-next-line complexity
+    PriceScale.prototype._private__recalculatePriceRangeImpl = function () {
+        var visibleBars = this._private__invalidatedForRange._internal_visibleBars;
+        if (visibleBars === null) {
+            return;
+        }
+        var priceRange = null;
+        var sources = this.sourcesForAutoScale();
+        var marginAbove = 0;
+        var marginBelow = 0;
+        for (var _i = 0, sources_1 = sources; _i < sources_1.length; _i++) {
+            var source = sources_1[_i];
+            if (!source.visible()) {
+                continue;
+            }
+            var firstValue = source.firstValue();
+            if (firstValue === null) {
+                continue;
+            }
+            var autoScaleInfo = source.autoscaleInfo(visibleBars.left(), visibleBars.right());
+            var sourceRange = autoScaleInfo && autoScaleInfo.priceRange();
+            if (sourceRange !== null) {
+                switch (this._private__options.mode) {
+                    case 1 /* Logarithmic */:
+                        sourceRange = convertPriceRangeToLog(sourceRange, this._private__logFormula);
+                        break;
+                    case 2 /* Percentage */:
+                        sourceRange = toPercentRange(sourceRange, firstValue.value);
+                        break;
+                    case 3 /* IndexedTo100 */:
+                        sourceRange = toIndexedTo100Range(sourceRange, firstValue.value);
+                        break;
+                }
+                if (priceRange === null) {
+                    priceRange = sourceRange;
+                }
+                else {
+                    priceRange = priceRange.merge(ensureNotNull(sourceRange));
+                }
+                if (autoScaleInfo !== null) {
+                    var margins = autoScaleInfo.margins();
+                    if (margins !== null) {
+                        marginAbove = Math.max(marginAbove, margins.above);
+                        marginBelow = Math.max(marginAbove, margins.below);
+                    }
+                }
+            }
+        }
+        if (marginAbove !== this._private__marginAbove || marginBelow !== this._private__marginBelow) {
+            this._private__marginAbove = marginAbove;
+            this._private__marginBelow = marginBelow;
+            this._private__marksCache = null;
+            this._private__invalidateInternalHeightCache();
+        }
+        if (priceRange !== null) {
+            // keep current range is new is empty
+            if (priceRange.minValue() === priceRange.maxValue()) {
+                var formatterSource = this._private__formatterSource();
+                var minMove = formatterSource === null || this.isPercentage() || this.isIndexedTo100() ? 1 : formatterSource.minMove();
+                // if price range is degenerated to 1 point let's extend it by 10 min move values
+                // to avoid incorrect range and empty (blank) scale (in case of min tick much greater than 1)
+                var extendValue = 5 * minMove;
+                if (this.isLog()) {
+                    priceRange = convertPriceRangeFromLog(priceRange, this._private__logFormula);
+                }
+                priceRange = new PriceRangeImpl(priceRange.minValue() - extendValue, priceRange.maxValue() + extendValue);
+                if (this.isLog()) {
+                    priceRange = convertPriceRangeToLog(priceRange, this._private__logFormula);
+                }
+            }
+            if (this.isLog()) {
+                var rawRange = convertPriceRangeFromLog(priceRange, this._private__logFormula);
+                var newLogFormula = logFormulaForPriceRange(rawRange);
+                if (!logFormulasAreSame(newLogFormula, this._private__logFormula)) {
+                    var rawSnapshot = this._private__priceRangeSnapshot !== null ? convertPriceRangeFromLog(this._private__priceRangeSnapshot, this._private__logFormula) : null;
+                    this._private__logFormula = newLogFormula;
+                    priceRange = convertPriceRangeToLog(rawRange, newLogFormula);
+                    if (rawSnapshot !== null) {
+                        this._private__priceRangeSnapshot = convertPriceRangeToLog(rawSnapshot, newLogFormula);
+                    }
+                }
+            }
+            this.setPriceRange(priceRange);
+        }
+        else {
+            // reset empty to default
+            if (this._private__priceRange === null) {
+                this.setPriceRange(new PriceRangeImpl(-0.5, 0.5));
+                this._private__logFormula = logFormulaForPriceRange(null);
+            }
+        }
+        this._private__invalidatedForRange._internal_isValid = true;
+    };
+    PriceScale.prototype._private__getCoordinateTransformer = function () {
+        var _this = this;
+        if (this.isPercentage()) {
+            return toPercent;
+        }
+        else if (this.isIndexedTo100()) {
+            return toIndexedTo100;
+        }
+        else if (this.isLog()) {
+            return function (price) { return toLog(price, _this._private__logFormula); };
+        }
+        return null;
+    };
+    PriceScale.prototype._private__formatPrice = function (price, fallbackFormatter) {
+        if (this._private__localizationOptions.priceFormatter === undefined) {
+            if (fallbackFormatter === undefined) {
+                fallbackFormatter = this.formatter();
+            }
+            return fallbackFormatter.format(price);
+        }
+        return this._private__localizationOptions.priceFormatter(price);
+    };
+    return PriceScale;
+}());
+
 var DEFAULT_STRETCH_FACTOR = 1000;
 var Pane = /** @class */ (function () {
     function Pane(timeScale, model) {
@@ -7116,6 +6188,962 @@ var Pane = /** @class */ (function () {
     return Pane;
 }());
 
+var getMonth = function (date) { return date.getUTCMonth() + 1; };
+var getDay = function (date) { return date.getUTCDate(); };
+var getYear = function (date) { return date.getUTCFullYear(); };
+var dd = function (date) { return numberToStringWithLeadingZero(getDay(date), 2); };
+var MMMM = function (date, locale) { return new Date(date.getUTCFullYear(), date.getUTCMonth(), 1)
+    .toLocaleString(locale, { month: 'long' }); };
+var MMM = function (date, locale) { return new Date(date.getUTCFullYear(), date.getUTCMonth(), 1)
+    .toLocaleString(locale, { month: 'short' }); };
+var MM = function (date) { return numberToStringWithLeadingZero(getMonth(date), 2); };
+var yy = function (date) { return numberToStringWithLeadingZero(getYear(date) % 100, 2); };
+var yyyy = function (date) { return numberToStringWithLeadingZero(getYear(date), 4); };
+function formatDate(date, format, locale) {
+    return format
+        .replace(/yyyy/g, yyyy(date))
+        .replace(/yy/g, yy(date))
+        .replace(/MMMM/g, MMMM(date, locale))
+        .replace(/MMM/g, MMM(date, locale))
+        .replace(/MM/g, MM(date))
+        .replace(/dd/g, dd(date));
+}
+
+var DateFormatter = /** @class */ (function () {
+    function DateFormatter(dateFormat, locale) {
+        if (dateFormat === void 0) { dateFormat = 'yyyy-MM-dd'; }
+        if (locale === void 0) { locale = 'default'; }
+        this._private__dateFormat = dateFormat;
+        this._private__locale = locale;
+    }
+    DateFormatter.prototype._internal_format = function (date) {
+        return formatDate(date, this._private__dateFormat, this._private__locale);
+    };
+    return DateFormatter;
+}());
+
+var TimeFormatter = /** @class */ (function () {
+    function TimeFormatter(format) {
+        this._private__formatStr = format || '%h:%m:%s';
+    }
+    TimeFormatter.prototype._internal_format = function (date) {
+        return this._private__formatStr.replace('%h', numberToStringWithLeadingZero(date.getUTCHours(), 2)).
+            replace('%m', numberToStringWithLeadingZero(date.getUTCMinutes(), 2)).
+            replace('%s', numberToStringWithLeadingZero(date.getUTCSeconds(), 2));
+    };
+    return TimeFormatter;
+}());
+
+var defaultParams = {
+    _internal_dateFormat: 'yyyy-MM-dd',
+    _internal_timeFormat: '%h:%m:%s',
+    _internal_dateTimeSeparator: ' ',
+    _internal_locale: 'default',
+};
+var DateTimeFormatter = /** @class */ (function () {
+    function DateTimeFormatter(params) {
+        if (params === void 0) { params = {}; }
+        var formatterParams = __assign(__assign({}, defaultParams), params);
+        this._private__dateFormatter = new DateFormatter(formatterParams._internal_dateFormat, formatterParams._internal_locale);
+        this._private__timeFormatter = new TimeFormatter(formatterParams._internal_timeFormat);
+        this._private__separator = formatterParams._internal_dateTimeSeparator;
+    }
+    DateTimeFormatter.prototype._internal_format = function (dateTime) {
+        return "" + this._private__dateFormatter._internal_format(dateTime) + this._private__separator + this._private__timeFormatter._internal_format(dateTime);
+    };
+    return DateTimeFormatter;
+}());
+
+function defaultTickMarkFormatter(timePoint, tickMarkType, locale) {
+    var formatOptions = {};
+    switch (tickMarkType) {
+        case 0 /* Year */:
+            formatOptions.year = 'numeric';
+            break;
+        case 1 /* Month */:
+            formatOptions.month = 'short';
+            break;
+        case 2 /* DayOfMonth */:
+            formatOptions.day = 'numeric';
+            break;
+        case 3 /* Time */:
+            formatOptions.hour12 = false;
+            formatOptions.hour = '2-digit';
+            formatOptions.minute = '2-digit';
+            break;
+        case 4 /* TimeWithSeconds */:
+            formatOptions.hour12 = false;
+            formatOptions.hour = '2-digit';
+            formatOptions.minute = '2-digit';
+            formatOptions.second = '2-digit';
+            break;
+    }
+    var date = timePoint.businessDay === undefined
+        ? new Date(timePoint.timestamp * 1000)
+        : new Date(Date.UTC(timePoint.businessDay.year, timePoint.businessDay.month - 1, timePoint.businessDay.day));
+    // from given date we should use only as UTC date or timestamp
+    // but to format as locale date we can convert UTC date to local date
+    var localDateFromUtc = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds());
+    return localDateFromUtc.toLocaleString(locale, formatOptions);
+}
+
+var FormattedLabelsCache = /** @class */ (function () {
+    function FormattedLabelsCache(format, size) {
+        if (size === void 0) { size = 50; }
+        this._private__actualSize = 0;
+        this._private__usageTick = 1;
+        this._private__oldestTick = 1;
+        this._private__cache = new Map();
+        this._private__tick2Labels = new Map();
+        this._private__format = format;
+        this._private__maxSize = size;
+    }
+    FormattedLabelsCache.prototype._internal_format = function (value) {
+        var cacheKey = value.businessDay === undefined
+            ? new Date(value.timestamp * 1000).getTime()
+            : new Date(Date.UTC(value.businessDay.year, value.businessDay.month - 1, value.businessDay.day)).getTime();
+        var tick = this._private__cache.get(cacheKey);
+        if (tick !== undefined) {
+            return tick._internal_string;
+        }
+        if (this._private__actualSize === this._private__maxSize) {
+            var oldestValue = this._private__tick2Labels.get(this._private__oldestTick);
+            this._private__tick2Labels.delete(this._private__oldestTick);
+            this._private__cache.delete(ensureDefined(oldestValue));
+            this._private__oldestTick++;
+            this._private__actualSize--;
+        }
+        var str = this._private__format(value);
+        this._private__cache.set(cacheKey, { _internal_string: str, _internal_tick: this._private__usageTick });
+        this._private__tick2Labels.set(this._private__usageTick, cacheKey);
+        this._private__actualSize++;
+        this._private__usageTick++;
+        return str;
+    };
+    return FormattedLabelsCache;
+}());
+
+var RangeImpl = /** @class */ (function () {
+    function RangeImpl(left, right) {
+        assert(left <= right, 'right should be >= left');
+        this._private__left = left;
+        this._private__right = right;
+    }
+    RangeImpl.prototype.left = function () {
+        return this._private__left;
+    };
+    RangeImpl.prototype.right = function () {
+        return this._private__right;
+    };
+    RangeImpl.prototype.count = function () {
+        return this._private__right - this._private__left + 1;
+    };
+    RangeImpl.prototype.contains = function (index) {
+        return this._private__left <= index && index <= this._private__right;
+    };
+    RangeImpl.prototype.equals = function (other) {
+        return this._private__left === other.left() && this._private__right === other.right();
+    };
+    return RangeImpl;
+}());
+function areRangesEqual(first, second) {
+    if (first === null || second === null) {
+        return first === second;
+    }
+    return first.equals(second);
+}
+
+var TickMarks = /** @class */ (function () {
+    function TickMarks() {
+        this._private__marksByWeight = new Map();
+        this._private__cache = null;
+    }
+    TickMarks.prototype._internal_setTimeScalePoints = function (newPoints, firstChangedPointIndex) {
+        this._private__removeMarksSinceIndex(firstChangedPointIndex);
+        this._private__cache = null;
+        for (var index = firstChangedPointIndex; index < newPoints.length; ++index) {
+            var point = newPoints[index];
+            var marksForWeight = this._private__marksByWeight.get(point.timeWeight);
+            if (marksForWeight === undefined) {
+                marksForWeight = [];
+                this._private__marksByWeight.set(point.timeWeight, marksForWeight);
+            }
+            marksForWeight.push({
+                _internal_index: index,
+                _internal_time: point.time,
+                _internal_weight: point.timeWeight,
+            });
+        }
+    };
+    TickMarks.prototype._internal_build = function (spacing, maxWidth) {
+        var maxIndexesPerMark = Math.ceil(maxWidth / spacing);
+        if (this._private__cache === null || this._private__cache._internal_maxIndexesPerMark !== maxIndexesPerMark) {
+            this._private__cache = {
+                _internal_marks: this._private__buildMarksImpl(maxIndexesPerMark),
+                _internal_maxIndexesPerMark: maxIndexesPerMark,
+            };
+        }
+        return this._private__cache._internal_marks;
+    };
+    TickMarks.prototype._private__removeMarksSinceIndex = function (sinceIndex) {
+        if (sinceIndex === 0) {
+            this._private__marksByWeight.clear();
+            return;
+        }
+        var weightsToClear = [];
+        this._private__marksByWeight.forEach(function (marks, timeWeight) {
+            if (sinceIndex <= marks[0]._internal_index) {
+                weightsToClear.push(timeWeight);
+            }
+            else {
+                marks.splice(lowerbound(marks, sinceIndex, function (tm) { return tm._internal_index < sinceIndex; }), Infinity);
+            }
+        });
+        for (var _i = 0, weightsToClear_1 = weightsToClear; _i < weightsToClear_1.length; _i++) {
+            var weight = weightsToClear_1[_i];
+            this._private__marksByWeight.delete(weight);
+        }
+    };
+    TickMarks.prototype._private__buildMarksImpl = function (maxIndexesPerMark) {
+        var marks = [];
+        for (var _i = 0, _a = Array.from(this._private__marksByWeight.keys()).sort(function (a, b) { return b - a; }); _i < _a.length; _i++) {
+            var weight = _a[_i];
+            if (!this._private__marksByWeight.get(weight)) {
+                continue;
+            }
+            // Built tickMarks are now prevMarks, and marks it as new array
+            var prevMarks = marks;
+            marks = [];
+            var prevMarksLength = prevMarks.length;
+            var prevMarksPointer = 0;
+            var currentWeight = ensureDefined(this._private__marksByWeight.get(weight));
+            var currentWeightLength = currentWeight.length;
+            var rightIndex = Infinity;
+            var leftIndex = -Infinity;
+            for (var i = 0; i < currentWeightLength; i++) {
+                var mark = currentWeight[i];
+                var currentIndex = mark._internal_index;
+                // Determine indexes with which current index will be compared
+                // All marks to the right is moved to new array
+                while (prevMarksPointer < prevMarksLength) {
+                    var lastMark = prevMarks[prevMarksPointer];
+                    var lastIndex = lastMark._internal_index;
+                    if (lastIndex < currentIndex) {
+                        prevMarksPointer++;
+                        marks.push(lastMark);
+                        leftIndex = lastIndex;
+                        rightIndex = Infinity;
+                    }
+                    else {
+                        rightIndex = lastIndex;
+                        break;
+                    }
+                }
+                if (rightIndex - currentIndex >= maxIndexesPerMark && currentIndex - leftIndex >= maxIndexesPerMark) {
+                    // TickMark fits. Place it into new array
+                    marks.push(mark);
+                    leftIndex = currentIndex;
+                }
+            }
+            // Place all unused tickMarks into new array;
+            for (; prevMarksPointer < prevMarksLength; prevMarksPointer++) {
+                marks.push(prevMarks[prevMarksPointer]);
+            }
+        }
+        return marks;
+    };
+    return TickMarks;
+}());
+
+var TimeScaleVisibleRange = /** @class */ (function () {
+    function TimeScaleVisibleRange(logicalRange) {
+        this._private__logicalRange = logicalRange;
+    }
+    TimeScaleVisibleRange.prototype._internal_strictRange = function () {
+        if (this._private__logicalRange === null) {
+            return null;
+        }
+        return new RangeImpl(Math.floor(this._private__logicalRange.left()), Math.ceil(this._private__logicalRange.right()));
+    };
+    TimeScaleVisibleRange.prototype._internal_logicalRange = function () {
+        return this._private__logicalRange;
+    };
+    TimeScaleVisibleRange._internal_invalid = function () {
+        return new TimeScaleVisibleRange(null);
+    };
+    return TimeScaleVisibleRange;
+}());
+
+/**
+ * Represents the type of a tick mark on the time axis.
+ */
+var TickMarkType;
+(function (TickMarkType) {
+    /**
+     * The start of the year (e.g. it's the first tick mark in a year).
+     */
+    TickMarkType[TickMarkType["Year"] = 0] = "Year";
+    /**
+     * The start of the month (e.g. it's the first tick mark in a month).
+     */
+    TickMarkType[TickMarkType["Month"] = 1] = "Month";
+    /**
+     * A day of the month.
+     */
+    TickMarkType[TickMarkType["DayOfMonth"] = 2] = "DayOfMonth";
+    /**
+     * A time without seconds.
+     */
+    TickMarkType[TickMarkType["Time"] = 3] = "Time";
+    /**
+     * A time with seconds.
+     */
+    TickMarkType[TickMarkType["TimeWithSeconds"] = 4] = "TimeWithSeconds";
+})(TickMarkType || (TickMarkType = {}));
+var TimeScale = /** @class */ (function () {
+    function TimeScale(model, options, localizationOptions) {
+        this._private__width = 0;
+        this._private__baseIndexOrNull = null;
+        this._private__points = [];
+        this._private__scrollStartPoint = null;
+        this._private__scaleStartPoint = null;
+        this._private__tickMarks = new TickMarks();
+        this._private__formattedByWeight = new Map();
+        this._private__visibleRange = TimeScaleVisibleRange._internal_invalid();
+        this._private__visibleRangeInvalidated = true;
+        this._private__visibleBarsChanged = new Delegate();
+        this._private__logicalRangeChanged = new Delegate();
+        this._private__optionsApplied = new Delegate();
+        this._private__commonTransitionStartState = null;
+        this._private__timeMarksCache = null;
+        this._private__labels = [];
+        this._private__options = options;
+        this._private__localizationOptions = localizationOptions;
+        this._private__rightOffset = options.rightOffset;
+        this._private__barSpacing = options.barSpacing;
+        this._private__model = model;
+        this._private__updateDateTimeFormatter();
+    }
+    TimeScale.prototype.options = function () {
+        return this._private__options;
+    };
+    TimeScale.prototype.applyLocalizationOptions = function (localizationOptions) {
+        merge(this._private__localizationOptions, localizationOptions);
+        this._private__invalidateTickMarks();
+        this._private__updateDateTimeFormatter();
+    };
+    TimeScale.prototype.applyOptions = function (options, localizationOptions) {
+        var _a;
+        merge(this._private__options, options);
+        if (this._private__options.fixLeftEdge) {
+            this._private__doFixLeftEdge();
+        }
+        if (this._private__options.fixRightEdge) {
+            this._private__doFixRightEdge();
+        }
+        // note that bar spacing should be applied before right offset
+        // because right offset depends on bar spacing
+        if (options.barSpacing !== undefined) {
+            this._private__model.setBarSpacing(options.barSpacing);
+        }
+        if (options.rightOffset !== undefined) {
+            this._private__model.setRightOffset(options.rightOffset);
+        }
+        if (options.minBarSpacing !== undefined) {
+            // yes, if we apply min bar spacing then we need to correct bar spacing
+            // the easiest way is to apply it once again
+            this._private__model.setBarSpacing((_a = options.barSpacing) !== null && _a !== void 0 ? _a : this._private__barSpacing);
+        }
+        this._private__invalidateTickMarks();
+        this._private__updateDateTimeFormatter();
+        this._private__optionsApplied._internal_fire();
+    };
+    TimeScale.prototype.indexToTime = function (index) {
+        var _a;
+        return ((_a = this._private__points[index]) === null || _a === void 0 ? void 0 : _a.time) || null;
+    };
+    TimeScale.prototype.timeToIndex = function (time, findNearest) {
+        if (this._private__points.length < 1) {
+            // no time points available
+            return null;
+        }
+        if (time.timestamp > this._private__points[this._private__points.length - 1].time.timestamp) {
+            // special case
+            return findNearest ? this._private__points.length - 1 : null;
+        }
+        var index = lowerbound(this._private__points, time.timestamp, function (a, b) { return a.time.timestamp < b; });
+        if (time.timestamp < this._private__points[index].time.timestamp) {
+            return findNearest ? index : null;
+        }
+        return index;
+    };
+    TimeScale.prototype.isEmpty = function () {
+        return this._private__width === 0 || this._private__points.length === 0 || this._private__baseIndexOrNull === null;
+    };
+    // strict range: integer indices of the bars in the visible range rounded in more wide direction
+    TimeScale.prototype.visibleStrictRange = function () {
+        this._private__updateVisibleRange();
+        return this._private__visibleRange._internal_strictRange();
+    };
+    TimeScale.prototype.visibleLogicalRange = function () {
+        this._private__updateVisibleRange();
+        return this._private__visibleRange._internal_logicalRange();
+    };
+    TimeScale.prototype.visibleTimeRange = function () {
+        var visibleBars = this.visibleStrictRange();
+        if (visibleBars === null) {
+            return null;
+        }
+        var range = {
+            from: visibleBars.left(),
+            to: visibleBars.right(),
+        };
+        return this.timeRangeForLogicalRange(range);
+    };
+    TimeScale.prototype.timeRangeForLogicalRange = function (range) {
+        var from = Math.round(range.from);
+        var to = Math.round(range.to);
+        var firstIndex = ensureNotNull(this._private__firstIndex());
+        var lastIndex = ensureNotNull(this._private__lastIndex());
+        return {
+            from: ensureNotNull(this.indexToTime(Math.max(firstIndex, from))),
+            to: ensureNotNull(this.indexToTime(Math.min(lastIndex, to))),
+        };
+    };
+    TimeScale.prototype.logicalRangeForTimeRange = function (range) {
+        return {
+            from: ensureNotNull(this.timeToIndex(range.from, true)),
+            to: ensureNotNull(this.timeToIndex(range.to, true)),
+        };
+    };
+    TimeScale.prototype.width = function () {
+        return this._private__width;
+    };
+    TimeScale.prototype.setWidth = function (width) {
+        if (!isFinite(width) || width <= 0) {
+            return;
+        }
+        if (this._private__width === width) {
+            return;
+        }
+        if (this._private__options.lockVisibleTimeRangeOnResize && this._private__width) {
+            // recalculate bar spacing
+            var newBarSpacing = this._private__barSpacing * width / this._private__width;
+            this._private__barSpacing = newBarSpacing;
+        }
+        // if time scale is scrolled to the end of data and we have fixed right edge
+        // keep left edge instead of right
+        // we need it to avoid "shaking" if the last bar visibility affects time scale width
+        if (this._private__options.fixLeftEdge) {
+            var visibleRange = this.visibleStrictRange();
+            if (visibleRange !== null) {
+                var firstVisibleBar = visibleRange.left();
+                // firstVisibleBar could be less than 0
+                // since index is a center of bar
+                if (firstVisibleBar <= 0) {
+                    var delta = this._private__width - width;
+                    // reduce  _rightOffset means move right
+                    // we could move more than required - this will be fixed by _correctOffset()
+                    this._private__rightOffset -= Math.round(delta / this._private__barSpacing) + 1;
+                }
+            }
+        }
+        this._private__width = width;
+        this._private__visibleRangeInvalidated = true;
+        // updating bar spacing should be first because right offset depends on it
+        this._private__correctBarSpacing();
+        this._private__correctOffset();
+    };
+    TimeScale.prototype.indexToCoordinate = function (index) {
+        if (this.isEmpty() || !isInteger(index)) {
+            return 0;
+        }
+        var baseIndex = this.baseIndex();
+        var deltaFromRight = baseIndex + this._private__rightOffset - index;
+        var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing - 1;
+        return coordinate;
+    };
+    TimeScale.prototype.indexesToCoordinates = function (points, visibleRange) {
+        var baseIndex = this.baseIndex();
+        var indexFrom = (visibleRange === undefined) ? 0 : visibleRange.from;
+        var indexTo = (visibleRange === undefined) ? points.length : visibleRange.to;
+        for (var i = indexFrom; i < indexTo; i++) {
+            var index = points[i].time;
+            var deltaFromRight = baseIndex + this._private__rightOffset - index;
+            var coordinate = this._private__width - (deltaFromRight + 0.5) * this._private__barSpacing - 1;
+            points[i].x = coordinate;
+        }
+    };
+    TimeScale.prototype.coordinateToIndex = function (x) {
+        return Math.ceil(this._private__coordinateToFloatIndex(x));
+    };
+    TimeScale.prototype.setRightOffset = function (offset) {
+        this._private__visibleRangeInvalidated = true;
+        this._private__rightOffset = offset;
+        this._private__correctOffset();
+        this._private__model.recalculateAllPanes();
+        this._private__model.lightUpdate();
+    };
+    TimeScale.prototype.barSpacing = function () {
+        return this._private__barSpacing;
+    };
+    TimeScale.prototype.setBarSpacing = function (newBarSpacing) {
+        this._private__setBarSpacing(newBarSpacing);
+        // do not allow scroll out of visible bars
+        this._private__correctOffset();
+        this._private__model.recalculateAllPanes();
+        this._private__model.lightUpdate();
+    };
+    TimeScale.prototype.rightOffset = function () {
+        return this._private__rightOffset;
+    };
+    // eslint-disable-next-line complexity
+    TimeScale.prototype.marks = function () {
+        if (this.isEmpty()) {
+            return null;
+        }
+        if (this._private__timeMarksCache !== null) {
+            return this._private__timeMarksCache;
+        }
+        var spacing = this._private__barSpacing;
+        var fontSize = this._private__model.options().layout.fontSize;
+        var maxLabelWidth = (fontSize + 4) * 5;
+        var indexPerLabel = Math.round(maxLabelWidth / spacing);
+        var visibleBars = ensureNotNull(this.visibleStrictRange());
+        var firstBar = Math.max(visibleBars.left(), visibleBars.left() - indexPerLabel);
+        var lastBar = Math.max(visibleBars.right(), visibleBars.right() - indexPerLabel);
+        var items = this._private__tickMarks._internal_build(spacing, maxLabelWidth);
+        // according to indexPerLabel value this value means "earliest index which _might be_ used as the second label on time scale"
+        var earliestIndexOfSecondLabel = this._private__firstIndex() + indexPerLabel;
+        // according to indexPerLabel value this value means "earliest index which _might be_ used as the second last label on time scale"
+        var indexOfSecondLastLabel = this._private__lastIndex() - indexPerLabel;
+        var isAllScalingAndScrollingDisabled = this._private__isAllScalingAndScrollingDisabled();
+        var isLeftEdgeFixed = this._private__options.fixLeftEdge || isAllScalingAndScrollingDisabled;
+        var isRightEdgeFixed = this._private__options.fixRightEdge || isAllScalingAndScrollingDisabled;
+        var targetIndex = 0;
+        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
+            var tm = items_1[_i];
+            if (!(firstBar <= tm._internal_index && tm._internal_index <= lastBar)) {
+                continue;
+            }
+            var label = void 0;
+            if (targetIndex < this._private__labels.length) {
+                label = this._private__labels[targetIndex];
+                label.coord = this.indexToCoordinate(tm._internal_index);
+                label.label = this._private__formatLabel(tm._internal_time, tm._internal_weight);
+                label.weight = tm._internal_weight;
+            }
+            else {
+                label = {
+                    needAlignCoordinate: false,
+                    coord: this.indexToCoordinate(tm._internal_index),
+                    label: this._private__formatLabel(tm._internal_time, tm._internal_weight),
+                    weight: tm._internal_weight,
+                };
+                this._private__labels.push(label);
+            }
+            if (this._private__barSpacing > (maxLabelWidth / 2) && !isAllScalingAndScrollingDisabled) {
+                // if there is enough space then let's show all tick marks as usual
+                label.needAlignCoordinate = false;
+            }
+            else {
+                // if a user is able to scroll after a tick mark then show it as usual, otherwise the coordinate might be aligned
+                // if the index is for the second (last) label or later (earlier) then most likely this label might be displayed without correcting the coordinate
+                label.needAlignCoordinate = (isLeftEdgeFixed && tm._internal_index <= earliestIndexOfSecondLabel) || (isRightEdgeFixed && tm._internal_index >= indexOfSecondLastLabel);
+            }
+            targetIndex++;
+        }
+        this._private__labels.length = targetIndex;
+        this._private__timeMarksCache = this._private__labels;
+        return this._private__labels;
+    };
+    TimeScale.prototype.restoreDefault = function () {
+        this._private__visibleRangeInvalidated = true;
+        this.setBarSpacing(this._private__options.barSpacing);
+        this.setRightOffset(this._private__options.rightOffset);
+    };
+    TimeScale.prototype.setBaseIndex = function (baseIndex) {
+        this._private__visibleRangeInvalidated = true;
+        this._private__baseIndexOrNull = baseIndex;
+        this._private__correctOffset();
+        this._private__doFixLeftEdge();
+    };
+    /**
+     * Zoom in/out the scale around a `zoomPoint` on `scale` value.
+     *
+     * @param zoomPoint - X coordinate of the point to apply the zoom.
+     * If `rightBarStaysOnScroll` option is disabled, then will be used to restore right offset.
+     * @param scale - Zoom value (in 1/10 parts of current bar spacing).
+     * Negative value means zoom out, positive - zoom in.
+     */
+    TimeScale.prototype.zoom = function (zoomPoint, scale) {
+        var floatIndexAtZoomPoint = this._private__coordinateToFloatIndex(zoomPoint);
+        var barSpacing = this.barSpacing();
+        var newBarSpacing = barSpacing + scale * (barSpacing / 10);
+        // zoom in/out bar spacing
+        this.setBarSpacing(newBarSpacing);
+        if (!this._private__options.rightBarStaysOnScroll) {
+            // and then correct right offset to move index under zoomPoint back to its coordinate
+            this.setRightOffset(this.rightOffset() + (floatIndexAtZoomPoint - this._private__coordinateToFloatIndex(zoomPoint)));
+        }
+    };
+    TimeScale.prototype.startScale = function (x) {
+        if (this._private__scrollStartPoint) {
+            this.endScroll();
+        }
+        if (this._private__scaleStartPoint !== null || this._private__commonTransitionStartState !== null) {
+            return;
+        }
+        if (this.isEmpty()) {
+            return;
+        }
+        this._private__scaleStartPoint = x;
+        this._private__saveCommonTransitionsStartState();
+    };
+    TimeScale.prototype.scaleTo = function (x) {
+        if (this._private__commonTransitionStartState === null) {
+            return;
+        }
+        var startLengthFromRight = clamp(this._private__width - x, 0, this._private__width);
+        var currentLengthFromRight = clamp(this._private__width - ensureNotNull(this._private__scaleStartPoint), 0, this._private__width);
+        if (startLengthFromRight === 0 || currentLengthFromRight === 0) {
+            return;
+        }
+        this.setBarSpacing(this._private__commonTransitionStartState._internal_barSpacing * startLengthFromRight / currentLengthFromRight);
+    };
+    TimeScale.prototype.endScale = function () {
+        if (this._private__scaleStartPoint === null) {
+            return;
+        }
+        this._private__scaleStartPoint = null;
+        this._private__clearCommonTransitionsStartState();
+    };
+    TimeScale.prototype.startScroll = function (x) {
+        if (this._private__scrollStartPoint !== null || this._private__commonTransitionStartState !== null) {
+            return;
+        }
+        if (this.isEmpty()) {
+            return;
+        }
+        this._private__scrollStartPoint = x;
+        this._private__saveCommonTransitionsStartState();
+    };
+    TimeScale.prototype.scrollTo = function (x) {
+        if (this._private__scrollStartPoint === null) {
+            return;
+        }
+        var shiftInLogical = (this._private__scrollStartPoint - x) / this.barSpacing();
+        this._private__rightOffset = ensureNotNull(this._private__commonTransitionStartState)._internal_rightOffset + shiftInLogical;
+        this._private__visibleRangeInvalidated = true;
+        // do not allow scroll out of visible bars
+        this._private__correctOffset();
+    };
+    TimeScale.prototype.endScroll = function () {
+        if (this._private__scrollStartPoint === null) {
+            return;
+        }
+        this._private__scrollStartPoint = null;
+        this._private__clearCommonTransitionsStartState();
+    };
+    TimeScale.prototype.scrollToRealTime = function () {
+        this.scrollToOffsetAnimated(this._private__options.rightOffset);
+    };
+    TimeScale.prototype.scrollToOffsetAnimated = function (offset, animationDuration) {
+        var _this = this;
+        if (animationDuration === void 0) { animationDuration = 400 /* DefaultAnimationDuration */; }
+        if (!isFinite(offset)) {
+            throw new RangeError('offset is required and must be finite number');
+        }
+        if (!isFinite(animationDuration) || animationDuration <= 0) {
+            throw new RangeError('animationDuration (optional) must be finite positive number');
+        }
+        var source = this._private__rightOffset;
+        var animationStart = performance.now();
+        var animationFn = function () {
+            var animationProgress = (performance.now() - animationStart) / animationDuration;
+            var finishAnimation = animationProgress >= 1;
+            var rightOffset = finishAnimation ? offset : source + (offset - source) * animationProgress;
+            _this.setRightOffset(rightOffset);
+            if (!finishAnimation) {
+                setTimeout(animationFn, 20);
+            }
+        };
+        animationFn();
+    };
+    TimeScale.prototype.update = function (newPoints, firstChangedPointIndex) {
+        this._private__visibleRangeInvalidated = true;
+        this._private__points = newPoints;
+        this._private__tickMarks._internal_setTimeScalePoints(newPoints, firstChangedPointIndex);
+        this._private__correctOffset();
+    };
+    TimeScale.prototype.visibleBarsChanged = function () {
+        return this._private__visibleBarsChanged;
+    };
+    TimeScale.prototype.logicalRangeChanged = function () {
+        return this._private__logicalRangeChanged;
+    };
+    TimeScale.prototype.optionsApplied = function () {
+        return this._private__optionsApplied;
+    };
+    TimeScale.prototype.baseIndex = function () {
+        // null is used to known that baseIndex is not set yet
+        // so in methods which should known whether it is set or not
+        // we should check field `_baseIndexOrNull` instead of getter `baseIndex()`
+        // see minRightOffset for example
+        return this._private__baseIndexOrNull || 0;
+    };
+    TimeScale.prototype.setVisibleRange = function (range) {
+        var length = range.count();
+        this._private__setBarSpacing(this._private__width / length);
+        this._private__rightOffset = range.right() - this.baseIndex();
+        this._private__correctOffset();
+        this._private__visibleRangeInvalidated = true;
+        this._private__model.recalculateAllPanes();
+        this._private__model.lightUpdate();
+    };
+    TimeScale.prototype.fitContent = function () {
+        var first = this._private__firstIndex();
+        var last = this._private__lastIndex();
+        if (first === null || last === null) {
+            return;
+        }
+        this.setVisibleRange(new RangeImpl(first, last + this._private__options.rightOffset));
+    };
+    TimeScale.prototype.setLogicalRange = function (range) {
+        var barRange = new RangeImpl(range.from, range.to);
+        this.setVisibleRange(barRange);
+    };
+    TimeScale.prototype.formatDateTime = function (time) {
+        if (this._private__localizationOptions.timeFormatter !== undefined) {
+            return this._private__localizationOptions.timeFormatter(time.businessDay || time.timestamp);
+        }
+        return this._private__dateTimeFormatter._internal_format(new Date(time.timestamp * 1000));
+    };
+    TimeScale.prototype._private__isAllScalingAndScrollingDisabled = function () {
+        var _a = this._private__model.options(), handleScroll = _a.handleScroll, handleScale = _a.handleScale;
+        return !handleScroll.horzTouchDrag
+            && !handleScroll.mouseWheel
+            && !handleScroll.pressedMouseMove
+            && !handleScroll.vertTouchDrag
+            && !handleScale.axisDoubleClickReset
+            && !handleScale.axisPressedMouseMove.time
+            && !handleScale.mouseWheel
+            && !handleScale.pinch;
+    };
+    TimeScale.prototype._private__firstIndex = function () {
+        return this._private__points.length === 0 ? null : 0;
+    };
+    TimeScale.prototype._private__lastIndex = function () {
+        return this._private__points.length === 0 ? null : (this._private__points.length - 1);
+    };
+    TimeScale.prototype._private__rightOffsetForCoordinate = function (x) {
+        return (this._private__width - 1 - x) / this._private__barSpacing;
+    };
+    TimeScale.prototype._private__coordinateToFloatIndex = function (x) {
+        var deltaFromRight = this._private__rightOffsetForCoordinate(x);
+        var baseIndex = this.baseIndex();
+        var index = baseIndex + this._private__rightOffset - deltaFromRight;
+        // JavaScript uses very strange rounding
+        // we need rounding to avoid problems with calculation errors
+        return Math.round(index * 1000000) / 1000000;
+    };
+    TimeScale.prototype._private__setBarSpacing = function (newBarSpacing) {
+        var oldBarSpacing = this._private__barSpacing;
+        this._private__barSpacing = newBarSpacing;
+        this._private__correctBarSpacing();
+        // this._barSpacing might be changed in _correctBarSpacing
+        if (oldBarSpacing !== this._private__barSpacing) {
+            this._private__visibleRangeInvalidated = true;
+            this._private__resetTimeMarksCache();
+        }
+    };
+    TimeScale.prototype._private__updateVisibleRange = function () {
+        if (!this._private__visibleRangeInvalidated) {
+            return;
+        }
+        this._private__visibleRangeInvalidated = false;
+        if (this.isEmpty()) {
+            this._private__setVisibleRange(TimeScaleVisibleRange._internal_invalid());
+            return;
+        }
+        var baseIndex = this.baseIndex();
+        var newBarsLength = this._private__width / this._private__barSpacing;
+        var rightBorder = this._private__rightOffset + baseIndex;
+        var leftBorder = rightBorder - newBarsLength + 1;
+        var logicalRange = new RangeImpl(leftBorder, rightBorder);
+        this._private__setVisibleRange(new TimeScaleVisibleRange(logicalRange));
+    };
+    TimeScale.prototype._private__correctBarSpacing = function () {
+        var minBarSpacing = this._private__minBarSpacing();
+        if (this._private__barSpacing < minBarSpacing) {
+            this._private__barSpacing = minBarSpacing;
+            this._private__visibleRangeInvalidated = true;
+        }
+        if (this._private__width !== 0) {
+            // make sure that this (1 / Constants.MinVisibleBarsCount) >= coeff in max bar spacing (it's 0.5 here)
+            var maxBarSpacing = this._private__width * 0.5;
+            if (this._private__barSpacing > maxBarSpacing) {
+                this._private__barSpacing = maxBarSpacing;
+                this._private__visibleRangeInvalidated = true;
+            }
+        }
+    };
+    TimeScale.prototype._private__minBarSpacing = function () {
+        // if both options are enabled then limit bar spacing so that zooming-out is not possible
+        // if it would cause either the first or last points to move too far from an edge
+        if (this._private__options.fixLeftEdge && this._private__options.fixRightEdge && this._private__points.length !== 0) {
+            return this._private__width / this._private__points.length;
+        }
+        return this._private__options.minBarSpacing;
+    };
+    TimeScale.prototype._private__correctOffset = function () {
+        // block scrolling of to future
+        var maxRightOffset = this._private__maxRightOffset();
+        if (this._private__rightOffset > maxRightOffset) {
+            this._private__rightOffset = maxRightOffset;
+            this._private__visibleRangeInvalidated = true;
+        }
+        // block scrolling of to past
+        var minRightOffset = this._private__minRightOffset();
+        if (minRightOffset !== null && this._private__rightOffset < minRightOffset) {
+            this._private__rightOffset = minRightOffset;
+            this._private__visibleRangeInvalidated = true;
+        }
+    };
+    TimeScale.prototype._private__minRightOffset = function () {
+        var firstIndex = this._private__firstIndex();
+        var baseIndex = this._private__baseIndexOrNull;
+        if (firstIndex === null || baseIndex === null) {
+            return null;
+        }
+        var barsEstimation = this._private__options.fixLeftEdge
+            ? this._private__width / this._private__barSpacing
+            : Math.min(2 /* MinVisibleBarsCount */, this._private__points.length);
+        return firstIndex - baseIndex - 1 + barsEstimation;
+    };
+    TimeScale.prototype._private__maxRightOffset = function () {
+        return this._private__options.fixRightEdge
+            ? 0
+            : (this._private__width / this._private__barSpacing) - Math.min(2 /* MinVisibleBarsCount */, this._private__points.length);
+    };
+    TimeScale.prototype._private__saveCommonTransitionsStartState = function () {
+        this._private__commonTransitionStartState = {
+            _internal_barSpacing: this.barSpacing(),
+            _internal_rightOffset: this.rightOffset(),
+        };
+    };
+    TimeScale.prototype._private__clearCommonTransitionsStartState = function () {
+        this._private__commonTransitionStartState = null;
+    };
+    TimeScale.prototype._private__formatLabel = function (time, weight) {
+        var _this = this;
+        var formatter = this._private__formattedByWeight.get(weight);
+        if (formatter === undefined) {
+            formatter = new FormattedLabelsCache(function (timePoint) {
+                return _this._private__formatLabelImpl(timePoint, weight);
+            });
+            this._private__formattedByWeight.set(weight, formatter);
+        }
+        return formatter._internal_format(time);
+    };
+    TimeScale.prototype._private__formatLabelImpl = function (timePoint, weight) {
+        var _a;
+        var tickMarkType = weightToTickMarkType(weight, this._private__options.timeVisible, this._private__options.secondsVisible);
+        if (this._private__options.tickMarkFormatter !== undefined) {
+            // this is temporary solution to make more consistency API
+            // it looks like that all time types in API should have the same form
+            // but for know defaultTickMarkFormatter is on model level and can't determine whether passed time is business day or UTCTimestamp
+            // because type guards are declared on API level
+            // in other hand, type guards couldn't be declared on model level so far
+            // because they are know about string representation of business day ¯\_(ツ)_/¯
+            // let's fix in for all cases for the whole API
+            return this._private__options.tickMarkFormatter((_a = timePoint.businessDay) !== null && _a !== void 0 ? _a : timePoint.timestamp, tickMarkType, this._private__localizationOptions.locale);
+        }
+        return defaultTickMarkFormatter(timePoint, tickMarkType, this._private__localizationOptions.locale);
+    };
+    TimeScale.prototype._private__setVisibleRange = function (newVisibleRange) {
+        var oldVisibleRange = this._private__visibleRange;
+        this._private__visibleRange = newVisibleRange;
+        if (!areRangesEqual(oldVisibleRange._internal_strictRange(), this._private__visibleRange._internal_strictRange())) {
+            this._private__visibleBarsChanged._internal_fire();
+        }
+        if (!areRangesEqual(oldVisibleRange._internal_logicalRange(), this._private__visibleRange._internal_logicalRange())) {
+            this._private__logicalRangeChanged._internal_fire();
+        }
+        // TODO: reset only coords in case when this._visibleBars has not been changed
+        this._private__resetTimeMarksCache();
+    };
+    TimeScale.prototype._private__resetTimeMarksCache = function () {
+        this._private__timeMarksCache = null;
+    };
+    TimeScale.prototype._private__invalidateTickMarks = function () {
+        this._private__resetTimeMarksCache();
+        this._private__formattedByWeight.clear();
+    };
+    TimeScale.prototype._private__updateDateTimeFormatter = function () {
+        var dateFormat = this._private__localizationOptions.dateFormat;
+        if (this._private__options.timeVisible) {
+            this._private__dateTimeFormatter = new DateTimeFormatter({
+                _internal_dateFormat: dateFormat,
+                _internal_timeFormat: this._private__options.secondsVisible ? '%h:%m:%s' : '%h:%m',
+                _internal_dateTimeSeparator: '   ',
+                _internal_locale: this._private__localizationOptions.locale,
+            });
+        }
+        else {
+            this._private__dateTimeFormatter = new DateFormatter(dateFormat, this._private__localizationOptions.locale);
+        }
+    };
+    TimeScale.prototype._private__doFixLeftEdge = function () {
+        if (!this._private__options.fixLeftEdge) {
+            return;
+        }
+        var firstIndex = this._private__firstIndex();
+        if (firstIndex === null) {
+            return;
+        }
+        var visibleRange = this.visibleStrictRange();
+        if (visibleRange === null) {
+            return;
+        }
+        var delta = visibleRange.left() - firstIndex;
+        if (delta < 0) {
+            var leftEdgeOffset = this._private__rightOffset - delta - 1;
+            this.setRightOffset(leftEdgeOffset);
+        }
+        this._private__correctBarSpacing();
+    };
+    TimeScale.prototype._private__doFixRightEdge = function () {
+        this._private__correctOffset();
+        this._private__correctBarSpacing();
+    };
+    return TimeScale;
+}());
+// eslint-disable-next-line complexity
+function weightToTickMarkType(weight, timeVisible, secondsVisible) {
+    switch (weight) {
+        case 0 /* LessThanSecond */:
+        case 10 /* Second */:
+            return timeVisible
+                ? (secondsVisible ? 4 /* TimeWithSeconds */ : 3 /* Time */)
+                : 2 /* DayOfMonth */;
+        case 20 /* Minute1 */:
+        case 21 /* Minute5 */:
+        case 22 /* Minute30 */:
+        case 30 /* Hour1 */:
+        case 31 /* Hour3 */:
+        case 32 /* Hour6 */:
+        case 33 /* Hour12 */:
+            return timeVisible ? 3 /* Time */ : 2 /* DayOfMonth */;
+        case 50 /* Day */:
+            return 2 /* DayOfMonth */;
+        case 60 /* Month */:
+            return 1 /* Month */;
+        case 70 /* Year */:
+            return 0 /* Year */;
+    }
+}
+
 var WatermarkRenderer = /** @class */ (function (_super) {
     __extends(WatermarkRenderer, _super);
     function WatermarkRenderer(data) {
@@ -7281,6 +7309,23 @@ var Watermark = /** @class */ (function (_super) {
 }(DataSource));
 
 /// <reference types="_build-time-constants" />
+/**
+ * Determine how to exit the tracking mode.
+ *
+ * By default, mobile users will long press to deactivate the scroll and have the ability to check values and dates.
+ * Another press is required to activate the scroll, be able to move left/right, zoom, etc.
+ */
+var TrackingModeExitMode;
+(function (TrackingModeExitMode) {
+    /**
+     * Tracking Mode will be deactivated on touch end event.
+     */
+    TrackingModeExitMode[TrackingModeExitMode["OnTouchEnd"] = 0] = "OnTouchEnd";
+    /**
+     * Tracking Mode will be deactivated on the next tap event.
+     */
+    TrackingModeExitMode[TrackingModeExitMode["OnNextTap"] = 1] = "OnNextTap";
+})(TrackingModeExitMode || (TrackingModeExitMode = {}));
 var ChartModel = /** @class */ (function () {
     function ChartModel(invalidateHandler, options) {
         this._private__panes = [];
@@ -7762,6 +7807,100 @@ var ChartModel = /** @class */ (function () {
     return ChartModel;
 }());
 
+function fillUpDownCandlesticksColors(options) {
+    if (options.borderColor !== undefined) {
+        options.borderUpColor = options.borderColor;
+        options.borderDownColor = options.borderColor;
+    }
+    if (options.wickColor !== undefined) {
+        options.wickUpColor = options.wickColor;
+        options.wickDownColor = options.wickColor;
+    }
+}
+/**
+ * Represents the type of the last price animation for series such as area or line.
+ */
+var LastPriceAnimationMode;
+(function (LastPriceAnimationMode) {
+    /**
+     * Animation is always disabled
+     */
+    LastPriceAnimationMode[LastPriceAnimationMode["Disabled"] = 0] = "Disabled";
+    /**
+     * Animation is always enabled.
+     */
+    LastPriceAnimationMode[LastPriceAnimationMode["Continuous"] = 1] = "Continuous";
+    /**
+     * Animation is active after new data.
+     */
+    LastPriceAnimationMode[LastPriceAnimationMode["OnDataUpdate"] = 2] = "OnDataUpdate";
+})(LastPriceAnimationMode || (LastPriceAnimationMode = {}));
+function precisionByMinMove(minMove) {
+    if (minMove >= 1) {
+        return 0;
+    }
+    var i = 0;
+    for (; i < 8; i++) {
+        var intPart = Math.round(minMove);
+        var fractPart = Math.abs(intPart - minMove);
+        if (fractPart < 1e-8) {
+            return i;
+        }
+        minMove = minMove * 10;
+    }
+    return i;
+}
+/**
+ * Represents the source of data to be used for the horizontal price line.
+ */
+var PriceLineSource;
+(function (PriceLineSource) {
+    /**
+     * Use the last bar data.
+     */
+    PriceLineSource[PriceLineSource["LastBar"] = 0] = "LastBar";
+    /**
+     * Use the last visible data of the chart viewport.
+     */
+    PriceLineSource[PriceLineSource["LastVisible"] = 1] = "LastVisible";
+})(PriceLineSource || (PriceLineSource = {}));
+
+/**
+ * Represents a type of color.
+ */
+var ColorType;
+(function (ColorType) {
+    /** Solid color */
+    ColorType["Solid"] = "solid";
+    /** Vertical gradient color */
+    ColorType["VerticalGradient"] = "gradient";
+})(ColorType || (ColorType = {}));
+
+/**
+ * Check if a time value is a business day object.
+ *
+ * @param time - The time to check.
+ * @returns `true` if `time` is a {@link BusinessDay} object, false otherwise.
+ */
+function isBusinessDay(time) {
+    return !isNumber(time) && !isString(time);
+}
+/**
+ * Check if a time value is a UTC timestamp number.
+ *
+ * @param time - The time to check.
+ * @returns `true` if `time` is a {@link UTCTimestamp} number, false otherwise.
+ */
+function isUTCTimestamp(time) {
+    return isNumber(time);
+}
+function isWhitespaceData(data) {
+    return data.open === undefined && data.value === undefined;
+}
+function isFulfilledData(data) {
+    return data.open !== undefined || data.value !== undefined;
+}
+
 var Size = /** @class */ (function () {
     function Size(w, h) {
         this._internal_w = w;
@@ -7802,7 +7941,7 @@ function createBoundCanvas(parentElement, size) {
     var doc = ensureNotNull(parentElement.ownerDocument);
     var canvas = doc.createElement('canvas');
     parentElement.appendChild(canvas);
-    var binding = bindToDevicePixelRatio(canvas);
+    var binding = bindToDevicePixelRatio(canvas, { allowDownsampling: false });
     binding.resizeCanvas({
         width: size._internal_w,
         height: size._internal_h,
@@ -7930,76 +8069,143 @@ var KineticAnimation = /** @class */ (function () {
 // eslint-disable-next-line @typescript-eslint/tslint/config
 var isRunningOnClientSide = typeof window !== 'undefined';
 
-function checkTouchEvents() {
+function isFF() {
     if (!isRunningOnClientSide) {
         return false;
     }
-    // eslint-disable-next-line no-restricted-syntax
-    if ('ontouchstart' in window) {
-        return true;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
-    return Boolean(window.DocumentTouch && document instanceof window.DocumentTouch);
+    return window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 }
-function getMobileTouch() {
+function isIOS() {
     if (!isRunningOnClientSide) {
         return false;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
-    var touch = !!navigator.maxTouchPoints || !!navigator.msMaxTouchPoints || checkTouchEvents();
-    // eslint-disable-next-line no-restricted-syntax
-    return 'onorientationchange' in window && touch;
+    // eslint-disable-next-line deprecation/deprecation
+    return /iPhone|iPad|iPod/.test(window.navigator.platform);
 }
-var mobileTouch = getMobileTouch();
-function getIsMobile() {
+function isChrome() {
     if (!isRunningOnClientSide) {
         return false;
     }
-    // actually we shouldn't check that values
-    // we even don't need to know what browser/UA/etc is (in almost all cases, except special ones)
-    // so, in MouseEventHandler/PaneWidget we should check what event happened (touch or mouse)
-    // not check current UA to detect "mobile" device
-    var android = /Android/i.test(navigator.userAgent);
-    var iOS = /iPhone|iPad|iPod|AppleWebKit.+Mobile/i.test(navigator.userAgent);
-    return android || iOS;
+    return window.chrome !== undefined;
 }
-var isMobile = getIsMobile();
+
+function preventScrollByWheelClick(el) {
+    if (!isChrome()) {
+        return;
+    }
+    el.addEventListener('mousedown', function (e) {
+        if (e.button === 1 /* Middle */) {
+            // prevent incorrect scrolling event
+            e.preventDefault();
+            return false;
+        }
+        return undefined;
+    });
+}
 
 // TODO: get rid of a lot of boolean flags, probably we should replace it with some enum
 var MouseEventHandler = /** @class */ (function () {
     function MouseEventHandler(target, handler, options) {
+        var _this = this;
         this._private__clickCount = 0;
         this._private__clickTimeoutId = null;
+        this._private__clickPosition = { _internal_x: Number.NEGATIVE_INFINITY, _internal_y: Number.POSITIVE_INFINITY };
+        this._private__tapCount = 0;
+        this._private__tapTimeoutId = null;
+        this._private__tapPosition = { _internal_x: Number.NEGATIVE_INFINITY, _internal_y: Number.POSITIVE_INFINITY };
         this._private__longTapTimeoutId = null;
         this._private__longTapActive = false;
         this._private__mouseMoveStartPosition = null;
-        this._private__moveExceededManhattanDistance = false;
+        this._private__touchMoveStartPosition = null;
+        this._private__touchMoveExceededManhattanDistance = false;
         this._private__cancelClick = false;
-        this._private__unsubscribeOutsideEvents = null;
+        this._private__cancelTap = false;
+        this._private__unsubscribeOutsideMouseEvents = null;
+        this._private__unsubscribeOutsideTouchEvents = null;
+        this._private__unsubscribeMobileSafariEvents = null;
         this._private__unsubscribeMousemove = null;
-        this._private__unsubscribeRoot = null;
+        this._private__unsubscribeRootMouseEvents = null;
+        this._private__unsubscribeRootTouchEvents = null;
         this._private__startPinchMiddlePoint = null;
         this._private__startPinchDistance = 0;
         this._private__pinchPrevented = false;
-        this._private__preventDragProcess = false;
+        this._private__preventTouchDragProcess = false;
         this._private__mousePressed = false;
+        this._private__lastTouchEventTimeStamp = 0;
+        // for touchstart/touchmove/touchend events we handle only first touch
+        // i.e. we don't support several active touches at the same time (except pinch event)
+        this._private__activeTouchId = null;
+        // accept all mouse leave events if it's not an iOS device
+        // see _mouseEnterHandler, _mouseMoveHandler, _mouseLeaveHandler
+        this._private__acceptMouseLeave = !isIOS();
+        /**
+         * In Firefox mouse events dont't fire if the mouse position is outside of the browser's border.
+         * To prevent the mouse from hanging while pressed we're subscribing on the mouseleave event of the document element.
+         * We're subscribing on mouseleave, but this event is actually fired on mouseup outside of the browser's border.
+         */
+        this._private__onFirefoxOutsideMouseUp = function (mouseUpEvent) {
+            _this._private__mouseUpHandler(mouseUpEvent);
+        };
+        /**
+         * Safari doesn't fire touchstart/mousedown events on double tap since iOS 13.
+         * There are two possible solutions:
+         * 1) Call preventDefault in touchEnd handler. But it also prevents click event from firing.
+         * 2) Add listener on dblclick event that fires with the preceding mousedown/mouseup.
+         * https://developer.apple.com/forums/thread/125073
+         */
+        this._private__onMobileSafariDoubleClick = function (dblClickEvent) {
+            if (_this._private__firesTouchEvents(dblClickEvent)) {
+                var compatEvent = _this._private__makeCompatEvent(dblClickEvent);
+                ++_this._private__tapCount;
+                if (_this._private__tapTimeoutId && _this._private__tapCount > 1) {
+                    var manhattanDistance = _this._private__touchMouseMoveWithDownInfo(getPosition(dblClickEvent), _this._private__tapPosition)._internal_manhattanDistance;
+                    if (manhattanDistance < 30 /* DoubleTapManhattanDistance */ && !_this._private__cancelTap) {
+                        _this._private__processTouchEvent(compatEvent, _this._private__handler._internal_doubleTapEvent);
+                    }
+                    _this._private__resetTapTimeout();
+                }
+            }
+            else {
+                var compatEvent = _this._private__makeCompatEvent(dblClickEvent);
+                ++_this._private__clickCount;
+                if (_this._private__clickTimeoutId && _this._private__clickCount > 1) {
+                    var manhattanDistance = _this._private__touchMouseMoveWithDownInfo(getPosition(dblClickEvent), _this._private__clickPosition)._internal_manhattanDistance;
+                    if (manhattanDistance < 5 /* DoubleClickManhattanDistance */ && !_this._private__cancelClick) {
+                        _this._private__processMouseEvent(compatEvent, _this._private__handler._internal_mouseDoubleClickEvent);
+                    }
+                    _this._private__resetClickTimeout();
+                }
+            }
+        };
         this._private__target = target;
         this._private__handler = handler;
         this._private__options = options;
         this._private__init();
     }
     MouseEventHandler.prototype.destroy = function () {
-        if (this._private__unsubscribeOutsideEvents !== null) {
-            this._private__unsubscribeOutsideEvents();
-            this._private__unsubscribeOutsideEvents = null;
+        if (this._private__unsubscribeOutsideMouseEvents !== null) {
+            this._private__unsubscribeOutsideMouseEvents();
+            this._private__unsubscribeOutsideMouseEvents = null;
+        }
+        if (this._private__unsubscribeOutsideTouchEvents !== null) {
+            this._private__unsubscribeOutsideTouchEvents();
+            this._private__unsubscribeOutsideTouchEvents = null;
         }
         if (this._private__unsubscribeMousemove !== null) {
             this._private__unsubscribeMousemove();
             this._private__unsubscribeMousemove = null;
         }
-        if (this._private__unsubscribeRoot !== null) {
-            this._private__unsubscribeRoot();
-            this._private__unsubscribeRoot = null;
+        if (this._private__unsubscribeRootMouseEvents !== null) {
+            this._private__unsubscribeRootMouseEvents();
+            this._private__unsubscribeRootMouseEvents = null;
+        }
+        if (this._private__unsubscribeRootTouchEvents !== null) {
+            this._private__unsubscribeRootTouchEvents();
+            this._private__unsubscribeRootTouchEvents = null;
+        }
+        if (this._private__unsubscribeMobileSafariEvents !== null) {
+            this._private__unsubscribeMobileSafariEvents();
+            this._private__unsubscribeMobileSafariEvents = null;
         }
         this._private__clearLongTapTimeout();
         this._private__resetClickTimeout();
@@ -8009,18 +8215,17 @@ var MouseEventHandler = /** @class */ (function () {
         if (this._private__unsubscribeMousemove) {
             this._private__unsubscribeMousemove();
         }
-        {
-            var boundMouseMoveHandler_1 = this._private__mouseMoveHandler.bind(this);
-            this._private__unsubscribeMousemove = function () {
-                _this._private__target.removeEventListener('mousemove', boundMouseMoveHandler_1);
-            };
-            this._private__target.addEventListener('mousemove', boundMouseMoveHandler_1);
-        }
-        if (isTouchEvent(enterEvent)) {
-            this._private__mouseMoveHandler(enterEvent);
+        var boundMouseMoveHandler = this._private__mouseMoveHandler.bind(this);
+        this._private__unsubscribeMousemove = function () {
+            _this._private__target.removeEventListener('mousemove', boundMouseMoveHandler);
+        };
+        this._private__target.addEventListener('mousemove', boundMouseMoveHandler);
+        if (this._private__firesTouchEvents(enterEvent)) {
+            return;
         }
         var compatEvent = this._private__makeCompatEvent(enterEvent);
-        this._private__processEvent(compatEvent, this._private__handler._internal_mouseEnterEvent);
+        this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseEnterEvent);
+        this._private__acceptMouseLeave = true;
     };
     MouseEventHandler.prototype._private__resetClickTimeout = function () {
         if (this._private__clickTimeoutId !== null) {
@@ -8028,102 +8233,185 @@ var MouseEventHandler = /** @class */ (function () {
         }
         this._private__clickCount = 0;
         this._private__clickTimeoutId = null;
+        this._private__clickPosition = { _internal_x: Number.NEGATIVE_INFINITY, _internal_y: Number.POSITIVE_INFINITY };
+    };
+    MouseEventHandler.prototype._private__resetTapTimeout = function () {
+        if (this._private__tapTimeoutId !== null) {
+            clearTimeout(this._private__tapTimeoutId);
+        }
+        this._private__tapCount = 0;
+        this._private__tapTimeoutId = null;
+        this._private__tapPosition = { _internal_x: Number.NEGATIVE_INFINITY, _internal_y: Number.POSITIVE_INFINITY };
     };
     MouseEventHandler.prototype._private__mouseMoveHandler = function (moveEvent) {
-        if (this._private__mousePressed && !isTouchEvent(moveEvent)) {
+        if (this._private__mousePressed || this._private__touchMoveStartPosition !== null) {
+            return;
+        }
+        if (this._private__firesTouchEvents(moveEvent)) {
             return;
         }
         var compatEvent = this._private__makeCompatEvent(moveEvent);
-        this._private__processEvent(compatEvent, this._private__handler._internal_mouseMoveEvent);
+        this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseMoveEvent);
+        this._private__acceptMouseLeave = true;
     };
-    // eslint-disable-next-line complexity
-    MouseEventHandler.prototype._private__mouseMoveWithDownHandler = function (moveEvent) {
-        // eslint-disable-next-line no-restricted-syntax
-        if ('button' in moveEvent && moveEvent.button !== 0 /* Left */) {
+    MouseEventHandler.prototype._private__touchMoveHandler = function (moveEvent) {
+        var touch = touchWithId(moveEvent.changedTouches, ensureNotNull(this._private__activeTouchId));
+        if (touch === null) {
             return;
         }
+        this._private__lastTouchEventTimeStamp = eventTimeStamp(moveEvent);
         if (this._private__startPinchMiddlePoint !== null) {
             return;
         }
-        var isTouch = isTouchEvent(moveEvent);
-        if (this._private__preventDragProcess && isTouch) {
+        if (this._private__preventTouchDragProcess) {
             return;
         }
         // prevent pinch if move event comes faster than the second touch
         this._private__pinchPrevented = true;
-        var compatEvent = this._private__makeCompatEvent(moveEvent);
-        var startMouseMovePos = ensure(this._private__mouseMoveStartPosition);
-        var xOffset = Math.abs(startMouseMovePos._internal_x - compatEvent._internal_pageX);
-        var yOffset = Math.abs(startMouseMovePos._internal_y - compatEvent._internal_pageY);
-        var moveExceededManhattanDistance = xOffset + yOffset > 5;
-        if (!moveExceededManhattanDistance && isTouch) {
+        var moveInfo = this._private__touchMouseMoveWithDownInfo(getPosition(touch), ensureNotNull(this._private__touchMoveStartPosition));
+        var xOffset = moveInfo._internal_xOffset, yOffset = moveInfo._internal_yOffset, manhattanDistance = moveInfo._internal_manhattanDistance;
+        if (!this._private__touchMoveExceededManhattanDistance && manhattanDistance < 5 /* CancelTapManhattanDistance */) {
             return;
         }
-        if (moveExceededManhattanDistance && !this._private__moveExceededManhattanDistance && isTouch) {
+        if (!this._private__touchMoveExceededManhattanDistance) {
+            // first time when current position exceeded manhattan distance
             // vertical drag is more important than horizontal drag
             // because we scroll the page vertically often than horizontally
             var correctedXOffset = xOffset * 0.5;
             // a drag can be only if touch page scroll isn't allowed
-            var isVertDrag = yOffset >= correctedXOffset && !this._private__options._internal_treatVertTouchDragAsPageScroll;
-            var isHorzDrag = correctedXOffset > yOffset && !this._private__options._internal_treatHorzTouchDragAsPageScroll;
+            var isVertDrag = yOffset >= correctedXOffset && !this._private__options._internal_treatVertTouchDragAsPageScroll();
+            var isHorzDrag = correctedXOffset > yOffset && !this._private__options._internal_treatHorzTouchDragAsPageScroll();
             // if drag event happened then we should revert preventDefault state to original one
             // and try to process the drag event
             // else we shouldn't prevent default of the event and ignore processing the drag event
             if (!isVertDrag && !isHorzDrag) {
-                this._private__preventDragProcess = true;
+                this._private__preventTouchDragProcess = true;
             }
+            this._private__touchMoveExceededManhattanDistance = true;
+            // if manhattan distance is more that 5 - we should cancel tap event
+            this._private__cancelTap = true;
+            this._private__clearLongTapTimeout();
+            this._private__resetTapTimeout();
         }
-        if (moveExceededManhattanDistance) {
-            this._private__moveExceededManhattanDistance = true;
-            // if manhattan distance is more that 5 - we should cancel click event
-            this._private__cancelClick = true;
-            if (isTouch) {
-                this._private__clearLongTapTimeout();
-            }
-        }
-        if (!this._private__preventDragProcess) {
-            this._private__processEvent(compatEvent, this._private__handler._internal_pressedMouseMoveEvent);
+        if (!this._private__preventTouchDragProcess) {
+            var compatEvent = this._private__makeCompatEvent(moveEvent, touch);
+            this._private__processTouchEvent(compatEvent, this._private__handler._internal_touchMoveEvent);
             // we should prevent default in case of touch only
             // to prevent scroll of the page
-            if (isTouch) {
-                preventDefault(moveEvent);
+            preventDefault(moveEvent);
+        }
+    };
+    MouseEventHandler.prototype._private__mouseMoveWithDownHandler = function (moveEvent) {
+        if (moveEvent.button !== 0 /* Left */) {
+            return;
+        }
+        var moveInfo = this._private__touchMouseMoveWithDownInfo(getPosition(moveEvent), ensureNotNull(this._private__mouseMoveStartPosition));
+        var manhattanDistance = moveInfo._internal_manhattanDistance;
+        if (manhattanDistance >= 5 /* CancelClickManhattanDistance */) {
+            // if manhattan distance is more that 5 - we should cancel click event
+            this._private__cancelClick = true;
+            this._private__resetClickTimeout();
+        }
+        if (this._private__cancelClick) {
+            // if this._cancelClick is true, that means that minimum manhattan distance is already exceeded
+            var compatEvent = this._private__makeCompatEvent(moveEvent);
+            this._private__processMouseEvent(compatEvent, this._private__handler._internal_pressedMouseMoveEvent);
+        }
+    };
+    MouseEventHandler.prototype._private__touchMouseMoveWithDownInfo = function (currentPosition, startPosition) {
+        var xOffset = Math.abs(startPosition._internal_x - currentPosition._internal_x);
+        var yOffset = Math.abs(startPosition._internal_y - currentPosition._internal_y);
+        var manhattanDistance = xOffset + yOffset;
+        return {
+            _internal_xOffset: xOffset,
+            _internal_yOffset: yOffset,
+            _internal_manhattanDistance: manhattanDistance,
+        };
+    };
+    // eslint-disable-next-line complexity
+    MouseEventHandler.prototype._private__touchEndHandler = function (touchEndEvent) {
+        var touch = touchWithId(touchEndEvent.changedTouches, ensureNotNull(this._private__activeTouchId));
+        if (touch === null && touchEndEvent.touches.length === 0) {
+            // something went wrong, somehow we missed the required touchend event
+            // probably the browser has not sent this event
+            touch = touchEndEvent.changedTouches[0];
+        }
+        if (touch === null) {
+            return;
+        }
+        this._private__activeTouchId = null;
+        this._private__lastTouchEventTimeStamp = eventTimeStamp(touchEndEvent);
+        this._private__clearLongTapTimeout();
+        this._private__touchMoveStartPosition = null;
+        if (this._private__unsubscribeRootTouchEvents) {
+            this._private__unsubscribeRootTouchEvents();
+            this._private__unsubscribeRootTouchEvents = null;
+        }
+        var compatEvent = this._private__makeCompatEvent(touchEndEvent, touch);
+        this._private__processTouchEvent(compatEvent, this._private__handler._internal_touchEndEvent);
+        ++this._private__tapCount;
+        if (this._private__tapTimeoutId && this._private__tapCount > 1) {
+            // check that both clicks are near enough
+            var manhattanDistance = this._private__touchMouseMoveWithDownInfo(getPosition(touch), this._private__tapPosition)._internal_manhattanDistance;
+            if (manhattanDistance < 30 /* DoubleTapManhattanDistance */ && !this._private__cancelTap) {
+                this._private__processTouchEvent(compatEvent, this._private__handler._internal_doubleTapEvent);
+            }
+            this._private__resetTapTimeout();
+        }
+        else {
+            if (!this._private__cancelTap) {
+                this._private__processTouchEvent(compatEvent, this._private__handler._internal_tapEvent);
+                // do not fire mouse events if tap handler was executed
+                // prevent click event on new dom element (who appeared after tap)
+                if (this._private__handler._internal_tapEvent) {
+                    preventDefault(touchEndEvent);
+                }
+            }
+        }
+        // prevent, for example, safari's dblclick-to-zoom or fast-click after long-tap
+        // we handle mouseDoubleClickEvent here ourselves
+        if (this._private__tapCount === 0) {
+            preventDefault(touchEndEvent);
+        }
+        if (touchEndEvent.touches.length === 0) {
+            if (this._private__longTapActive) {
+                this._private__longTapActive = false;
+                // prevent native click event
+                preventDefault(touchEndEvent);
             }
         }
     };
     MouseEventHandler.prototype._private__mouseUpHandler = function (mouseUpEvent) {
-        // eslint-disable-next-line no-restricted-syntax
-        if ('button' in mouseUpEvent && mouseUpEvent.button !== 0 /* Left */) {
+        if (mouseUpEvent.button !== 0 /* Left */) {
             return;
         }
         var compatEvent = this._private__makeCompatEvent(mouseUpEvent);
-        this._private__clearLongTapTimeout();
         this._private__mouseMoveStartPosition = null;
         this._private__mousePressed = false;
-        if (this._private__unsubscribeRoot) {
-            this._private__unsubscribeRoot();
-            this._private__unsubscribeRoot = null;
+        if (this._private__unsubscribeRootMouseEvents) {
+            this._private__unsubscribeRootMouseEvents();
+            this._private__unsubscribeRootMouseEvents = null;
         }
-        if (isTouchEvent(mouseUpEvent)) {
-            this._private__mouseLeaveHandler(mouseUpEvent);
+        if (isFF()) {
+            var rootElement = this._private__target.ownerDocument.documentElement;
+            rootElement.removeEventListener('mouseleave', this._private__onFirefoxOutsideMouseUp);
         }
-        this._private__processEvent(compatEvent, this._private__handler._internal_mouseUpEvent);
+        if (this._private__firesTouchEvents(mouseUpEvent)) {
+            return;
+        }
+        this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseUpEvent);
         ++this._private__clickCount;
         if (this._private__clickTimeoutId && this._private__clickCount > 1) {
-            this._private__processEvent(compatEvent, this._private__handler._internal_mouseDoubleClickEvent);
+            // check that both clicks are near enough
+            var manhattanDistance = this._private__touchMouseMoveWithDownInfo(getPosition(mouseUpEvent), this._private__clickPosition)._internal_manhattanDistance;
+            if (manhattanDistance < 5 /* DoubleClickManhattanDistance */ && !this._private__cancelClick) {
+                this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseDoubleClickEvent);
+            }
             this._private__resetClickTimeout();
         }
         else {
             if (!this._private__cancelClick) {
-                this._private__processEvent(compatEvent, this._private__handler._internal_mouseClickEvent);
-            }
-        }
-        // prevent safari's dblclick-to-zoom
-        // we handle mouseDoubleClickEvent here ourself
-        if (isTouchEvent(mouseUpEvent)) {
-            preventDefault(mouseUpEvent);
-            this._private__mouseLeaveHandler(mouseUpEvent);
-            if (mouseUpEvent.touches.length === 0) {
-                this._private__longTapActive = false;
+                this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseClickEvent);
             }
         }
     };
@@ -8134,57 +8422,82 @@ var MouseEventHandler = /** @class */ (function () {
         clearTimeout(this._private__longTapTimeoutId);
         this._private__longTapTimeoutId = null;
     };
-    MouseEventHandler.prototype._private__mouseDownHandler = function (downEvent) {
-        // eslint-disable-next-line no-restricted-syntax
-        if ('button' in downEvent && downEvent.button !== 0 /* Left */) {
+    MouseEventHandler.prototype._private__touchStartHandler = function (downEvent) {
+        if (this._private__activeTouchId !== null) {
             return;
         }
-        var compatEvent = this._private__makeCompatEvent(downEvent);
-        this._private__cancelClick = false;
-        this._private__moveExceededManhattanDistance = false;
-        this._private__preventDragProcess = false;
-        if (isTouchEvent(downEvent)) {
-            this._private__mouseEnterHandler(downEvent);
+        var touch = downEvent.changedTouches[0];
+        this._private__activeTouchId = touch.identifier;
+        this._private__lastTouchEventTimeStamp = eventTimeStamp(downEvent);
+        var rootElement = this._private__target.ownerDocument.documentElement;
+        this._private__cancelTap = false;
+        this._private__touchMoveExceededManhattanDistance = false;
+        this._private__preventTouchDragProcess = false;
+        this._private__touchMoveStartPosition = getPosition(touch);
+        if (this._private__unsubscribeRootTouchEvents) {
+            this._private__unsubscribeRootTouchEvents();
+            this._private__unsubscribeRootTouchEvents = null;
         }
-        this._private__mouseMoveStartPosition = {
-            _internal_x: compatEvent._internal_pageX,
-            _internal_y: compatEvent._internal_pageY,
-        };
-        if (this._private__unsubscribeRoot) {
-            this._private__unsubscribeRoot();
-            this._private__unsubscribeRoot = null;
+        {
+            var boundTouchMoveWithDownHandler_1 = this._private__touchMoveHandler.bind(this);
+            var boundTouchEndHandler_1 = this._private__touchEndHandler.bind(this);
+            this._private__unsubscribeRootTouchEvents = function () {
+                rootElement.removeEventListener('touchmove', boundTouchMoveWithDownHandler_1);
+                rootElement.removeEventListener('touchend', boundTouchEndHandler_1);
+            };
+            rootElement.addEventListener('touchmove', boundTouchMoveWithDownHandler_1, { passive: false });
+            rootElement.addEventListener('touchend', boundTouchEndHandler_1, { passive: false });
+            this._private__clearLongTapTimeout();
+            this._private__longTapTimeoutId = setTimeout(this._private__longTapHandler.bind(this, downEvent), 240 /* LongTap */);
+        }
+        var compatEvent = this._private__makeCompatEvent(downEvent, touch);
+        this._private__processTouchEvent(compatEvent, this._private__handler._internal_touchStartEvent);
+        if (!this._private__tapTimeoutId) {
+            this._private__tapCount = 0;
+            this._private__tapTimeoutId = setTimeout(this._private__resetTapTimeout.bind(this), 500 /* ResetClick */);
+            this._private__tapPosition = getPosition(touch);
+        }
+    };
+    MouseEventHandler.prototype._private__mouseDownHandler = function (downEvent) {
+        if (downEvent.button !== 0 /* Left */) {
+            return;
+        }
+        var rootElement = this._private__target.ownerDocument.documentElement;
+        if (isFF()) {
+            rootElement.addEventListener('mouseleave', this._private__onFirefoxOutsideMouseUp);
+        }
+        this._private__cancelClick = false;
+        this._private__mouseMoveStartPosition = getPosition(downEvent);
+        if (this._private__unsubscribeRootMouseEvents) {
+            this._private__unsubscribeRootMouseEvents();
+            this._private__unsubscribeRootMouseEvents = null;
         }
         {
             var boundMouseMoveWithDownHandler_1 = this._private__mouseMoveWithDownHandler.bind(this);
             var boundMouseUpHandler_1 = this._private__mouseUpHandler.bind(this);
-            var rootElement_1 = this._private__target.ownerDocument.documentElement;
-            this._private__unsubscribeRoot = function () {
-                rootElement_1.removeEventListener('touchmove', boundMouseMoveWithDownHandler_1);
-                rootElement_1.removeEventListener('touchend', boundMouseUpHandler_1);
-                rootElement_1.removeEventListener('mousemove', boundMouseMoveWithDownHandler_1);
-                rootElement_1.removeEventListener('mouseup', boundMouseUpHandler_1);
+            this._private__unsubscribeRootMouseEvents = function () {
+                rootElement.removeEventListener('mousemove', boundMouseMoveWithDownHandler_1);
+                rootElement.removeEventListener('mouseup', boundMouseUpHandler_1);
             };
-            rootElement_1.addEventListener('touchmove', boundMouseMoveWithDownHandler_1, { passive: false });
-            rootElement_1.addEventListener('touchend', boundMouseUpHandler_1, { passive: false });
-            this._private__clearLongTapTimeout();
-            if (isTouchEvent(downEvent) && downEvent.touches.length === 1) {
-                this._private__longTapTimeoutId = setTimeout(this._private__longTapHandler.bind(this, downEvent), 240 /* LongTap */);
-            }
-            else {
-                rootElement_1.addEventListener('mousemove', boundMouseMoveWithDownHandler_1);
-                rootElement_1.addEventListener('mouseup', boundMouseUpHandler_1);
-            }
+            rootElement.addEventListener('mousemove', boundMouseMoveWithDownHandler_1);
+            rootElement.addEventListener('mouseup', boundMouseUpHandler_1);
         }
         this._private__mousePressed = true;
-        this._private__processEvent(compatEvent, this._private__handler._internal_mouseDownEvent);
+        if (this._private__firesTouchEvents(downEvent)) {
+            return;
+        }
+        var compatEvent = this._private__makeCompatEvent(downEvent);
+        this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseDownEvent);
         if (!this._private__clickTimeoutId) {
             this._private__clickCount = 0;
             this._private__clickTimeoutId = setTimeout(this._private__resetClickTimeout.bind(this), 500 /* ResetClick */);
+            this._private__clickPosition = getPosition(downEvent);
         }
     };
     MouseEventHandler.prototype._private__init = function () {
         var _this = this;
         this._private__target.addEventListener('mouseenter', this._private__mouseEnterHandler.bind(this));
+        // Do not show context menu when something went wrong
         this._private__target.addEventListener('touchcancel', this._private__clearLongTapTimeout.bind(this));
         {
             var doc_1 = this._private__target.ownerDocument;
@@ -8192,31 +8505,35 @@ var MouseEventHandler = /** @class */ (function () {
                 if (!_this._private__handler._internal_mouseDownOutsideEvent) {
                     return;
                 }
-                if (event.composed && _this._private__target.contains(event.composedPath()[0])) {
-                    return;
-                }
                 if (event.target && _this._private__target.contains(event.target)) {
                     return;
                 }
                 _this._private__handler._internal_mouseDownOutsideEvent();
             };
-            this._private__unsubscribeOutsideEvents = function () {
-                doc_1.removeEventListener('mousedown', outsideHandler_1);
+            this._private__unsubscribeOutsideTouchEvents = function () {
                 doc_1.removeEventListener('touchstart', outsideHandler_1);
+            };
+            this._private__unsubscribeOutsideMouseEvents = function () {
+                doc_1.removeEventListener('mousedown', outsideHandler_1);
             };
             doc_1.addEventListener('mousedown', outsideHandler_1);
             doc_1.addEventListener('touchstart', outsideHandler_1, { passive: true });
         }
-        this._private__target.addEventListener('mouseleave', this._private__mouseLeaveHandler.bind(this));
-        this._private__target.addEventListener('touchstart', this._private__mouseDownHandler.bind(this), { passive: true });
-        if (!mobileTouch) {
-            this._private__target.addEventListener('mousedown', this._private__mouseDownHandler.bind(this));
+        if (isIOS()) {
+            this._private__unsubscribeMobileSafariEvents = function () {
+                _this._private__target.removeEventListener('dblclick', _this._private__onMobileSafariDoubleClick);
+            };
+            this._private__target.addEventListener('dblclick', this._private__onMobileSafariDoubleClick);
         }
+        this._private__target.addEventListener('mouseleave', this._private__mouseLeaveHandler.bind(this));
+        this._private__target.addEventListener('touchstart', this._private__touchStartHandler.bind(this), { passive: true });
+        preventScrollByWheelClick(this._private__target);
+        this._private__target.addEventListener('mousedown', this._private__mouseDownHandler.bind(this));
         this._private__initPinch();
         // Hey mobile Safari, what's up?
         // If mobile Safari doesn't have any touchmove handler with passive=false
         // it treats a touchstart and the following touchmove events as cancelable=false,
-        // so we can't prevent them (as soon we subscribe on touchmove inside handler of touchstart).
+        // so we can't prevent them (as soon we subscribe on touchmove inside touchstart's handler).
         // And we'll get scroll of the page along with chart's one instead of only chart's scroll.
         this._private__target.addEventListener('touchmove', function () { }, { passive: false });
     };
@@ -8279,36 +8596,52 @@ var MouseEventHandler = /** @class */ (function () {
         if (this._private__unsubscribeMousemove) {
             this._private__unsubscribeMousemove();
         }
+        if (this._private__firesTouchEvents(event)) {
+            return;
+        }
+        if (!this._private__acceptMouseLeave) {
+            // mobile Safari sometimes emits mouse leave event for no reason, there is no way to handle it in other way
+            // just ignore this event if there was no mouse move or mouse enter events
+            return;
+        }
         var compatEvent = this._private__makeCompatEvent(event);
-        this._private__processEvent(compatEvent, this._private__handler._internal_mouseLeaveEvent);
+        this._private__processMouseEvent(compatEvent, this._private__handler._internal_mouseLeaveEvent);
+        // accept all mouse leave events if it's not an iOS device
+        this._private__acceptMouseLeave = !isIOS();
     };
     MouseEventHandler.prototype._private__longTapHandler = function (event) {
-        var compatEvent = this._private__makeCompatEvent(event);
-        this._private__processEvent(compatEvent, this._private__handler._internal_longTapEvent);
-        this._private__cancelClick = true;
-        // long tap is active untill touchend event with 0 touches occured
+        var touch = touchWithId(event.touches, ensureNotNull(this._private__activeTouchId));
+        if (touch === null) {
+            return;
+        }
+        var compatEvent = this._private__makeCompatEvent(event, touch);
+        this._private__processTouchEvent(compatEvent, this._private__handler._internal_longTapEvent);
+        this._private__cancelTap = true;
+        // long tap is active until touchend event with 0 touches occurred
         this._private__longTapActive = true;
     };
-    MouseEventHandler.prototype._private__processEvent = function (event, callback) {
+    MouseEventHandler.prototype._private__firesTouchEvents = function (e) {
+        if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents !== undefined) {
+            return e.sourceCapabilities.firesTouchEvents;
+        }
+        return eventTimeStamp(e) < this._private__lastTouchEventTimeStamp + 500 /* PreventFiresTouchEvents */;
+    };
+    MouseEventHandler.prototype._private__processTouchEvent = function (event, callback) {
+        if (callback) {
+            callback.call(this._private__handler, event);
+        }
+    };
+    MouseEventHandler.prototype._private__processMouseEvent = function (event, callback) {
         if (!callback) {
             return;
         }
         callback.call(this._private__handler, event);
     };
-    MouseEventHandler.prototype._private__makeCompatEvent = function (event) {
+    MouseEventHandler.prototype._private__makeCompatEvent = function (event, touch) {
         // TouchEvent has no clientX/Y coordinates:
         // We have to use the last Touch instead
-        var eventLike;
-        if ('touches' in event && event.touches.length) { // eslint-disable-line no-restricted-syntax
-            eventLike = event.touches[0];
-        }
-        else if ('changedTouches' in event && event.changedTouches.length) { // eslint-disable-line no-restricted-syntax
-            eventLike = event.changedTouches[0];
-        }
-        else {
-            eventLike = event;
-        }
-        var box = getBoundingClientRect(this._private__target);
+        var eventLike = touch || event;
+        var box = this._private__target.getBoundingClientRect() || { left: 0, top: 0 };
         return {
             _internal_clientX: eventLike.clientX,
             _internal_clientY: eventLike.clientY,
@@ -8316,14 +8649,22 @@ var MouseEventHandler = /** @class */ (function () {
             _internal_pageY: eventLike.pageY,
             _internal_screenX: eventLike.screenX,
             _internal_screenY: eventLike.screenY,
-            _internal_localX: eventLike.clientX - box.left,
-            _internal_localY: eventLike.clientY - box.top,
+            _internal_localX: (eventLike.clientX - box.left),
+            _internal_localY: (eventLike.clientY - box.top),
             _internal_ctrlKey: event.ctrlKey,
             _internal_altKey: event.altKey,
             _internal_shiftKey: event.shiftKey,
             _internal_metaKey: event.metaKey,
-            _internal_type: event.type.startsWith('mouse') ? 'mouse' : 'touch',
+            _internal_isTouch: !event.type.startsWith('mouse') && event.type !== 'contextmenu' && event.type !== 'click',
+            _internal_srcType: event.type,
+            _internal_target: eventLike.target,
             _internal_view: event.view,
+            _internal_preventDefault: function () {
+                if (event.type !== 'touchstart') {
+                    // touchstart is passive and cannot be prevented
+                    preventDefault(event);
+                }
+            },
         };
     };
     return MouseEventHandler;
@@ -8336,13 +8677,28 @@ function getDistance(p1, p2) {
     var yDiff = p1.clientY - p2.clientY;
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 }
-function isTouchEvent(event) {
-    return Boolean(event.touches);
-}
 function preventDefault(event) {
     if (event.cancelable) {
         event.preventDefault();
     }
+}
+function getPosition(eventLike) {
+    return {
+        _internal_x: eventLike.pageX,
+        _internal_y: eventLike.pageY,
+    };
+}
+function eventTimeStamp(e) {
+    // for some reason e.timestamp is always 0 on iPad with magic mouse, so we use performance.now() as a fallback
+    return e.timeStamp || performance.now();
+}
+function touchWithId(touches, id) {
+    for (var i = 0; i < touches.length; ++i) {
+        if (touches[i].identifier === id) {
+            return touches[i];
+        }
+    }
+    return null;
 }
 
 var MAX_COUNT = 200;
@@ -8420,7 +8776,6 @@ var PriceAxisWidget = /** @class */ (function () {
         var _this = this;
         this._private__priceScale = null;
         this._private__size = null;
-        this._private__updateTimeout = null;
         this._private__mousedown = false;
         this._private__mouseDraggingCustomPriceLine = null;
         this._private__mouseDragFromPriceString = '';
@@ -8429,14 +8784,18 @@ var PriceAxisWidget = /** @class */ (function () {
         this._private__color = null;
         this._private__font = null;
         this._private__prevOptimalWidth = 0;
+        this._private__isSettingSize = false;
         this._private__canvasConfiguredHandler = function () {
             _this._private__recreateTickMarksCache(_this._private__rendererOptionsProvider.options());
-            var model = _this._private__pane._internal_chart()._internal_model();
-            model.lightUpdate();
+            if (!_this._private__isSettingSize) {
+                _this._private__pane._internal_chart()._internal_model().lightUpdate();
+            }
         };
         this._private__topCanvasConfiguredHandler = function () {
-            var model = _this._private__pane._internal_chart()._internal_model();
-            model.lightUpdate();
+            if (_this._private__isSettingSize) {
+                return;
+            }
+            _this._private__pane._internal_chart()._internal_model().lightUpdate();
         };
         this._private__pane = pane;
         this._private__options = options;
@@ -8465,16 +8824,20 @@ var PriceAxisWidget = /** @class */ (function () {
         var handler = {
             _internal_mouseMoveEvent: this._private__mouseMoveEvent.bind(this),
             _internal_mouseDownEvent: this._private__mouseDownEvent.bind(this),
+            _internal_touchStartEvent: this._private__mouseDownEvent.bind(this),
             _internal_pressedMouseMoveEvent: this._private__pressedMouseMoveEvent.bind(this),
+            _internal_touchMoveEvent: this._private__pressedMouseMoveEvent.bind(this),
             _internal_mouseDownOutsideEvent: this._private__mouseDownOutsideEvent.bind(this),
             _internal_mouseUpEvent: this._private__mouseUpEvent.bind(this),
+            _internal_touchEndEvent: this._private__mouseUpEvent.bind(this),
             _internal_mouseDoubleClickEvent: this._private__mouseDoubleClickEvent.bind(this),
+            _internal_doubleTapEvent: this._private__mouseDoubleClickEvent.bind(this),
             _internal_mouseEnterEvent: this._private__mouseEnterEvent.bind(this),
             _internal_mouseLeaveEvent: this._private__mouseLeaveEvent.bind(this),
         };
         this._private__mouseEventHandler = new MouseEventHandler(this._private__topCanvasBinding.canvas, handler, {
-            _internal_treatVertTouchDragAsPageScroll: false,
-            _internal_treatHorzTouchDragAsPageScroll: true,
+            _internal_treatVertTouchDragAsPageScroll: function () { return false; },
+            _internal_treatHorzTouchDragAsPageScroll: function () { return true; },
         });
     }
     PriceAxisWidget.prototype.destroy = function () {
@@ -8487,10 +8850,6 @@ var PriceAxisWidget = /** @class */ (function () {
             this._private__priceScale.onMarksChanged().unsubscribeAll(this);
         }
         this._private__priceScale = null;
-        if (this._private__updateTimeout !== null) {
-            clearTimeout(this._private__updateTimeout);
-            this._private__updateTimeout = null;
-        }
         this._private__tickMarksCache.destroy();
     };
     PriceAxisWidget.prototype._internal_getElement = function () {
@@ -8526,8 +8885,7 @@ var PriceAxisWidget = /** @class */ (function () {
         if (this._private__priceScale === null) {
             return 0;
         }
-        // need some reasonable value for scale while initialization
-        var tickMarkMaxWidth = 34;
+        var tickMarkMaxWidth = 0;
         var rendererOptions = this._internal_rendererOptions();
         var ctx = getContext2D(this._private__canvasBinding.canvas);
         var tickMarks = this._private__priceScale.marks();
@@ -8548,12 +8906,12 @@ var PriceAxisWidget = /** @class */ (function () {
             var bottomValue = this._private__priceScale.coordinateToPrice(this._private__size._internal_h - 2, firstValue);
             tickMarkMaxWidth = Math.max(tickMarkMaxWidth, this._private__widthCache.measureText(ctx, this._private__priceScale.formatPrice(Math.floor(Math.min(topValue, bottomValue)) + 0.11111111111111, firstValue)), this._private__widthCache.measureText(ctx, this._private__priceScale.formatPrice(Math.ceil(Math.max(topValue, bottomValue)) - 0.11111111111111, firstValue)));
         }
-        tickMarkMaxWidth = Math.max(tickMarkMaxWidth, rendererOptions.width);
+        var resultTickMarksMaxWidth = Math.max(tickMarkMaxWidth || 34 /* DefaultOptimalWidth */, rendererOptions.width);
         var res = Math.ceil(rendererOptions.borderSize +
             rendererOptions.tickLength +
             rendererOptions.paddingInner +
             rendererOptions.paddingOuter +
-            tickMarkMaxWidth);
+            resultTickMarksMaxWidth);
         // make it even
         res += res % 2;
         return res;
@@ -8564,8 +8922,10 @@ var PriceAxisWidget = /** @class */ (function () {
         }
         if (this._private__size === null || !this._private__size._internal_equals(size)) {
             this._private__size = size;
+            this._private__isSettingSize = true;
             this._private__canvasBinding.resizeCanvas({ width: size._internal_w, height: size._internal_h });
             this._private__topCanvasBinding.resizeCanvas({ width: size._internal_w, height: size._internal_h });
+            this._private__isSettingSize = false;
             this._private__cell.style.width = size._internal_w + 'px';
             // need this for IE11
             this._private__cell.style.height = size._internal_h + 'px';
@@ -8615,6 +8975,11 @@ var PriceAxisWidget = /** @class */ (function () {
     };
     PriceAxisWidget.prototype._internal_getImage = function () {
         return this._private__canvasBinding.canvas;
+    };
+    PriceAxisWidget.prototype._internal_update = function () {
+        var _a;
+        // this call has side-effect - it regenerates marks on the price scale
+        (_a = this._private__priceScale) === null || _a === void 0 ? void 0 : _a.marks();
     };
     PriceAxisWidget.prototype._private__getDraggableCustomPriceLines = function () {
         var lines = [];
@@ -8974,20 +9339,11 @@ var PriceAxisWidget = /** @class */ (function () {
         this._private__cell.style.cursor = cursor;
     };
     PriceAxisWidget.prototype._private__onMarksChanged = function () {
-        var _this = this;
         var width = this._internal_optimalWidth();
+        // avoid price scale is shrunk
+        // using < instead !== to avoid infinite changes
         if (this._private__prevOptimalWidth < width) {
-            // avoid price scale is shrunk
-            // using < instead !== to avoid infinite changes
-            var chart_1 = this._private__pane._internal_chart();
-            if (this._private__updateTimeout === null) {
-                this._private__updateTimeout = setTimeout(function () {
-                    if (chart_1) {
-                        chart_1._internal_model().fullUpdate();
-                    }
-                    _this._private__updateTimeout = null;
-                }, 100);
-            }
+            this._private__pane._internal_chart()._internal_model().fullUpdate();
         }
         this._private__prevOptimalWidth = width;
     };
@@ -8998,9 +9354,6 @@ var PriceAxisWidget = /** @class */ (function () {
     return PriceAxisWidget;
 }());
 
-// actually we should check what event happened (touch or mouse)
-// not check current UA to detect "mobile" device
-var trackCrosshairOnlyAfterLongTap = isMobile;
 function drawBackground(renderer, ctx, pixelRatio, isHovered, hitTestData) {
     if (renderer.drawBackground) {
         renderer.drawBackground(ctx, pixelRatio, isHovered, hitTestData);
@@ -9030,8 +9383,19 @@ var PaneWidget = /** @class */ (function () {
         this._private__exitTrackingModeOnNextTry = false;
         this._private__initCrosshairPosition = null;
         this._private__scrollXAnimation = null;
-        this._private__canvasConfiguredHandler = function () { return _this._private__state && _this._private__model().lightUpdate(); };
-        this._private__topCanvasConfiguredHandler = function () { return _this._private__state && _this._private__model().lightUpdate(); };
+        this._private__isSettingSize = false;
+        this._private__canvasConfiguredHandler = function () {
+            if (_this._private__isSettingSize || _this._private__state === null) {
+                return;
+            }
+            _this._private__model().lightUpdate();
+        };
+        this._private__topCanvasConfiguredHandler = function () {
+            if (_this._private__isSettingSize || _this._private__state === null) {
+                return;
+            }
+            _this._private__model().lightUpdate();
+        };
         this._private__chart = chart;
         this._private__state = state;
         this._private__state.onDestroyed().subscribe(this._private__onStateDestroyed.bind(this), this, true);
@@ -9066,11 +9430,10 @@ var PaneWidget = /** @class */ (function () {
         this._private__rowElement.appendChild(this._private__leftAxisCell);
         this._private__rowElement.appendChild(this._private__paneCell);
         this._private__rowElement.appendChild(this._private__rightAxisCell);
-        this._internal_updatePriceAxisWidgets();
-        var scrollOptions = this._internal_chart()._internal_options().handleScroll;
+        this._internal_updatePriceAxisWidgetsStates();
         this._private__mouseEventHandler = new MouseEventHandler(this._private__topCanvasBinding.canvas, this, {
-            _internal_treatVertTouchDragAsPageScroll: !scrollOptions.vertTouchDrag,
-            _internal_treatHorzTouchDragAsPageScroll: !scrollOptions.horzTouchDrag,
+            _internal_treatVertTouchDragAsPageScroll: function () { return _this._private__startTrackPoint === null && !_this._private__chart._internal_options().handleScroll.vertTouchDrag; },
+            _internal_treatHorzTouchDragAsPageScroll: function () { return _this._private__startTrackPoint === null && !_this._private__chart._internal_options().handleScroll.horzTouchDrag; },
         });
     }
     PaneWidget.prototype.destroy = function () {
@@ -9100,7 +9463,7 @@ var PaneWidget = /** @class */ (function () {
         if (this._private__state !== null) {
             this._private__state.onDestroyed().subscribe(PaneWidget.prototype._private__onStateDestroyed.bind(this), this, true);
         }
-        this._internal_updatePriceAxisWidgets();
+        this._internal_updatePriceAxisWidgetsStates();
     };
     PaneWidget.prototype._internal_chart = function () {
         return this._private__chart;
@@ -9108,7 +9471,7 @@ var PaneWidget = /** @class */ (function () {
     PaneWidget.prototype._internal_getElement = function () {
         return this._private__rowElement;
     };
-    PaneWidget.prototype._internal_updatePriceAxisWidgets = function () {
+    PaneWidget.prototype._internal_updatePriceAxisWidgetsStates = function () {
         if (this._private__state === null) {
             return;
         }
@@ -9125,6 +9488,14 @@ var PaneWidget = /** @class */ (function () {
             this._private__rightPriceAxisWidget._internal_setPriceScale(ensureNotNull(rightPriceScale));
         }
     };
+    PaneWidget.prototype._internal_updatePriceAxisWidgets = function () {
+        if (this._private__leftPriceAxisWidget !== null) {
+            this._private__leftPriceAxisWidget._internal_update();
+        }
+        if (this._private__rightPriceAxisWidget !== null) {
+            this._private__rightPriceAxisWidget._internal_update();
+        }
+    };
     PaneWidget.prototype._internal_stretchFactor = function () {
         return this._private__state !== null ? this._private__state.stretchFactor() : 0;
     };
@@ -9137,147 +9508,55 @@ var PaneWidget = /** @class */ (function () {
         if (!this._private__state) {
             return;
         }
+        this._private__onMouseEvent();
         var x = event._internal_localX;
         var y = event._internal_localY;
-        if (!mobileTouch) {
-            this._private__setCrosshairPosition(x, y);
-        }
+        this._private__setCrosshairPosition(x, y);
     };
     PaneWidget.prototype._internal_mouseDownEvent = function (event) {
-        this._private__longTap = false;
-        this._private__exitTrackingModeOnNextTry = this._private__startTrackPoint !== null;
-        if (!this._private__state) {
-            return;
-        }
-        this._private__terminateKineticAnimation();
-        if (document.activeElement !== document.body && document.activeElement !== document.documentElement) {
-            // If any focusable element except the page itself is focused, remove the focus
-            ensureNotNull(document.activeElement).blur();
-        }
-        else {
-            // Clear selection
-            var selection = document.getSelection();
-            if (selection !== null) {
-                selection.removeAllRanges();
-            }
-        }
-        var model = this._private__model();
-        var priceScale = this._private__state.defaultPriceScale();
-        if (priceScale.isEmpty() || model.timeScale().isEmpty()) {
-            return;
-        }
-        if (this._private__startTrackPoint !== null) {
-            var crosshair = model.crosshairSource();
-            this._private__initCrosshairPosition = { x: crosshair.appliedX(), y: crosshair.appliedY() };
-            this._private__startTrackPoint = { x: event._internal_localX, y: event._internal_localY };
-        }
-        if (!mobileTouch) {
-            this._private__setCrosshairPosition(event._internal_localX, event._internal_localY);
-        }
+        this._private__onMouseEvent();
+        this._private__mouseTouchDownEvent();
+        this._private__setCrosshairPosition(event._internal_localX, event._internal_localY);
     };
     PaneWidget.prototype._internal_mouseMoveEvent = function (event) {
         if (!this._private__state) {
             return;
         }
+        this._private__onMouseEvent();
         var x = event._internal_localX;
         var y = event._internal_localY;
-        if (this._private__preventCrosshairMove()) {
-            this._private__clearCrosshairPosition();
-        }
-        if (!mobileTouch) {
-            this._private__setCrosshairPosition(x, y);
-            var hitTest = this._internal_hitTest(x, y);
-            this._private__model().setHoveredSource(hitTest && { source: hitTest._internal_source, object: hitTest._internal_object });
-        }
+        this._private__setCrosshairPosition(x, y);
+        var hitTest = this._internal_hitTest(x, y);
+        this._private__model().setHoveredSource(hitTest && { source: hitTest._internal_source, object: hitTest._internal_object });
     };
     PaneWidget.prototype._internal_mouseClickEvent = function (event) {
         if (this._private__state === null) {
             return;
         }
+        this._private__onMouseEvent();
         var x = event._internal_localX;
         var y = event._internal_localY;
         if (this._private__clicked._internal_hasListeners()) {
             var currentTime = this._private__model().crosshairSource().appliedIndex();
             this._private__clicked._internal_fire(currentTime, { x: x, y: y });
         }
-        this._private__tryExitTrackingMode();
     };
-    // eslint-disable-next-line complexity
     PaneWidget.prototype._internal_pressedMouseMoveEvent = function (event) {
-        if (this._private__state === null) {
-            return;
-        }
-        var model = this._private__model();
-        var x = event._internal_localX;
-        var y = event._internal_localY;
-        if (this._private__startTrackPoint !== null) {
-            // tracking mode: move crosshair
-            this._private__exitTrackingModeOnNextTry = false;
-            var origPoint = ensureNotNull(this._private__initCrosshairPosition);
-            var newX = origPoint.x + (x - this._private__startTrackPoint.x);
-            var newY = origPoint.y + (y - this._private__startTrackPoint.y);
-            this._private__setCrosshairPosition(newX, newY);
-        }
-        else if (!this._private__preventCrosshairMove()) {
-            this._private__setCrosshairPosition(x, y);
-        }
-        if (model.timeScale().isEmpty()) {
-            return;
-        }
-        var chartOptions = this._private__chart._internal_options();
-        var scrollOptions = chartOptions.handleScroll;
-        var kineticScrollOptions = chartOptions.kineticScroll;
-        if ((!scrollOptions.pressedMouseMove || event._internal_type === 'touch') &&
-            (!scrollOptions.horzTouchDrag && !scrollOptions.vertTouchDrag || event._internal_type === 'mouse')) {
-            return;
-        }
-        var priceScale = this._private__state.defaultPriceScale();
-        var now = performance.now();
-        if (this._private__startScrollingPos === null && !this._private__preventScroll()) {
-            this._private__startScrollingPos = {
-                x: event._internal_clientX,
-                y: event._internal_clientY,
-                _internal_timestamp: now,
-                _internal_localX: event._internal_localX,
-                _internal_localY: event._internal_localY,
-            };
-        }
-        if (this._private__scrollXAnimation !== null) {
-            this._private__scrollXAnimation._internal_addPosition(event._internal_localX, now);
-        }
-        if (this._private__startScrollingPos !== null &&
-            !this._private__isScrolling &&
-            (this._private__startScrollingPos.x !== event._internal_clientX || this._private__startScrollingPos.y !== event._internal_clientY)) {
-            if (this._private__scrollXAnimation === null && (event._internal_type === 'touch' && kineticScrollOptions.touch ||
-                event._internal_type === 'mouse' && kineticScrollOptions.mouse)) {
-                this._private__scrollXAnimation = new KineticAnimation(0.2 /* MinScrollSpeed */, 7 /* MaxScrollSpeed */, 0.997 /* DumpingCoeff */, 15 /* ScrollMinMove */);
-                this._private__scrollXAnimation._internal_addPosition(this._private__startScrollingPos._internal_localX, this._private__startScrollingPos._internal_timestamp);
-                this._private__scrollXAnimation._internal_addPosition(event._internal_localX, now);
-            }
-            if (!priceScale.isEmpty()) {
-                model.startScrollPrice(this._private__state, priceScale, event._internal_localY);
-            }
-            model.startScrollTime(event._internal_localX);
-            this._private__isScrolling = true;
-        }
-        if (this._private__isScrolling) {
-            // this allows scrolling not default price scales
-            if (!priceScale.isEmpty()) {
-                model.scrollPriceTo(this._private__state, priceScale, event._internal_localY);
-            }
-            model.scrollTimeTo(event._internal_localX);
-        }
+        this._private__onMouseEvent();
+        this._private__pressedMouseTouchMoveEvent(event);
+        this._private__setCrosshairPosition(event._internal_localX, event._internal_localY);
     };
     PaneWidget.prototype._internal_mouseUpEvent = function (event) {
         if (this._private__state === null) {
             return;
         }
+        this._private__onMouseEvent();
         this._private__longTap = false;
         this._private__endScroll(event);
     };
     PaneWidget.prototype._internal_longTapEvent = function (event) {
         this._private__longTap = true;
-        if (this._private__startTrackPoint === null && trackCrosshairOnlyAfterLongTap) {
+        if (this._private__startTrackPoint === null) {
             var point = { x: event._internal_localX, y: event._internal_localY };
             this._private__startTrackingMode(point, point);
         }
@@ -9286,10 +9565,9 @@ var PaneWidget = /** @class */ (function () {
         if (this._private__state === null) {
             return;
         }
+        this._private__onMouseEvent();
         this._private__state.model().setHoveredSource(null);
-        if (!isMobile) {
-            this._private__clearCrosshairPosition();
-        }
+        this._private__clearCrosshairPosition();
     };
     PaneWidget.prototype._internal_clicked = function () {
         return this._private__clicked;
@@ -9305,6 +9583,40 @@ var PaneWidget = /** @class */ (function () {
         var zoomScale = (scale - this._private__prevPinchScale) * 5;
         this._private__prevPinchScale = scale;
         this._private__model().zoomTime(middlePoint._internal_x, zoomScale);
+    };
+    PaneWidget.prototype._internal_touchStartEvent = function (event) {
+        this._private__longTap = false;
+        this._private__exitTrackingModeOnNextTry = this._private__startTrackPoint !== null;
+        this._private__mouseTouchDownEvent();
+        if (this._private__startTrackPoint !== null) {
+            var crosshair = this._private__model().crosshairSource();
+            this._private__initCrosshairPosition = { x: crosshair.appliedX(), y: crosshair.appliedY() };
+            this._private__startTrackPoint = { x: event._internal_localX, y: event._internal_localY };
+        }
+    };
+    PaneWidget.prototype._internal_touchMoveEvent = function (event) {
+        if (this._private__state === null) {
+            return;
+        }
+        var x = event._internal_localX;
+        var y = event._internal_localY;
+        if (this._private__startTrackPoint !== null) {
+            // tracking mode: move crosshair
+            this._private__exitTrackingModeOnNextTry = false;
+            var origPoint = ensureNotNull(this._private__initCrosshairPosition);
+            var newX = origPoint.x + (x - this._private__startTrackPoint.x);
+            var newY = origPoint.y + (y - this._private__startTrackPoint.y);
+            this._private__setCrosshairPosition(newX, newY);
+            return;
+        }
+        this._private__pressedMouseTouchMoveEvent(event);
+    };
+    PaneWidget.prototype._internal_touchEndEvent = function (event) {
+        if (this._internal_chart()._internal_options().trackingMode.exitMode === 0 /* OnTouchEnd */) {
+            this._private__exitTrackingModeOnNextTry = true;
+        }
+        this._private__tryExitTrackingMode();
+        this._private__endScroll(event);
     };
     PaneWidget.prototype._internal_hitTest = function (x, y) {
         var state = this._private__state;
@@ -9340,8 +9652,10 @@ var PaneWidget = /** @class */ (function () {
             return;
         }
         this._private__size = size;
+        this._private__isSettingSize = true;
         this._private__canvasBinding.resizeCanvas({ width: size._internal_w, height: size._internal_h });
         this._private__topCanvasBinding.resizeCanvas({ width: size._internal_w, height: size._internal_h });
+        this._private__isSettingSize = false;
         this._private__paneCell.style.width = size._internal_w + 'px';
         this._private__paneCell.style.height = size._internal_h + 'px';
     };
@@ -9516,11 +9830,8 @@ var PaneWidget = /** @class */ (function () {
             this._private__rightAxisCell.appendChild(this._private__rightPriceAxisWidget._internal_getElement());
         }
     };
-    PaneWidget.prototype._private__preventCrosshairMove = function () {
-        return trackCrosshairOnlyAfterLongTap && this._private__startTrackPoint === null;
-    };
-    PaneWidget.prototype._private__preventScroll = function () {
-        return trackCrosshairOnlyAfterLongTap && this._private__longTap || this._private__startTrackPoint !== null;
+    PaneWidget.prototype._private__preventScroll = function (event) {
+        return event._internal_isTouch && this._private__longTap || this._private__startTrackPoint !== null;
     };
     PaneWidget.prototype._private__correctXCoord = function (x) {
         return Math.max(0, Math.min(x, this._private__size._internal_w - 1));
@@ -9598,6 +9909,83 @@ var PaneWidget = /** @class */ (function () {
             requestAnimationFrame(animationFn);
         };
         requestAnimationFrame(animationFn);
+    };
+    PaneWidget.prototype._private__onMouseEvent = function () {
+        this._private__startTrackPoint = null;
+    };
+    PaneWidget.prototype._private__mouseTouchDownEvent = function () {
+        if (!this._private__state) {
+            return;
+        }
+        this._private__terminateKineticAnimation();
+        if (document.activeElement !== document.body && document.activeElement !== document.documentElement) {
+            // If any focusable element except the page itself is focused, remove the focus
+            ensureNotNull(document.activeElement).blur();
+        }
+        else {
+            // Clear selection
+            var selection = document.getSelection();
+            if (selection !== null) {
+                selection.removeAllRanges();
+            }
+        }
+        var priceScale = this._private__state.defaultPriceScale();
+        if (priceScale.isEmpty() || this._private__model().timeScale().isEmpty()) {
+            return;
+        }
+    };
+    // eslint-disable-next-line complexity
+    PaneWidget.prototype._private__pressedMouseTouchMoveEvent = function (event) {
+        if (this._private__state === null) {
+            return;
+        }
+        var model = this._private__model();
+        if (model.timeScale().isEmpty()) {
+            return;
+        }
+        var chartOptions = this._private__chart._internal_options();
+        var scrollOptions = chartOptions.handleScroll;
+        var kineticScrollOptions = chartOptions.kineticScroll;
+        if ((!scrollOptions.pressedMouseMove || event._internal_isTouch) &&
+            (!scrollOptions.horzTouchDrag && !scrollOptions.vertTouchDrag || !event._internal_isTouch)) {
+            return;
+        }
+        var priceScale = this._private__state.defaultPriceScale();
+        var now = performance.now();
+        if (this._private__startScrollingPos === null && !this._private__preventScroll(event)) {
+            this._private__startScrollingPos = {
+                x: event._internal_clientX,
+                y: event._internal_clientY,
+                _internal_timestamp: now,
+                _internal_localX: event._internal_localX,
+                _internal_localY: event._internal_localY,
+            };
+        }
+        if (this._private__scrollXAnimation !== null) {
+            this._private__scrollXAnimation._internal_addPosition(event._internal_localX, now);
+        }
+        if (this._private__startScrollingPos !== null &&
+            !this._private__isScrolling &&
+            (this._private__startScrollingPos.x !== event._internal_clientX || this._private__startScrollingPos.y !== event._internal_clientY)) {
+            if (this._private__scrollXAnimation === null && (event._internal_isTouch && kineticScrollOptions.touch ||
+                !event._internal_isTouch && kineticScrollOptions.mouse)) {
+                this._private__scrollXAnimation = new KineticAnimation(0.2 /* MinScrollSpeed */, 7 /* MaxScrollSpeed */, 0.997 /* DumpingCoeff */, 15 /* ScrollMinMove */);
+                this._private__scrollXAnimation._internal_addPosition(this._private__startScrollingPos._internal_localX, this._private__startScrollingPos._internal_timestamp);
+                this._private__scrollXAnimation._internal_addPosition(event._internal_localX, now);
+            }
+            if (!priceScale.isEmpty()) {
+                model.startScrollPrice(this._private__state, priceScale, event._internal_localY);
+            }
+            model.startScrollTime(event._internal_localX);
+            this._private__isScrolling = true;
+        }
+        if (this._private__isScrolling) {
+            // this allows scrolling not default price scales
+            if (!priceScale.isEmpty()) {
+                model.scrollPriceTo(this._private__state, priceScale, event._internal_localY);
+            }
+            model.scrollTimeTo(event._internal_localX);
+        }
     };
     PaneWidget.prototype._private__terminateKineticAnimation = function () {
         var now = performance.now();
@@ -9705,8 +10093,17 @@ var TimeAxisWidget = /** @class */ (function () {
         this._private__size = new Size(0, 0);
         this._private__sizeChanged = new Delegate();
         this._private__widthCache = new TextWidthCache(5);
-        this._private__canvasConfiguredHandler = function () { return _this._private__chart._internal_model().lightUpdate(); };
-        this._private__topCanvasConfiguredHandler = function () { return _this._private__chart._internal_model().lightUpdate(); };
+        this._private__isSettingSize = false;
+        this._private__canvasConfiguredHandler = function () {
+            if (!_this._private__isSettingSize) {
+                _this._private__chart._internal_model().lightUpdate();
+            }
+        };
+        this._private__topCanvasConfiguredHandler = function () {
+            if (!_this._private__isSettingSize) {
+                _this._private__chart._internal_model().lightUpdate();
+            }
+        };
         this._private__chart = chartWidget;
         this._private__options = chartWidget._internal_options().layout;
         this._private__element = document.createElement('tr');
@@ -9743,8 +10140,8 @@ var TimeAxisWidget = /** @class */ (function () {
         this._private__recreateStubs();
         this._private__chart._internal_model().priceScalesOptionsChanged().subscribe(this._private__recreateStubs.bind(this), this);
         this._private__mouseEventHandler = new MouseEventHandler(this._private__topCanvasBinding.canvas, this, {
-            _internal_treatVertTouchDragAsPageScroll: true,
-            _internal_treatHorzTouchDragAsPageScroll: false,
+            _internal_treatVertTouchDragAsPageScroll: function () { return true; },
+            _internal_treatHorzTouchDragAsPageScroll: function () { return false; },
         });
     }
     TimeAxisWidget.prototype.destroy = function () {
@@ -9780,6 +10177,9 @@ var TimeAxisWidget = /** @class */ (function () {
         }
         model.startScaleTime(event._internal_localX);
     };
+    TimeAxisWidget.prototype._internal_touchStartEvent = function (event) {
+        this._internal_mouseDownEvent(event);
+    };
     TimeAxisWidget.prototype._internal_mouseDownOutsideEvent = function () {
         var model = this._private__chart._internal_model();
         if (!model.timeScale().isEmpty() && this._private__mouseDown) {
@@ -9796,7 +10196,10 @@ var TimeAxisWidget = /** @class */ (function () {
         }
         model.scaleTimeTo(event._internal_localX);
     };
-    TimeAxisWidget.prototype._internal_mouseUpEvent = function (event) {
+    TimeAxisWidget.prototype._internal_touchMoveEvent = function (event) {
+        this._internal_pressedMouseMoveEvent(event);
+    };
+    TimeAxisWidget.prototype._internal_mouseUpEvent = function () {
         this._private__mouseDown = false;
         var model = this._private__chart._internal_model();
         if (model.timeScale().isEmpty() && !this._private__chart._internal_options().handleScale.axisPressedMouseMove.time) {
@@ -9804,17 +10207,23 @@ var TimeAxisWidget = /** @class */ (function () {
         }
         model.endScaleTime();
     };
+    TimeAxisWidget.prototype._internal_touchEndEvent = function () {
+        this._internal_mouseUpEvent();
+    };
     TimeAxisWidget.prototype._internal_mouseDoubleClickEvent = function () {
         if (this._private__chart._internal_options().handleScale.axisDoubleClickReset) {
             this._private__chart._internal_model().resetTimeScale();
         }
     };
-    TimeAxisWidget.prototype._internal_mouseEnterEvent = function (e) {
+    TimeAxisWidget.prototype._internal_doubleTapEvent = function () {
+        this._internal_mouseDoubleClickEvent();
+    };
+    TimeAxisWidget.prototype._internal_mouseEnterEvent = function () {
         if (this._private__chart._internal_model().options().handleScale.axisPressedMouseMove.time) {
             this._private__setCursor(1 /* EwResize */);
         }
     };
-    TimeAxisWidget.prototype._internal_mouseLeaveEvent = function (e) {
+    TimeAxisWidget.prototype._internal_mouseLeaveEvent = function () {
         this._private__setCursor(0 /* Default */);
     };
     TimeAxisWidget.prototype._internal_getSize = function () {
@@ -9826,8 +10235,10 @@ var TimeAxisWidget = /** @class */ (function () {
     TimeAxisWidget.prototype._internal_setSizes = function (timeAxisSize, leftStubWidth, rightStubWidth) {
         if (!this._private__size || !this._private__size._internal_equals(timeAxisSize)) {
             this._private__size = timeAxisSize;
+            this._private__isSettingSize = true;
             this._private__canvasBinding.resizeCanvas({ width: timeAxisSize._internal_w, height: timeAxisSize._internal_h });
             this._private__topCanvasBinding.resizeCanvas({ width: timeAxisSize._internal_w, height: timeAxisSize._internal_h });
+            this._private__isSettingSize = false;
             this._private__cell.style.width = timeAxisSize._internal_w + 'px';
             this._private__cell.style.height = timeAxisSize._internal_h + 'px';
             this._private__sizeChanged._internal_fire(timeAxisSize);
@@ -9949,6 +10360,7 @@ var TimeAxisWidget = /** @class */ (function () {
                 }
             }
         });
+        ctx.restore();
     };
     TimeAxisWidget.prototype._private__alignTickMarkLabelCoordinate = function (ctx, coordinate, labelText) {
         var labelWidth = this._private__widthCache.measureText(ctx, labelText);
@@ -10181,6 +10593,9 @@ var ChartWidget = /** @class */ (function () {
         }
     };
     ChartWidget.prototype._internal_applyOptions = function (options) {
+        // we don't need to merge options here because it's done in chart model
+        // and since both model and widget share the same object it will be done automatically for widget as well
+        // not ideal solution for sure, but it work's for now ¯\_(ツ)_/¯
         this._private__model.applyOptions(options);
         this._private__updateTimeAxisVisibility();
         var width = options.width || this._private__width;
@@ -10395,6 +10810,7 @@ var ChartWidget = /** @class */ (function () {
         }
     };
     ChartWidget.prototype._private__drawImpl = function (invalidateMask) {
+        var _a;
         var invalidationType = invalidateMask.fullInvalidation();
         // actions for full invalidation ONLY (not shared with light)
         if (invalidationType === 3 /* Full */) {
@@ -10403,25 +10819,41 @@ var ChartWidget = /** @class */ (function () {
         // light or full invalidate actions
         if (invalidationType === 3 /* Full */ ||
             invalidationType === 2 /* Light */) {
-            var panes = this._private__model.panes();
-            for (var i = 0; i < panes.length; i++) {
-                if (invalidateMask.invalidateForPane(i).autoScale) {
-                    panes[i].momentaryAutoScale();
-                }
-            }
-            var timeScaleInvalidations = invalidateMask.timeScaleInvalidations();
-            for (var _i = 0, timeScaleInvalidations_1 = timeScaleInvalidations; _i < timeScaleInvalidations_1.length; _i++) {
-                var tsInvalidation = timeScaleInvalidations_1[_i];
-                this._private__applyTimeScaleInvalidation(tsInvalidation);
-            }
-            if (timeScaleInvalidations.length > 0) {
-                this._private__model.recalculateAllPanes();
-                this._private__model.updateCrosshair();
-                this._private__model.lightUpdate();
-            }
+            this._private__applyMomentaryAutoScale(invalidateMask);
+            this._private__applyTimeScaleInvalidations(invalidateMask);
             this._private__timeAxisWidget._internal_update();
+            this._private__paneWidgets.forEach(function (pane) {
+                pane._internal_updatePriceAxisWidgets();
+            });
+            // In the case a full invalidation has been postponed during the draw, reapply
+            // the timescale invalidations. A full invalidation would mean there is a change
+            // in the timescale width (caused by price scale changes) that needs to be drawn
+            // right away to avoid flickering.
+            if (((_a = this._private__invalidateMask) === null || _a === void 0 ? void 0 : _a.fullInvalidation()) === 3 /* Full */) {
+                this._private__invalidateMask.merge(invalidateMask);
+                this._private__updateGui();
+                this._private__applyMomentaryAutoScale(this._private__invalidateMask);
+                this._private__applyTimeScaleInvalidations(this._private__invalidateMask);
+                invalidateMask = this._private__invalidateMask;
+                this._private__invalidateMask = null;
+            }
         }
         this._internal_paint(invalidateMask);
+    };
+    ChartWidget.prototype._private__applyTimeScaleInvalidations = function (invalidateMask) {
+        var timeScaleInvalidations = invalidateMask.timeScaleInvalidations();
+        for (var _i = 0, timeScaleInvalidations_1 = timeScaleInvalidations; _i < timeScaleInvalidations_1.length; _i++) {
+            var tsInvalidation = timeScaleInvalidations_1[_i];
+            this._private__applyTimeScaleInvalidation(tsInvalidation);
+        }
+    };
+    ChartWidget.prototype._private__applyMomentaryAutoScale = function (invalidateMask) {
+        var panes = this._private__model.panes();
+        for (var i = 0; i < panes.length; i++) {
+            if (invalidateMask.invalidateForPane(i).autoScale) {
+                panes[i].momentaryAutoScale();
+            }
+        }
     };
     ChartWidget.prototype._private__applyTimeScaleInvalidation = function (invalidation) {
         var timeScale = this._private__model.timeScale();
@@ -10457,8 +10889,9 @@ var ChartWidget = /** @class */ (function () {
                 _this._private__drawPlanned = false;
                 _this._private__drawRafId = 0;
                 if (_this._private__invalidateMask !== null) {
-                    _this._private__drawImpl(_this._private__invalidateMask);
+                    var mask = _this._private__invalidateMask;
                     _this._private__invalidateMask = null;
+                    _this._private__drawImpl(mask);
                 }
             });
         }
@@ -10506,7 +10939,7 @@ var ChartWidget = /** @class */ (function () {
                 paneWidget._internal_setState(state);
             }
             else {
-                paneWidget._internal_updatePriceAxisWidgets();
+                paneWidget._internal_updatePriceAxisWidgetsStates();
             }
         }
         this._private__updateTimeAxisVisibility();
@@ -10598,6 +11031,10 @@ function warn(msg) {
 
 function getLineBasedSeriesPlotRow(time, index, item) {
     var val = item.value;
+    return { index: index, time: time, value: [val, val, val, val] };
+}
+function getColoredLineBasedSeriesPlotRow(time, index, item) {
+    var val = item.value;
     var res = { index: index, time: time, value: [val, val, val, val] };
     // 'color' here is public property (from API) so we can use `in` here safely
     // eslint-disable-next-line no-restricted-syntax
@@ -10606,8 +11043,33 @@ function getLineBasedSeriesPlotRow(time, index, item) {
     }
     return res;
 }
-function getOHLCBasedSeriesPlotRow(time, index, item) {
-    return { index: index, time: time, value: [item.open, item.high, item.low, item.close] };
+function getBarSeriesPlotRow(time, index, item) {
+    var res = { index: index, time: time, value: [item.open, item.high, item.low, item.close] };
+    // 'color' here is public property (from API) so we can use `in` here safely
+    // eslint-disable-next-line no-restricted-syntax
+    if ('color' in item && item.color !== undefined) {
+        res.color = item.color;
+    }
+    return res;
+}
+function getCandlestickSeriesPlotRow(time, index, item) {
+    var res = { index: index, time: time, value: [item.open, item.high, item.low, item.close] };
+    // 'color' here is public property (from API) so we can use `in` here safely
+    // eslint-disable-next-line no-restricted-syntax
+    if ('color' in item && item.color !== undefined) {
+        res.color = item.color;
+    }
+    // 'borderColor' here is public property (from API) so we can use `in` here safely
+    // eslint-disable-next-line no-restricted-syntax
+    if ('borderColor' in item && item.borderColor !== undefined) {
+        res.borderColor = item.borderColor;
+    }
+    // 'wickColor' here is public property (from API) so we can use `in` here safely
+    // eslint-disable-next-line no-restricted-syntax
+    if ('wickColor' in item && item.wickColor !== undefined) {
+        res.wickColor = item.wickColor;
+    }
+    return res;
 }
 function isSeriesPlotRow(row) {
     return row.value !== undefined;
@@ -10621,12 +11083,12 @@ function wrapWhitespaceData(createPlotRowFn) {
     };
 }
 var seriesPlotRowFnMap = {
-    Candlestick: wrapWhitespaceData(getOHLCBasedSeriesPlotRow),
-    Bar: wrapWhitespaceData(getOHLCBasedSeriesPlotRow),
+    Candlestick: wrapWhitespaceData(getCandlestickSeriesPlotRow),
+    Bar: wrapWhitespaceData(getBarSeriesPlotRow),
     Area: wrapWhitespaceData(getLineBasedSeriesPlotRow),
     Baseline: wrapWhitespaceData(getLineBasedSeriesPlotRow),
-    Histogram: wrapWhitespaceData(getLineBasedSeriesPlotRow),
-    Line: wrapWhitespaceData(getLineBasedSeriesPlotRow),
+    Histogram: wrapWhitespaceData(getColoredLineBasedSeriesPlotRow),
+    Line: wrapWhitespaceData(getColoredLineBasedSeriesPlotRow),
 };
 function getSeriesPlotRowCreator(seriesType) {
     return seriesPlotRowFnMap[seriesType];
@@ -11105,6 +11567,7 @@ var priceLineOptionsDefaults = {
     price: 0,
     lineStyle: 2 /* Dashed */,
     lineWidth: 1,
+    lineVisible: true,
     axisLabelVisible: true,
     title: '',
     draggable: false,
@@ -11367,6 +11830,9 @@ var chartOptionsDefaults = {
     kineticScroll: {
         mouse: false,
         touch: true,
+    },
+    trackingMode: {
+        exitMode: 1 /* OnNextTap */,
     },
 };
 
@@ -11959,7 +12425,7 @@ function createChart(container, options) {
  * Returns the current version as a string. For example `'3.3.0'`.
  */
 function version() {
-    return "3.8.0-dev+202112190350";
+    return "3.8.0-dev+202202041418";
 }
 
-export { ColorType, CrosshairMode, LastPriceAnimationMode as LasPriceAnimationMode, LastPriceAnimationMode, LineStyle, LineType, PriceFormatter, PriceLineSource, PriceScaleMode, TickMarkType, createChart, isBusinessDay, isUTCTimestamp, version };
+export { ColorType, CrosshairMode, LastPriceAnimationMode as LasPriceAnimationMode, LastPriceAnimationMode, LineStyle, LineType, PriceFormatter, PriceLineSource, PriceScaleMode, TickMarkType, TrackingModeExitMode, createChart, isBusinessDay, isUTCTimestamp, version };
