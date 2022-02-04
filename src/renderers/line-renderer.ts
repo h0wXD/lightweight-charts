@@ -82,7 +82,8 @@ export class PaneRendererLine extends PaneRendererLineBase<PaneRendererLineData>
 
 		ctx.beginPath();
 
-		const firstItem = items[visibleRange.from];
+		let i = visibleRange.from;
+		const firstItem = items[i];
 		ctx.moveTo(firstItem.x, firstItem.y);
 
 		let prevStrokeStyle = firstItem.color ?? lineColor;
@@ -95,26 +96,59 @@ export class PaneRendererLine extends PaneRendererLineBase<PaneRendererLineData>
 			prevStrokeStyle = color;
 		};
 
-		for (let i = visibleRange.from + 1; i < visibleRange.to; ++i) {
-			const currItem = items[i];
-			const prevItem = items[i - 1];
+		i++;
 
-			const currentStrokeStyle = currItem.color ?? lineColor;
+		if (lineType === LineType.WithSteps) {
+			for (; i < visibleRange.to; i++) {
+				const currItem = items[i];
+				const prevItem = items[i - 1];
+				const currentStrokeStyle = currItem.color ?? lineColor;
 
-			if (lineType === LineType.WithSteps) {
 				ctx.lineTo(currItem.x, prevItem.y);
 
 				if (currentStrokeStyle !== prevStrokeStyle) {
 					changeColor(currentStrokeStyle);
 					ctx.moveTo(currItem.x, prevItem.y);
 				}
+
+				ctx.lineTo(currItem.x, currItem.y);
 			}
+		} else if (lineType === LineType.WithGaps) {
+			let isGap = true;
+			for (; i < visibleRange.to; i++) {
+				const currItem = items[i];
+				const prevItem = items[i - 1];
+				const currentStrokeStyle = currItem.color ?? lineColor;
+				const currPrice = currItem.price;
 
-			ctx.lineTo(currItem.x, currItem.y);
+				if (currentStrokeStyle !== prevStrokeStyle) {
+					changeColor(currentStrokeStyle);
+					ctx.moveTo(currItem.x, prevItem.y);
+				}
 
-			if (lineType !== LineType.WithSteps && currentStrokeStyle !== prevStrokeStyle) {
-				changeColor(currentStrokeStyle);
-				ctx.moveTo(currItem.x, currItem.y);
+				if (currPrice === null) {
+					isGap = true;
+					continue;
+				}
+
+				if (isGap) {
+					ctx.moveTo(currItem.x, currItem.y);
+					isGap = false;
+				}
+
+				ctx.lineTo(currItem.x, currItem.y);
+			}
+		} else {
+			for (; i < visibleRange.to; i++) {
+				const currItem = items[i];
+				const currentStrokeStyle = currItem.color ?? lineColor;
+
+				ctx.lineTo(currItem.x, currItem.y);
+
+				if (currentStrokeStyle !== prevStrokeStyle) {
+					changeColor(currentStrokeStyle);
+					ctx.moveTo(currItem.x, currItem.y);
+				}
 			}
 		}
 
